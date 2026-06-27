@@ -11,8 +11,18 @@ NAVER_CLIENT_SECRET = os.environ['NAVER_CLIENT_SECRET']
 UA = {'User-Agent': 'Mozilla/5.0'}
 
 def get_access_token():
-    r = requests.post('https://kauth.kakao.com/oauth/token', timeout=10, data={'grant_type': 'refresh_token', 'client_id': KAKAO_CLIENT_ID, 'client_secret': KAKAO_CLIENT_SECRET, 'refresh_token': KAKAO_REFRESH_TOKEN})
-    return r.json()['access_token']
+    r = requests.post('https://kauth.kakao.com/oauth/token', timeout=10, data={
+        'grant_type': 'refresh_token',
+        'client_id': KAKAO_CLIENT_ID,
+        'client_secret': KAKAO_CLIENT_SECRET,
+        'refresh_token': KAKAO_REFRESH_TOKEN,
+    })
+    print(f"Token response: {r.status_code} {r.text}")
+    data = r.json()
+    if 'access_token' not in data:
+        raise Exception(f"Token error: {data}")
+    return data['access_token']
+    
 
 def send_memo(token, text):
     text = text[:200]
