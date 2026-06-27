@@ -32,13 +32,18 @@ def send_memo(token, text):
 
 def get_fear_greed():
     try:
-        d = requests.get('https://production.dataviz.cnn.io/index/fearandgreed/graphdata', headers=UA, timeout=10).json()['fear_and_greed']
-        m = {'Extreme Fear': '😱극단공포', 'Fear': '😨공포', 'Neutral': '😐중립', 'Greed': '😏탐욕', 'Extreme Greed': '🤑극단탐욕'}
-        return f"{round(d['score'])}/100 {m.get(d['rating'], d['rating'])}"
+        import yfinance as yf
+        vix = yf.Ticker('^VIX').fast_info.last_price
+        if vix >= 30: label = '😱극단공포'
+        elif vix >= 20: label = '😨공포'
+        elif vix >= 15: label = '😐중립'
+        elif vix >= 12: label = '😏탐욕'
+        else: label = '🤑극단탐욕'
+        return f"VIX {vix:.1f} {label}"
     except Exception as e:
         print(f"FG error: {e}")
         return "N/A"
-
+        
 def get_night_futures():
     try:
         r = requests.get('https://esignal.co.kr/kospi200-futures-night/', headers=UA, timeout=10)
@@ -49,15 +54,15 @@ def get_night_futures():
         return "N/A"
 
 def get_naver_news(query, n=3):
-    url = f"https://openapi.naver.com/v1/search/news.json?query={urllib.parse.quote(query)}&display=5&sort=date"
-    hdrs = {'X-Naver-Client-Id': NAVER_CLIENT_ID, 'X-Naver-Client-Secret': NAVER_CLIENT_SECRET}
+    url = f"https://news.google.com/rss/search?q={urllib.parse.quote(query)}&hl=ko&gl=KR&ceid=KR:ko"
     try:
-        items = requests.get(url, headers=hdrs, timeout=10).json().get('items', [])
-        return [re.sub('<[^>]+>', '', i['title'])[:50] for i in items[:n]]
+        r = requests.get(url, headers=UA, timeout=10)
+        titles = re.findall(r'<title>(.*?)</title>', r.text)
+        return [re.sub('<[^>]+>', '', t)[:50] for t in titles[1:n+1]]
     except Exception as e:
-        print(f"Naver error: {e}")
+        print(f"News error ({query}): {e}")
         return ['뉴스 수집 실패']
-
+        
 def get_price(symbol):
     try:
         import yfinance as yf
