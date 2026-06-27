@@ -80,7 +80,7 @@ def fmt(p, c, w=False):
 
 def get_global_news():
     try:
-        url = "https://news.google.com/rss/search?q=stock+market+nasdaq&hl=en&gl=US&ceid=US:en"
+        url = "https://news.google.com/rss/search?q=글로벌+증시+미국+주식&hl=ko&gl=KR&ceid=KR:ko"
         r = requests.get(url, headers=UA, timeout=10)
         titles = re.findall(r'<title>(.*?)</title>', r.text)
         return [re.sub('<[^>]+>', '', t)[:60] for t in titles[1:4]]
