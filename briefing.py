@@ -80,12 +80,14 @@ def fmt(p, c, w=False):
 
 def get_global_news():
     try:
-        r = requests.get('https://feeds.finance.yahoo.com/rss/2.0/headline?s=^GSPC&region=US&lang=en-US', headers=UA, timeout=10)
-        titles = re.findall(r'<title><!\[CDATA\[(.*?)\]\]></title>', r.text)
-        return [t[:60] for t in titles[1:4]]
-    except:
+        url = "https://news.google.com/rss/search?q=stock+market+nasdaq&hl=en&gl=US&ceid=US:en"
+        r = requests.get(url, headers=UA, timeout=10)
+        titles = re.findall(r'<title>(.*?)</title>', r.text)
+        return [re.sub('<[^>]+>', '', t)[:60] for t in titles[1:4]]
+    except Exception as e:
+        print(f"Global news error: {e}")
         return ['글로벌 뉴스 수집 실패', '', '']
-
+        
 def nl(lst, i):
     return lst[i] if i < len(lst) else ''
 
