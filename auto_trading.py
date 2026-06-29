@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 
 KST = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
-BUDGET = 1_000_000  # 100만원
+BUDGET = 500_000  # 50만원
 ACCOUNT_NO = os.environ['KIS_ACCOUNT_NO']
 ACCOUNT_PROD = "01"
 
