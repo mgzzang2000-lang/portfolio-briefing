@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 
 KST = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
-BUDGET = 500_000  # 50만원
+MAX_BET = 500_000  # 최대 진입금액 캡 (복리)
 ACCOUNT_NO = os.environ['KIS_ACCOUNT_NO']
 ACCOUNT_PROD = "01"
 
@@ -211,7 +211,7 @@ def main():
         print("조건 충족 종목 없음"); return
 
     best = candidates[0]
-    price, qty = best['price'], int(BUDGET / best['price'])
+    price, qty = best['price'], int(min(cash, MAX_BET) / best['price'])
     if qty < 1:
         print(f"수량 부족 (가격:{price:,}원)"); return
 
