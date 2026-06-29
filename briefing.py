@@ -1,3 +1,4 @@
+# 포트폴리오 브리핑 — 매일 오전 7시 KST 자동 실행
 import os, json, re, requests, urllib.parse
 from datetime import datetime, timezone, timedelta
 
