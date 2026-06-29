@@ -200,7 +200,9 @@ def main():
         if sell:
             place_order(kis_token, code, qty, "sell")
             pnl_amt = int((cur_price - avg_price) * qty)
-            send_kakao(kakao_token, f"📤 매도\n{name} {qty}주\n사유: {reason}\n손익: {pnl:+.2f}% ({pnl_amt:+,}원)")
+            time.sleep(1)
+            _, new_cash = get_balance(kis_token)
+            send_kakao(kakao_token, f"📤 매도\n{name} {qty}주\n사유: {reason}\n손익: {pnl:+.2f}% ({pnl_amt:+,}원)\n💰 잔고: {new_cash:,.0f}원")
         return
 
     if now >= now.replace(hour=14, minute=0, second=0, microsecond=0):
@@ -216,10 +218,12 @@ def main():
         print(f"수량 부족 (가격:{price:,}원)"); return
 
     place_order(kis_token, best['code'], qty, "buy")
+    used = price * qty
     send_kakao(kakao_token,
         f"📥 매수\n{best['name']} {qty}주\n가격: {price:,.0f}원\n"
         f"RSI: {best['rsi']:.1f} | 갭: {best['gap']:+.1f}%\n"
-        f"익절: {price*1.04:,.0f} | 손절: {price*0.98:,.0f}")
+        f"익절: {price*1.04:,.0f} | 손절: {price*0.98:,.0f}\n"
+        f"💰 투입: {used:,.0f}원 | 잔고: {cash-used:,.0f}원")
 
 if __name__ == '__main__':
     main()
