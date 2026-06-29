@@ -90,6 +90,17 @@ def load_dashboard():
 
 def save_dashboard(data):
     data['last_updated'] = datetime.now(KST).isoformat()
+    # 잔고 이력 기록 (하루 1회 or 매매 시마다)
+    history = data.setdefault('balance_history', [])
+    today = datetime.now(KST).strftime('%m/%d')
+    entry = {'date': today, 'balance': data.get('current_balance', 500000)}
+    # 같은 날짜면 덮어쓰기, 아니면 추가
+    if history and history[-1]['date'] == today:
+        history[-1] = entry
+    else:
+        history.append(entry)
+    # 최대 60개 유지
+    data['balance_history'] = history[-60:]
     with open(DASHBOARD_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     print(f"[대시보드] 저장 완료")
