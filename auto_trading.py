@@ -252,10 +252,8 @@ def place_order(token, code, qty, side="buy"):
 # ── 신호 스캔 ─────────────────────────────────────────────────
 def scan_signals(token):
     candidates = []
-    kospi  = get_volume_rank(token, "J")
-    time.sleep(0.3)
-    kosdaq = get_volume_rank(token, "Q")
-    all_stocks = list(dict.fromkeys(kospi + kosdaq))
+    kospi = get_volume_rank(token, "J")
+    all_stocks = list(dict.fromkeys(kospi))
     print(f"스캔 대상: {len(all_stocks)}종목")
 
     if not all_stocks:
