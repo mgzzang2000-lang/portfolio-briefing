@@ -18,9 +18,24 @@ KAKAO_CLIENT_SECRET = os.environ['KAKAO_CLIENT_SECRET']
 KAKAO_REFRESH_TOKEN = os.environ['KAKAO_REFRESH_TOKEN']
 
 DASHBOARD_FILE = "dashboard_data.json"
+TOKEN_FILE     = "kis_token.json"
 
-# ── KIS 인증 ──────────────────────────────────────────────────
+# ── KIS 인증 (토큰 캐싱 — 1일 1회 발급) ─────────────────────
 def get_kis_token():
+    # 저장된 토큰이 있으면 재사용 (23시간 이내)
+    try:
+        with open(TOKEN_FILE, 'r') as f:
+            cached = json.load(f)
+        issued_at = datetime.fromisoformat(cached['issued_at'])
+        age = (datetime.now(KST) - issued_at).total_seconds()
+        if age < 23 * 3600 and cached.get('access_token'):
+            print(f"[토큰] 캐시 재사용 (발급 후 {age/3600:.1f}시간)")
+            return cached['access_token']
+    except Exception:
+        pass
+
+    # 새 토큰 발급
+    print("[토큰] 새로 발급 중...")
     r = requests.post(f"{BASE_URL}/oauth2/tokenP", json={
         "grant_type": "client_credentials",
         "appkey": KIS_APP_KEY,
@@ -29,6 +44,12 @@ def get_kis_token():
     data = r.json()
     if 'access_token' not in data:
         raise Exception(f"KIS 토큰 오류: {data}")
+
+    # 파일에 저장
+    with open(TOKEN_FILE, 'w') as f:
+        json.dump({'access_token': data['access_token'],
+                   'issued_at': datetime.now(KST).isoformat()}, f)
+    print("[토큰] 발급 및 저장 완료")
     return data['access_token']
 
 def kis_get(token, path, params, tr_id):
