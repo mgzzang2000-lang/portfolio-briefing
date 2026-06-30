@@ -1,13 +1,13 @@
-# 자동매매 — 다중 필터 단타 전략 (MA크로스 + RSI + 갭)
-# 조건: MA5>MA20, RSI<40, 시초가 갭 -1% 이하 동시 충족 시 매수
-# 익절 +4%, 손절 -2%, 15:20 강제청산
+# 자동매매 — 추세 추종 단타 전략
+# 조건: MA20/MA200 상단, MACD 골든크로스(5일내), RSI 상승+70미만, 거래량 2배, 갭 +3% 미만
+# 진입: 9:00~11:00 | 익절 +4%, 손절 -2%, 15:20 강제청산
 
 import os, json, time, requests
 from datetime import datetime, timezone, timedelta
 
 KST = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
-MAX_BET = 500_000  # 최대 진입금액 캡 (복리)
+MAX_BET = 500_000  # 최대 진입금액 캡
 ACCOUNT_NO = os.environ['KIS_ACCOUNT_NO']
 ACCOUNT_PROD = "01"
 
@@ -22,7 +22,6 @@ TOKEN_FILE     = "kis_token.json"
 
 # ── KIS 인증 (토큰 캐싱 — 1일 1회 발급) ─────────────────────
 def get_kis_token():
-    # 저장된 토큰이 있으면 재사용 (23시간 이내)
     try:
         with open(TOKEN_FILE, 'r') as f:
             cached = json.load(f)
@@ -34,7 +33,6 @@ def get_kis_token():
     except Exception:
         pass
 
-    # 새 토큰 발급
     print("[토큰] 새로 발급 중...")
     r = requests.post(f"{BASE_URL}/oauth2/tokenP", json={
         "grant_type": "client_credentials",
@@ -45,7 +43,6 @@ def get_kis_token():
     if 'access_token' not in data:
         raise Exception(f"KIS 토큰 오류: {data}")
 
-    # 파일에 저장
     with open(TOKEN_FILE, 'w') as f:
         json.dump({'access_token': data['access_token'],
                    'issued_at': datetime.now(KST).isoformat()}, f)
@@ -182,18 +179,22 @@ def get_volume_rank(token, market="J"):
     return [item['mksc_shrn_iscd'] for item in output[:100]]
 
 def get_daily_ohlcv(token, code):
+    """일봉 데이터 조회 — MA200 + MACD 계산을 위해 시작일 지정"""
+    start = (datetime.now(KST) - timedelta(days=500)).strftime('%Y%m%d')
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-daily-price", {
         "FID_COND_MRKT_DIV_CODE": "J",
         "FID_INPUT_ISCD": code,
         "FID_PERIOD_DIV_CODE": "D",
-        "FID_ORG_ADJ_PRC": "0"
+        "FID_ORG_ADJ_PRC": "0",
+        "FID_INPUT_DATE_1": start,
     }, "FHKST01010400")
     output = data.get('output', [])
-    if len(output) < 21:
+    if len(output) < 30:
         return None
-    closes = [float(x['stck_clpr']) for x in output[:25]]
-    opens  = [float(x['stck_oprc']) for x in output[:25]]
-    return {'closes': closes, 'opens': opens}
+    # output[0]이 최신, output[-1]이 과거 (역순)
+    closes  = [float(x['stck_clpr']) for x in output]
+    volumes = [int(x.get('acml_vol', 0)) for x in output]
+    return {'closes': closes, 'volumes': volumes}
 
 def get_current_price(token, code):
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-price", {
@@ -205,14 +206,29 @@ def get_current_price(token, code):
         'price':      float(o.get('stck_prpr', 0)),
         'open':       float(o.get('stck_oprc', 0)),
         'prev_close': float(o.get('stck_sdpr', 0)),
-        'name':       o.get('hts_kor_isnm', code)
+        'name':       o.get('hts_kor_isnm', code),
+        'volume':     int(o.get('acml_vol', 0)),   # 오늘 누적 거래량
     }
 
 # ── 지표 계산 ─────────────────────────────────────────────────
 def calc_ma(closes, period):
+    if len(closes) < period:
+        return None
     return sum(closes[:period]) / period
 
+def calc_ema(closes_desc, period):
+    """closes_desc: 최신이 index 0인 역순. 오름차순으로 변환 후 EMA 계산."""
+    if len(closes_desc) < period:
+        return None
+    asc = list(reversed(closes_desc))
+    k = 2 / (period + 1)
+    ema = sum(asc[:period]) / period
+    for v in asc[period:]:
+        ema = v * k + ema * (1 - k)
+    return ema
+
 def calc_rsi(closes, period=14):
+    """closes: 최신이 index 0"""
     if len(closes) < period + 1:
         return None
     diffs  = [closes[i] - closes[i+1] for i in range(period)]
@@ -222,6 +238,61 @@ def calc_rsi(closes, period=14):
         return 100
     rs = gains / losses
     return 100 - (100 / (1 + rs))
+
+def calc_macd(closes_desc, fast=12, slow=26, signal=9):
+    """
+    closes_desc: 최신이 index 0인 역순
+    returns: (macd, signal_line, golden_days_ago)
+             golden_days_ago: 최근 골든크로스 경과일, None이면 5일 내 없음
+    """
+    if len(closes_desc) < slow + signal + 6:
+        return None, None, None
+
+    asc = list(reversed(closes_desc))
+    n = len(asc)
+
+    k_f   = 2 / (fast + 1)
+    k_s   = 2 / (slow + 1)
+    k_sig = 2 / (signal + 1)
+
+    # 초기 EMA (SMA로 시작)
+    ema_f = sum(asc[:fast]) / fast
+    ema_s = sum(asc[:slow]) / slow
+
+    # fast EMA를 slow 시작점까지 업데이트
+    for i in range(fast, slow):
+        ema_f = asc[i] * k_f + ema_f * (1 - k_f)
+
+    # MACD 시계열 생성
+    macd_series = []
+    for i in range(slow, n):
+        ema_f = asc[i] * k_f + ema_f * (1 - k_f)
+        ema_s = asc[i] * k_s + ema_s * (1 - k_s)
+        macd_series.append(ema_f - ema_s)
+
+    if len(macd_series) < signal:
+        return None, None, None
+
+    # Signal line 시계열 생성
+    sig = sum(macd_series[:signal]) / signal
+    sig_series = [sig]
+    for v in macd_series[signal:]:
+        sig = v * k_sig + sig * (1 - k_sig)
+        sig_series.append(sig)
+
+    # 최근 5일 내 골든크로스 확인 (MACD가 Signal 상향 돌파)
+    golden_days = None
+    check = min(6, len(macd_series) - 1, len(sig_series) - 1)
+    for i in range(1, check + 1):
+        m_now  = macd_series[-i]
+        m_prev = macd_series[-(i+1)]
+        s_now  = sig_series[-i]
+        s_prev = sig_series[-(i+1)]
+        if m_prev < s_prev and m_now >= s_now:
+            golden_days = i
+            break
+
+    return macd_series[-1], sig_series[-1], golden_days
 
 # ── 계좌 조회 ─────────────────────────────────────────────────
 def get_balance(token):
@@ -266,26 +337,61 @@ def scan_signals(token):
             if not ohlcv:
                 continue
 
-            closes = ohlcv['closes']
-            ma5    = calc_ma(closes, 5)
-            ma20   = calc_ma(closes, 20)
-            rsi    = calc_rsi(closes, 14)
-            if rsi is None:
+            closes  = ohlcv['closes']   # 최신이 index 0
+            volumes = ohlcv['volumes']
+
+            # ── 지표 계산 ──
+            ma20  = calc_ma(closes, 20)
+            ma200 = calc_ma(closes, 200)  # 데이터 부족 시 None
+            rsi_today     = calc_rsi(closes,     14)
+            rsi_yesterday = calc_rsi(closes[1:], 14)
+            macd, signal_line, golden_days = calc_macd(closes)
+
+            if ma20 is None or rsi_today is None or rsi_yesterday is None or macd is None:
                 continue
 
+            # 20일 평균 거래량 (어제 기준, index 1~20)
+            vol_avg20 = sum(volumes[1:21]) / 20 if len(volumes) >= 21 else None
+
+            # 현재가 조회
             cur = get_current_price(token, code)
-            if cur['open'] == 0 or cur['prev_close'] == 0 or cur['price'] == 0:
+            price = cur['price']
+            if price == 0 or cur['open'] == 0 or cur['prev_close'] == 0:
                 continue
 
             gap = (cur['open'] - cur['prev_close']) / cur['prev_close'] * 100
 
-            if ma5 > ma20 and rsi < 40 and gap <= -1.0:
-                candidates.append({
-                    'code': code, 'name': cur['name'],
-                    'price': cur['price'], 'rsi': rsi,
-                    'ma5': ma5, 'ma20': ma20, 'gap': gap
-                })
-                print(f"  신호! {cur['name']} RSI={rsi:.1f} 갭={gap:+.1f}%")
+            # ── 조건 필터 ──
+            # 1. MA20 상단
+            if price <= ma20:
+                continue
+            # 2. MA200 상단 (데이터 있을 때만)
+            if ma200 is not None and price <= ma200:
+                continue
+            # 3. MACD 골든크로스 5일 이내 + 현재 MACD > Signal
+            if golden_days is None or macd <= signal_line:
+                continue
+            # 4. RSI 상승 추세 + 과매수 제외
+            if rsi_today <= rsi_yesterday or rsi_today >= 70:
+                continue
+            # 5. 거래량 급증 (20일 평균 2배 이상)
+            if vol_avg20 and cur['volume'] < vol_avg20 * 2:
+                continue
+            # 6. 시초가 갭 +3% 미만
+            if gap >= 3.0:
+                continue
+
+            vol_ratio = cur['volume'] / vol_avg20 if vol_avg20 else 0
+            candidates.append({
+                'code': code, 'name': cur['name'],
+                'price': price, 'rsi': rsi_today,
+                'ma20': ma20, 'ma200': ma200,
+                'macd': macd, 'golden_days': golden_days,
+                'gap': gap, 'vol_ratio': vol_ratio
+            })
+            ma200_str = f"{ma200:,.0f}" if ma200 else "N/A"
+            print(f"  신호! {cur['name']} RSI={rsi_today:.1f} MACD크로스={golden_days}일전 "
+                  f"갭={gap:+.1f}% 거래량={vol_ratio:.1f}배 MA200={ma200_str}")
 
             time.sleep(0.06)
 
@@ -293,7 +399,8 @@ def scan_signals(token):
             print(f"  오류 {code}: {e}")
             continue
 
-    candidates.sort(key=lambda x: x['rsi'])
+    # 거래량 비율 높은 순 정렬 (세력 참여 강도 우선)
+    candidates.sort(key=lambda x: -x['vol_ratio'])
     return candidates
 
 # ── 메인 ──────────────────────────────────────────────────────
@@ -304,7 +411,7 @@ def main():
     market_open   = now.replace(hour=9,  minute=0,  second=0, microsecond=0)
     force_sell_at = now.replace(hour=15, minute=20, second=0, microsecond=0)
     market_close  = now.replace(hour=15, minute=30, second=0, microsecond=0)
-    entry_cutoff  = now.replace(hour=14, minute=0,  second=0, microsecond=0)
+    entry_cutoff  = now.replace(hour=11, minute=0,  second=0, microsecond=0)  # 11시 진입 마감
 
     if now < market_open or now > market_close:
         print("장 시간 외 — 종료")
@@ -354,9 +461,9 @@ def main():
                 save_dashboard(dash)
             return
 
-        # ② 신규 진입 스캔 (14시 이전만)
+        # ② 신규 진입 스캔 (11시 이전만)
         if now >= entry_cutoff:
-            print("14시 이후 — 신규 진입 없음")
+            print("11시 이후 — 신규 진입 없음")
             return
 
         print("포지션 없음 → 신호 스캔 시작")
@@ -381,9 +488,12 @@ def main():
 
         tp = price * 1.04
         sl = price * 0.98
+        ma200_str = f"{best['ma200']:,.0f}" if best['ma200'] else "N/A"
         msg = (f"📥 매수\n{best['name']} {qty}주\n"
                f"가격: {price:,.0f}원\n"
-               f"RSI: {best['rsi']:.1f} | 갭: {best['gap']:+.1f}%\n"
+               f"RSI: {best['rsi']:.1f} | MACD크로스: {best['golden_days']}일전\n"
+               f"거래량: {best['vol_ratio']:.1f}배 | 갭: {best['gap']:+.1f}%\n"
+               f"MA200: {ma200_str}\n"
                f"익절: {tp:,.0f} | 손절: {sl:,.0f}\n"
                f"💰 투입: {used:,.0f}원 | 잔고: {cash-used:,.0f}원")
         send_kakao(kakao_token, msg)
