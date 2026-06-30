@@ -163,7 +163,7 @@ def update_position_price(dash, current_price):
 
 # ── 시장 데이터 ───────────────────────────────────────────────
 def get_volume_rank(token, market="J"):
-    data = kis_get(token, "/uapi/domestic-stock/v1/ranking/volume", {
+    data = kis_get(token, "/uapi/domestic-stock/v1/quotations/volume-rank", {
         "FID_COND_MRKT_DIV_CODE": market,
         "FID_COND_SCR_DIV_CODE": "20171",
         "FID_INPUT_ISCD": "0000",
@@ -171,9 +171,9 @@ def get_volume_rank(token, market="J"):
         "FID_BLNG_CLS_CODE": "0",
         "FID_TRGT_CLS_CODE": "111111111",
         "FID_TRGT_EXLS_CLS_CODE": "000000",
-        "FID_INPUT_PRICE_1": "2000",
-        "FID_INPUT_PRICE_2": "300000",
-        "FID_VOL_CNT": "100000",
+        "FID_INPUT_PRICE_1": "",
+        "FID_INPUT_PRICE_2": "",
+        "FID_VOL_CNT": "",
         "FID_INPUT_DATE_1": ""
     }, "FHPST01710000")
     output = data.get('output', [])
