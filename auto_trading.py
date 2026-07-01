@@ -443,7 +443,9 @@ def scan_signals(token):
     정렬: 스퀴즈 종목 우선 + 거래량 비율 순
     """
     candidates = []
-    stocks = list(dict.fromkeys(get_volume_rank(token, "J")))
+    kospi  = get_volume_rank(token, "J")
+    kosdaq = get_volume_rank(token, "Q")
+    stocks = list(dict.fromkeys(kospi + kosdaq))
     print(f"스캔 대상: {len(stocks)}종목")
     if not stocks:
         print("[경고] 스캔 대상 없음")
