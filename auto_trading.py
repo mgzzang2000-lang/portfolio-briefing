@@ -1,14 +1,25 @@
-# 자동매매 — 추세 추종 단타 전략
-# 조건: MA20/MA200 상단, MACD 골든크로스(5일내), RSI 상승+70미만, 거래량 2배, 갭 +3% 미만
-# 진입: 9:00~11:00 | 익절 +4%, 손절 -2%, 15:20 강제청산
+# 자동매매 — 2단계 추세 추종 단타 전략
+# ═══════════════════════════════════════════════════════════
+# [1단계: 일봉] 종목 선정
+#   MA20/MA200 상단, MACD 골든크로스(5일내),
+#   볼린저밴드 스퀴즈 or BB 상단 근접,
+#   거래량 2배, 갭 +3% 미만
+# -------------------------------------------------------
+# [2단계: 1분봉] 진입 타이밍 확인 (상위 3 후보에만 적용)
+#   스토캐스틱RSI: K > D AND K > 20 (과매도 탈출 후 상승)
+#   현재가 ≥ 1분봉 볼린저밴드 중심선
+# -------------------------------------------------------
+# 손절: 1분봉 ATR(14) × 1.5 동적 손절 (position에 저장)
+# 익절: +4% | 강제청산: 15:20
+# ═══════════════════════════════════════════════════════════
 
 import os, json, time, requests
 from datetime import datetime, timezone, timedelta
 
 KST = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
-MAX_BET = 500_000  # 최대 진입금액 캡
-ACCOUNT_NO = os.environ['KIS_ACCOUNT_NO']
+MAX_BET = 500_000
+ACCOUNT_NO   = os.environ['KIS_ACCOUNT_NO']
 ACCOUNT_PROD = "01"
 
 KIS_APP_KEY    = os.environ['KIS_APP_KEY']
@@ -130,17 +141,22 @@ def save_dashboard(data):
     data['balance_history'] = history[-60:]
     with open(DASHBOARD_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-    print(f"[대시보드] 저장 완료")
+    print("[대시보드] 저장 완료")
 
-def log_buy(dash, code, name, qty, price, cash_after):
+def log_buy(dash, code, name, qty, price, cash_after, stop_price, target_price):
+    """stop_price: ATR×1.5 동적 손절가, target_price: +4% 익절가"""
     dash['trades'].append({
         'action': 'buy',
         'date': datetime.now(KST).strftime('%m/%d %H:%M'),
         'code': code, 'stock': name, 'qty': qty,
         'price': int(price), 'amount': int(price * qty)
     })
-    dash['position'] = {'code': code, 'name': name, 'qty': qty,
-                        'avg_price': int(price), 'current_price': int(price)}
+    dash['position'] = {
+        'code': code, 'name': name, 'qty': qty,
+        'avg_price': int(price), 'current_price': int(price),
+        'stop_price':   int(stop_price),    # ATR×1.5 손절가
+        'target_price': int(target_price),  # +4% 익절가
+    }
     dash['current_balance'] = int(cash_after)
 
 def log_sell(dash, name, qty, avg_price, sell_price, pnl_pct, pnl_amt, reason, new_cash):
@@ -179,7 +195,7 @@ def get_volume_rank(token, market="J"):
     return [item['mksc_shrn_iscd'] for item in output[:100]]
 
 def get_daily_ohlcv(token, code):
-    """일봉 데이터 조회 — MA200 + MACD 계산을 위해 시작일 지정"""
+    """일봉 OHLCV (High/Low 포함) — ATR·BB 계산용"""
     start = (datetime.now(KST) - timedelta(days=500)).strftime('%Y%m%d')
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-daily-price", {
         "FID_COND_MRKT_DIV_CODE": "J",
@@ -191,10 +207,38 @@ def get_daily_ohlcv(token, code):
     output = data.get('output', [])
     if len(output) < 30:
         return None
-    # output[0]이 최신, output[-1]이 과거 (역순)
+    # output[0]=최신, output[-1]=과거
     closes  = [float(x['stck_clpr']) for x in output]
+    highs   = [float(x.get('stck_hgpr', x['stck_clpr'])) for x in output]
+    lows    = [float(x.get('stck_lwpr', x['stck_clpr'])) for x in output]
     volumes = [int(x.get('acml_vol', 0)) for x in output]
-    return {'closes': closes, 'volumes': volumes}
+    return {'closes': closes, 'highs': highs, 'lows': lows, 'volumes': volumes}
+
+def get_minute_ohlcv(token, code, n=30):
+    """
+    1분봉 OHLCV (최신이 index 0)
+    스토캐스틱RSI·BB·ATR 계산용
+    """
+    now = datetime.now(KST)
+    data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice", {
+        "FID_COND_MRKT_DIV_CODE": "J",
+        "FID_INPUT_ISCD": code,
+        "FID_INPUT_HOUR_1": now.strftime('%H%M%S'),
+        "FID_PW_DATA_INCU_YN": "Y",
+        "FID_ETC_CLS_CODE": "0",
+        "FID_INPUT_DATE_1": now.strftime('%Y%m%d'),
+    }, "FHKST03010100")
+    output = data.get('output2', [])
+    if not output or len(output) < 10:
+        print(f"  [1분봉] {code} 데이터 부족 ({len(output)}봉)")
+        return None
+    result = output[:n]
+    closes = [float(x.get('stck_prpr', 0)) for x in result]
+    highs  = [float(x.get('stck_hgpr', 0)) for x in result]
+    lows   = [float(x.get('stck_lwpr', 0)) for x in result]
+    if any(c == 0 for c in closes[:3]):
+        return None
+    return {'closes': closes, 'highs': highs, 'lows': lows}
 
 def get_current_price(token, code):
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-price", {
@@ -207,7 +251,7 @@ def get_current_price(token, code):
         'open':       float(o.get('stck_oprc', 0)),
         'prev_close': float(o.get('stck_sdpr', 0)),
         'name':       o.get('hts_kor_isnm', code),
-        'volume':     int(o.get('acml_vol', 0)),   # 오늘 누적 거래량
+        'volume':     int(o.get('acml_vol', 0)),
     }
 
 # ── 지표 계산 ─────────────────────────────────────────────────
@@ -217,7 +261,6 @@ def calc_ma(closes, period):
     return sum(closes[:period]) / period
 
 def calc_ema(closes_desc, period):
-    """closes_desc: 최신이 index 0인 역순. 오름차순으로 변환 후 EMA 계산."""
     if len(closes_desc) < period:
         return None
     asc = list(reversed(closes_desc))
@@ -235,64 +278,131 @@ def calc_rsi(closes, period=14):
     gains  = sum(d for d in diffs if d > 0) / period
     losses = sum(abs(d) for d in diffs if d < 0) / period
     if losses == 0:
-        return 100
-    rs = gains / losses
-    return 100 - (100 / (1 + rs))
+        return 100.0
+    return 100 - (100 / (1 + gains / losses))
 
 def calc_macd(closes_desc, fast=12, slow=26, signal=9):
-    """
-    closes_desc: 최신이 index 0인 역순
-    returns: (macd, signal_line, golden_days_ago)
-             golden_days_ago: 최근 골든크로스 경과일, None이면 5일 내 없음
-    """
+    """returns: (macd, signal_line, golden_days_ago)"""
     if len(closes_desc) < slow + signal + 6:
         return None, None, None
-
     asc = list(reversed(closes_desc))
     n = len(asc)
-
     k_f   = 2 / (fast + 1)
     k_s   = 2 / (slow + 1)
     k_sig = 2 / (signal + 1)
-
-    # 초기 EMA (SMA로 시작)
     ema_f = sum(asc[:fast]) / fast
     ema_s = sum(asc[:slow]) / slow
-
-    # fast EMA를 slow 시작점까지 업데이트
     for i in range(fast, slow):
         ema_f = asc[i] * k_f + ema_f * (1 - k_f)
-
-    # MACD 시계열 생성
     macd_series = []
     for i in range(slow, n):
         ema_f = asc[i] * k_f + ema_f * (1 - k_f)
         ema_s = asc[i] * k_s + ema_s * (1 - k_s)
         macd_series.append(ema_f - ema_s)
-
     if len(macd_series) < signal:
         return None, None, None
-
-    # Signal line 시계열 생성
     sig = sum(macd_series[:signal]) / signal
     sig_series = [sig]
     for v in macd_series[signal:]:
         sig = v * k_sig + sig * (1 - k_sig)
         sig_series.append(sig)
-
-    # 최근 5일 내 골든크로스 확인 (MACD가 Signal 상향 돌파)
     golden_days = None
     check = min(6, len(macd_series) - 1, len(sig_series) - 1)
     for i in range(1, check + 1):
-        m_now  = macd_series[-i]
-        m_prev = macd_series[-(i+1)]
-        s_now  = sig_series[-i]
-        s_prev = sig_series[-(i+1)]
-        if m_prev < s_prev and m_now >= s_now:
+        if (macd_series[-(i+1)] < sig_series[-(i+1)] and
+                macd_series[-i] >= sig_series[-i]):
             golden_days = i
             break
-
     return macd_series[-1], sig_series[-1], golden_days
+
+def calc_atr(highs, lows, closes, period=14):
+    """ATR. 모두 최신이 index 0. TR = max(H-L, |H-prevC|, |L-prevC|)"""
+    if len(closes) < period + 1:
+        return None
+    trs = []
+    for i in range(period):
+        tr = max(highs[i] - lows[i],
+                 abs(highs[i] - closes[i + 1]),
+                 abs(lows[i]  - closes[i + 1]))
+        trs.append(tr)
+    return sum(trs) / period
+
+def calc_bb(closes, period=20, mult=2.0):
+    """볼린저밴드. closes: 최신이 index 0. returns: (upper, mid, lower, bandwidth)"""
+    if len(closes) < period:
+        return None, None, None, None
+    data = closes[:period]
+    mid  = sum(data) / period
+    var  = sum((x - mid) ** 2 for x in data) / period
+    std  = var ** 0.5
+    upper = mid + mult * std
+    lower = mid - mult * std
+    bw    = (upper - lower) / mid if mid != 0 else 0
+    return upper, mid, lower, bw
+
+def is_daily_bb_squeeze(closes, period=20, lookback=20):
+    """
+    일봉 BB 스퀴즈 감지.
+    현재 밴드폭이 과거 lookback봉 중 하위 30%이면 True.
+    """
+    if len(closes) < period + lookback:
+        return False
+    _, _, _, bw_now = calc_bb(closes, period)
+    if bw_now is None:
+        return False
+    bw_hist = []
+    for i in range(1, lookback + 1):
+        _, _, _, bw = calc_bb(closes[i:], period)
+        if bw is not None:
+            bw_hist.append(bw)
+    if not bw_hist:
+        return False
+    threshold = sorted(bw_hist)[int(len(bw_hist) * 0.3)]
+    return bw_now <= threshold
+
+def calc_stoch_rsi(closes, rsi_period=14, stoch_period=5, smooth_k=3, smooth_d=3):
+    """
+    스토캐스틱 RSI (1분봉 최적화: stoch_period=5, 약 25봉 필요)
+    closes: 최신이 index 0
+    returns: (K, D) — 매수 신호: K > D AND K > 20
+    """
+    needed = rsi_period + stoch_period + smooth_k + smooth_d + 2
+    if len(closes) < needed:
+        return None, None
+
+    asc = list(reversed(closes))
+
+    # RSI 시계열
+    rsi_vals = []
+    for i in range(rsi_period, len(asc)):
+        window = list(reversed(asc[i - rsi_period: i + 1]))
+        r = calc_rsi(window, rsi_period)
+        if r is not None:
+            rsi_vals.append(r)
+    if len(rsi_vals) < stoch_period:
+        return None, None
+
+    # Raw Stochastic K
+    raw_k = []
+    for i in range(stoch_period - 1, len(rsi_vals)):
+        win = rsi_vals[i - stoch_period + 1: i + 1]
+        hi, lo = max(win), min(win)
+        raw_k.append(50.0 if hi == lo
+                     else (rsi_vals[i] - lo) / (hi - lo) * 100)
+
+    # Smooth K (SMA)
+    if len(raw_k) < smooth_k:
+        return None, None
+    k_vals = [sum(raw_k[i - smooth_k + 1: i + 1]) / smooth_k
+               for i in range(smooth_k - 1, len(raw_k))]
+
+    # Smooth D (SMA of K)
+    if len(k_vals) < smooth_d:
+        return None, None
+    d_vals = [sum(k_vals[i - smooth_d + 1: i + 1]) / smooth_d
+               for i in range(smooth_d - 1, len(k_vals))]
+
+    return k_vals[-1], d_vals[-1]
 
 # ── 계좌 조회 ─────────────────────────────────────────────────
 def get_balance(token):
@@ -320,40 +430,46 @@ def place_order(token, code, qty, side="buy"):
     print(f"[주문] {side} {code} {qty}주 → {result}")
     return result
 
-# ── 신호 스캔 ─────────────────────────────────────────────────
+# ── [1단계] 일봉 신호 스캔 ────────────────────────────────────
 def scan_signals(token):
+    """
+    일봉 종목 선정 조건:
+      ① MA20 상단
+      ② MA200 상단 (데이터 충분할 때)
+      ③ MACD 골든크로스 5일 이내 + 현재 MACD > Signal
+      ④ 볼린저밴드 스퀴즈 OR BB 상단 근접(98%) [기존 RSI 단독 조건 제거]
+      ⑤ 거래량 20일 평균 2배 이상
+      ⑥ 시초가 갭 +3% 미만
+    정렬: 스퀴즈 종목 우선 + 거래량 비율 순
+    """
     candidates = []
-    kospi = get_volume_rank(token, "J")
-    all_stocks = list(dict.fromkeys(kospi))
-    print(f"스캔 대상: {len(all_stocks)}종목")
-
-    if not all_stocks:
-        print("[경고] 스캔 대상 종목 없음 — API 응답 이상")
+    stocks = list(dict.fromkeys(get_volume_rank(token, "J")))
+    print(f"스캔 대상: {len(stocks)}종목")
+    if not stocks:
+        print("[경고] 스캔 대상 없음")
         return []
 
-    for code in all_stocks:
+    for code in stocks:
         try:
             ohlcv = get_daily_ohlcv(token, code)
             if not ohlcv:
                 continue
 
-            closes  = ohlcv['closes']   # 최신이 index 0
+            closes  = ohlcv['closes']
+            highs   = ohlcv['highs']
+            lows    = ohlcv['lows']
             volumes = ohlcv['volumes']
 
-            # ── 지표 계산 ──
             ma20  = calc_ma(closes, 20)
-            ma200 = calc_ma(closes, 200)  # 데이터 부족 시 None
-            rsi_today     = calc_rsi(closes,     14)
-            rsi_yesterday = calc_rsi(closes[1:], 14)
+            ma200 = calc_ma(closes, 200)
             macd, signal_line, golden_days = calc_macd(closes)
+            bb_upper, bb_mid, _, bw = calc_bb(closes, 20)
+            in_squeeze = is_daily_bb_squeeze(closes)
 
-            if ma20 is None or rsi_today is None or rsi_yesterday is None or macd is None:
+            if ma20 is None or macd is None or bb_upper is None:
                 continue
 
-            # 20일 평균 거래량 (어제 기준, index 1~20)
             vol_avg20 = sum(volumes[1:21]) / 20 if len(volumes) >= 21 else None
-
-            # 현재가 조회
             cur = get_current_price(token, code)
             price = cur['price']
             if price == 0 or cur['open'] == 0 or cur['prev_close'] == 0:
@@ -361,47 +477,97 @@ def scan_signals(token):
 
             gap = (cur['open'] - cur['prev_close']) / cur['prev_close'] * 100
 
-            # ── 조건 필터 ──
-            # 1. MA20 상단
+            # ── 필터 ──────────────────────────────────────────
             if price <= ma20:
                 continue
-            # 2. MA200 상단 (데이터 있을 때만)
             if ma200 is not None and price <= ma200:
                 continue
-            # 3. MACD 골든크로스 5일 이내 + 현재 MACD > Signal
             if golden_days is None or macd <= signal_line:
                 continue
-            # 4. RSI 상승 추세 + 과매수 제외
-            if rsi_today <= rsi_yesterday or rsi_today >= 70:
+            # BB: 스퀴즈 상태 OR BB 상단 근접 (기존 RSI 조건 대체)
+            bb_near_upper = (price >= bb_upper * 0.98)
+            if not (in_squeeze or bb_near_upper):
                 continue
-            # 5. 거래량 급증 (20일 평균 2배 이상)
             if vol_avg20 and cur['volume'] < vol_avg20 * 2:
                 continue
-            # 6. 시초가 갭 +3% 미만
             if gap >= 3.0:
                 continue
 
             vol_ratio = cur['volume'] / vol_avg20 if vol_avg20 else 0
+            ma200_str  = f"{ma200:,.0f}" if ma200 else "N/A"
+            bb_tag     = "스퀴즈" if in_squeeze else "BB상단근접"
+            print(f"  [일봉] {cur['name']} MACD={golden_days}일전 "
+                  f"갭={gap:+.1f}% 거래량={vol_ratio:.1f}배 "
+                  f"BB={bb_tag} MA200={ma200_str}")
+
             candidates.append({
                 'code': code, 'name': cur['name'],
-                'price': price, 'rsi': rsi_today,
-                'ma20': ma20, 'ma200': ma200,
+                'price': price, 'ma20': ma20, 'ma200': ma200,
                 'macd': macd, 'golden_days': golden_days,
-                'gap': gap, 'vol_ratio': vol_ratio
+                'gap': gap, 'vol_ratio': vol_ratio,
+                'in_squeeze': in_squeeze, 'bw': bw,
             })
-            ma200_str = f"{ma200:,.0f}" if ma200 else "N/A"
-            print(f"  신호! {cur['name']} RSI={rsi_today:.1f} MACD크로스={golden_days}일전 "
-                  f"갭={gap:+.1f}% 거래량={vol_ratio:.1f}배 MA200={ma200_str}")
-
             time.sleep(0.06)
 
         except Exception as e:
             print(f"  오류 {code}: {e}")
             continue
 
-    # 거래량 비율 높은 순 정렬 (세력 참여 강도 우선)
-    candidates.sort(key=lambda x: -x['vol_ratio'])
+    # 스퀴즈 우선, 동순위 내 거래량 비율 순
+    candidates.sort(key=lambda x: (-int(x['in_squeeze']), -x['vol_ratio']))
     return candidates
+
+# ── [2단계] 1분봉 진입 타이밍 확인 ──────────────────────────────
+def check_1min_entry(token, code, name):
+    """
+    1분봉 기준 진입 최종 확인
+      ① 스토캐스틱RSI: K > D AND K > 20
+      ② 현재가 >= 1분봉 볼린저밴드 중심선(MA20)
+    ATR(14) × 1.5 = 동적 손절가 계산
+    returns: (ok, stop_price, target_price, info_str)
+    """
+    minute = get_minute_ohlcv(token, code)
+    if not minute:
+        return False, 0, 0, "1분봉 데이터 없음"
+
+    closes = minute['closes']
+    highs  = minute['highs']
+    lows   = minute['lows']
+    price  = closes[0]
+
+    # ① 스토캐스틱 RSI
+    stoch_k, stoch_d = calc_stoch_rsi(closes)
+    if stoch_k is None:
+        return False, 0, 0, "스토캐스틱RSI 계산 불가"
+    stoch_ok = (stoch_k > stoch_d and stoch_k > 20)
+
+    # ② 1분봉 BB 중심선
+    _, bb_mid_1m, _, _ = calc_bb(closes, period=20)
+    bb_ok = (bb_mid_1m is not None and price >= bb_mid_1m)
+
+    # ③ ATR×1.5 손절가
+    atr_1m = calc_atr(highs, lows, closes, period=14)
+    if atr_1m:
+        stop_price = price - atr_1m * 1.5
+        stop_price = min(stop_price, price * 0.995)  # 최소 -0.5% 보호
+    else:
+        stop_price = price * 0.98  # ATR 계산 불가 시 폴백
+
+    target_price = price * 1.04
+
+    atr_str = f"{atr_1m:.0f}" if atr_1m else "N/A"
+    mid_str = f"{bb_mid_1m:.0f}" if bb_mid_1m else "N/A"
+    s_tag = "✓" if stoch_ok else "✗"
+    b_tag = "✓" if bb_ok else "✗"
+    info = (f"StochRSI K={stoch_k:.1f}/D={stoch_d:.1f}({s_tag}) "
+            f"BB중심={mid_str}({b_tag}) "
+            f"ATR={atr_str} 손절={stop_price:,.0f}")
+
+    print(f"  [1분봉] {name}: {info}")
+
+    if stoch_ok and bb_ok:
+        return True, stop_price, target_price, info
+    return False, 0, 0, info
 
 # ── 메인 ──────────────────────────────────────────────────────
 def main():
@@ -411,7 +577,7 @@ def main():
     market_open   = now.replace(hour=9,  minute=0,  second=0, microsecond=0)
     force_sell_at = now.replace(hour=15, minute=20, second=0, microsecond=0)
     market_close  = now.replace(hour=15, minute=30, second=0, microsecond=0)
-    entry_cutoff  = now.replace(hour=11, minute=0,  second=0, microsecond=0)  # 11시 진입 마감
+    entry_cutoff  = now.replace(hour=11, minute=0,  second=0, microsecond=0)
 
     if now < market_open or now > market_close:
         print("장 시간 외 — 종료")
@@ -423,7 +589,7 @@ def main():
     dash = load_dashboard()
 
     try:
-        # ① 보유 포지션 관리
+        # ① 보유 포지션 관리 ──────────────────────────────────
         active = [h for h in holdings if int(h.get('hldg_qty', 0)) > 0]
         if active:
             h = active[0]
@@ -434,14 +600,20 @@ def main():
             cur_price = float(h['prpr'])
             pnl       = (cur_price - avg_price) / avg_price * 100
 
+            # position 데이터에서 손절가·익절가 복원 (없으면 폴백)
+            pos          = dash.get('position') or {}
+            stop_price   = pos.get('stop_price',   avg_price * 0.98)
+            target_price = pos.get('target_price', avg_price * 1.04)
+
             print(f"보유: {name} {qty}주 | 평균가:{avg_price:,.0f} 현재:{cur_price:,.0f} ({pnl:+.2f}%)")
+            print(f"  손절:{stop_price:,.0f} | 익절:{target_price:,.0f}")
             update_position_price(dash, cur_price)
 
             sell, reason = False, ""
-            if pnl >= 4.0:
+            if cur_price >= target_price:
                 sell, reason = True, f"익절 ({pnl:+.2f}%)"
-            elif pnl <= -2.0:
-                sell, reason = True, f"손절 ({pnl:+.2f}%)"
+            elif cur_price <= stop_price:
+                sell, reason = True, f"ATR손절 ({pnl:+.2f}%)"
             elif now >= force_sell_at:
                 sell, reason = True, "강제청산 (15:20)"
 
@@ -450,7 +622,8 @@ def main():
                 time.sleep(1)
                 _, new_cash = get_balance(kis_token)
                 pnl_amt = int((cur_price - avg_price) * qty)
-                log_sell(dash, name, qty, avg_price, cur_price, pnl, pnl_amt, reason, new_cash)
+                log_sell(dash, name, qty, avg_price, cur_price,
+                         pnl, pnl_amt, reason, new_cash)
                 save_dashboard(dash)
                 msg = (f"📤 매도\n{name} {qty}주\n"
                        f"사유: {reason}\n"
@@ -461,40 +634,55 @@ def main():
                 save_dashboard(dash)
             return
 
-        # ② 신규 진입 스캔 (11시 이전만)
+        # ② 신규 진입 스캔 (11시 이전만) ─────────────────────
         if now >= entry_cutoff:
             print("11시 이후 — 신규 진입 없음")
             return
 
-        print("포지션 없음 → 신호 스캔 시작")
+        print("포지션 없음 → [1단계] 일봉 신호 스캔")
         candidates = scan_signals(kis_token)
-
         if not candidates:
-            print("조건 충족 종목 없음")
+            print("일봉 조건 충족 종목 없음")
             return
 
-        best  = candidates[0]
-        price = best['price']
-        qty   = int(min(cash, MAX_BET) / price)
+        # 상위 3 후보 → 1분봉 타이밍 확인
+        top_n = min(3, len(candidates))
+        print(f"\n→ [2단계] 1분봉 진입 타이밍 확인 (상위 {top_n}종목)")
+        chosen = None
+        for c in candidates[:top_n]:
+            time.sleep(0.1)
+            ok, stop_px, target_px, info = check_1min_entry(
+                kis_token, c['code'], c['name'])
+            if ok:
+                chosen = {**c, 'stop_price': stop_px, 'target_price': target_px}
+                print(f"  → 진입 결정: {c['name']}")
+                break
+            print(f"  → 패스: {c['name']}")
 
+        if not chosen:
+            print("1분봉 타이밍 조건 미충족 — 다음 스캔 대기")
+            return
+
+        # ③ 매수 ──────────────────────────────────────────────
+        price = chosen['price']
+        qty   = int(min(cash, MAX_BET) / price)
         if qty < 1:
             print(f"매수 수량 부족 (가격:{price:,}원)")
             return
 
-        place_order(kis_token, best['code'], qty, "buy")
+        place_order(kis_token, chosen['code'], qty, "buy")
         used = int(price * qty)
-        log_buy(dash, best['code'], best['name'], qty, price, cash - used)
+        log_buy(dash, chosen['code'], chosen['name'], qty, price,
+                cash - used, chosen['stop_price'], chosen['target_price'])
         save_dashboard(dash)
 
-        tp = price * 1.04
-        sl = price * 0.98
-        ma200_str = f"{best['ma200']:,.0f}" if best['ma200'] else "N/A"
-        msg = (f"📥 매수\n{best['name']} {qty}주\n"
+        ma200_str   = f"{chosen['ma200']:,.0f}" if chosen['ma200'] else "N/A"
+        squeeze_tag = "🔥스퀴즈" if chosen['in_squeeze'] else "📈BB상단"
+        msg = (f"📥 매수 {squeeze_tag}\n{chosen['name']} {qty}주\n"
                f"가격: {price:,.0f}원\n"
-               f"RSI: {best['rsi']:.1f} | MACD크로스: {best['golden_days']}일전\n"
-               f"거래량: {best['vol_ratio']:.1f}배 | 갭: {best['gap']:+.1f}%\n"
-               f"MA200: {ma200_str}\n"
-               f"익절: {tp:,.0f} | 손절: {sl:,.0f}\n"
+               f"MACD크로스: {chosen['golden_days']}일전 | 거래량: {chosen['vol_ratio']:.1f}배\n"
+               f"갭: {chosen['gap']:+.1f}% | MA200: {ma200_str}\n"
+               f"익절: {chosen['target_price']:,.0f} | ATR손절: {chosen['stop_price']:,.0f}\n"
                f"💰 투입: {used:,.0f}원 | 잔고: {cash-used:,.0f}원")
         send_kakao(kakao_token, msg)
 
@@ -503,7 +691,7 @@ def main():
         print(err_msg)
         try:
             send_kakao(kakao_token, err_msg)
-        except:
+        except Exception:
             pass
 
 if __name__ == '__main__':
