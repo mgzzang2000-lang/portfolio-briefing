@@ -447,6 +447,13 @@ def scan_signals(token):
     else:
         gap_threshold = 3.0  # 기본값 (도달 불가)
 
+    # [2026-07-02] 시간 경과 비례 거래량 기대치
+    # 오늘 누적거래량(장중 계속 증가)을 과거 20일 '하루 종일' 평균과 시간 보정 없이
+    # 비교하면 09:05에 어제 하루치의 2배를 요구하는 셈이 되어 아침 시간대만 과도하게
+    # 엄격해짐. 경과 시간 비율만큼 기대치를 낮춰서 비교한다.
+    market_open_dt = now.replace(hour=9, minute=0, second=0, microsecond=0)
+    elapsed_minutes = max(1.0, min(390.0, (now - market_open_dt).total_seconds() / 60))
+
     candidates = []
     kospi  = get_volume_rank(token, "J")
     time.sleep(1)
@@ -491,7 +498,7 @@ def scan_signals(token):
             bb_near_upper = (price >= bb_upper * 0.98)
             if not (in_squeeze or bb_near_upper):
                 continue
-            if vol_avg20 and cur['volume'] < vol_avg20 * 2:
+            if vol_avg20 and cur['volume'] < vol_avg20 * (elapsed_minutes / 390) * 2:
                 continue
             # [2026-07-02] 시간대별 갭 필터 적용
             if gap >= gap_threshold:
