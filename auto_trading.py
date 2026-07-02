@@ -152,9 +152,10 @@ def save_dashboard(data):
 
 def log_buy(dash, code, name, qty, price, cash_after, stop_price, target_price):
     """stop_price: ATR×1.5 동적 손절가, target_price: +4% 익절가"""
+    entry_time = datetime.now(KST)
     dash['trades'].append({
         'action': 'buy',
-        'date': datetime.now(KST).strftime('%m/%d %H:%M'),
+        'date': entry_time.strftime('%m/%d %H:%M'),
         'code': code, 'stock': name, 'qty': qty,
         'price': int(price), 'amount': int(price * qty)
     })
@@ -163,6 +164,8 @@ def log_buy(dash, code, name, qty, price, cash_after, stop_price, target_price):
         'avg_price': int(price), 'current_price': int(price),
         'stop_price':   int(stop_price),    # ATR×1.5 손절가
         'target_price': int(target_price),  # +4% 익절가
+        'entry_time': entry_time.isoformat(),  # 2시간 부분청산 용도
+        'trailing_activated': False,  # 트레일링 스탑 활성화 여부
     }
     dash['current_balance'] = int(cash_after)
 
