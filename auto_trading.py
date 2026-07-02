@@ -633,10 +633,37 @@ def main():
             update_position_price(dash, cur_price)
 
             sell, reason = False, ""
+            
+            # [2026-07-02 추가] 트레일링 스탑 (+2% 도달시)
+            if not pos.get('trailing_activated') and pnl >= 2.0:
+                trailing_stop = avg_price * 1.004  # 본전+0.4%
+                pos['stop_price'] = max(stop_price, trailing_stop)
+                pos['trailing_activated'] = True
+                stop_price = pos['stop_price']
+                print(f"  [트레일링] +2% 도달 → 손절선 상향: {stop_price:,.0f}")
+            
+            # [2026-07-02 추가] 2시간 부분청산 (0~+1% 구간)
+            if pos.get('entry_time'):
+                entry_dt = datetime.fromisoformat(pos['entry_time'])
+                elapsed_sec = (now - entry_dt).total_seconds()
+                two_hours = 2 * 3600
+                if abs(elapsed_sec - two_hours) <= 120:  # ±2분
+                    if 0 <= pnl <= 1.0:
+                        sell_qty = qty // 2
+                        if sell_qty >= 1:
+                            place_order(kis_token, code, sell_qty, "sell")
+                            time.sleep(1)
+                            _, new_cash = get_balance(kis_token)
+                            pos['stop_price'] = avg_price * 1.004
+                            dash['current_balance'] = int(new_cash)
+                            print(f"  [2시간] 50% 부분청산 ({sell_qty}주) → 나머지 손절: {pos['stop_price']:,.0f}")
+                            save_dashboard(dash)
+                            return
+            
             if cur_price >= target_price:
                 sell, reason = True, f"익절 ({pnl:+.2f}%)"
             elif cur_price <= stop_price:
-                sell, reason = True, f"ATR손절 ({pnl:+.2f}%)"
+                sell, reason = True, f"손절 ({pnl:+.2f}%)"
             elif now >= force_sell_at:
                 sell, reason = True, "강제청산 (15:20)"
 
