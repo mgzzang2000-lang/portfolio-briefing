@@ -2,8 +2,11 @@
 # ═══════════════════════════════════════════════════════════
 # [1단계: 일봉] 종목 선정
 #   MA20 상단, 볼린저밴드 스퀴즈 or BB 상단 근접,
-#   거래량 2배(시간 경과 비례 보정), 갭 +3% 미만
+#   거래량 2배(시간 경과 비례 보정), 갭 필터
 #   [2026-07-02] MA200 필터 제거, MACD 관련 조건/계산 전체 삭제
+#   [2026-07-02] MA20 "당일 신규 돌파" 여부는 제외 조건이 아니라
+#                정렬 우선순위로 사용 (1순위: 당일 신규 돌파, 2순위: 기존 상단 유지)
+#   [2026-07-02] 09:00~09:10 갭 기준 3% -> 5%로 완화 (09:10~11:00과 동일)
 # -------------------------------------------------------
 # [2단계: 1분봉] 진입 타이밍 확인 (상위 3 후보에만 적용)
 #   스토캐스틱RSI: K > D AND K > 20 (과매도 탈출 후 상승)
@@ -379,13 +382,13 @@ def place_order(token, code, qty, side="buy"):
 def scan_signals(token):
     """
     일봉 종목 선정 조건:
-      ① MA20 상단
+      ① MA20 상단 (당일 신규 돌파 여부는 제외 조건이 아니라 정렬 우선순위로만 사용)
       ② [2026-07-02 제거] MA200 필터 — 장기추세 조건 없음
       ③ [2026-07-02 제거] MACD 관련 조건 전체 삭제
       ④ 볼린저밴드 스퀴즈 OR BB 상단 근접(98%)
       ⑤ 거래량 20일 평균 2배 이상 (시간 경과 비례 보정)
-      ⑥ 시간대별 갭 필터: 09:00~09:10(3%), 09:10~11:00(5%), 14:00~14:30(고가98%)
-    정렬: 스퀴즈 종목 우선 + 거래량 비율 순
+      ⑥ 시간대별 갭 필터: 09:00~09:10(5%), 09:10~11:00(5%), 14:00~14:30(고가98%)
+    정렬: 1순위 당일 신규 돌파 > 2순위 스퀴즈 종목 > 3순위 거래량 비율 순
     """
     # [2026-07-02 추가] 시간대별 진입 가능 여부 판정
     now = datetime.now(KST)
@@ -405,14 +408,15 @@ def scan_signals(token):
         return []
 
     # 갭 필터 임계값 설정
+    # [2026-07-02] 09:00~09:10 구간도 3% -> 5%로 완화 (09:10~11:00과 동일)
     if now_hour == 9 and now_minute < 10:
-        gap_threshold = 3.0  # 09:00~09:10: 엄격
+        gap_threshold = 5.0  # 09:00~09:10
     elif 9 <= now_hour < 11:
-        gap_threshold = 5.0  # 09:10~11:00: 보통
+        gap_threshold = 5.0  # 09:10~11:00
     elif 14 <= now_hour < 15 and now_minute < 30:
         gap_threshold = float('inf')  # 14:00~14:30: 갭 조건 제거 (대신 고가근접 사용)
     else:
-        gap_threshold = 3.0  # 기본값 (도달 불가)
+        gap_threshold = 5.0  # 기본값 (도달 불가)
 
     # [2026-07-02] 시간 경과 비례 거래량 기대치
     # 오늘 누적거래량(장중 계속 증가)을 과거 20일 '하루 종일' 평균과 시간 보정 없이
@@ -456,6 +460,14 @@ def scan_signals(token):
             # ── 필터 ──────────────────────────────────────────
             if price <= ma20:
                 continue
+            # [2026-07-02] 당일 신규 돌파 여부 — 제외하지 않고 "우선순위" 태그로만 사용.
+            # 어제 종가가 20일선 이하였다가 오늘 처음 뚫은 종목이면 True(1순위 후보),
+            # 어제 이미 20일선 위였던 종목(시세가 이미 나온 경우가 많음)은 False(2순위 후보)
+            # 로 분류만 하고, 여전히 후보 목록에는 포함시킨다.
+            ma20_prev = calc_ma(closes[1:], 20)
+            is_new_breakout = (
+                ma20_prev is not None and len(closes) > 1 and closes[1] <= ma20_prev
+            )
             # [2026-07-02 제거] MA200 필터 — 아래 조건 비활성화
             # if ma200 is not None and price <= ma200:
             #     continue
@@ -477,7 +489,8 @@ def scan_signals(token):
             vol_ratio = cur['volume'] / vol_avg20 if vol_avg20 else 0
             ma200_str  = f"{ma200:,.0f}" if ma200 else "N/A"
             bb_tag     = "스퀴즈" if in_squeeze else "BB상단근접"
-            print(f"  [일봉] {cur['name']} "
+            breakout_tag = "당일돌파(1순위)" if is_new_breakout else "기존상단(2순위)"
+            print(f"  [일봉] {cur['name']} {breakout_tag} "
                   f"갭={gap:+.1f}% 거래량={vol_ratio:.1f}배 "
                   f"BB={bb_tag} MA200(참고)={ma200_str}")
             candidates.append({
@@ -485,13 +498,14 @@ def scan_signals(token):
                 'price': price, 'ma20': ma20, 'ma200': ma200,
                 'gap': gap, 'vol_ratio': vol_ratio,
                 'in_squeeze': in_squeeze, 'bw': bw,
+                'is_new_breakout': is_new_breakout,
             })
             time.sleep(0.06)
         except Exception as e:
             print(f"  오류 {code}: {e}")
             continue
-    # 스퀴즈 우선, 동순위 내 거래량 비율 순
-    candidates.sort(key=lambda x: (-int(x['in_squeeze']), -x['vol_ratio']))
+    # [2026-07-02] 정렬: 1순위 당일 신규 돌파 > 2순위 스퀴즈 종목 > 3순위 거래량 비율 순
+    candidates.sort(key=lambda x: (-int(x['is_new_breakout']), -int(x['in_squeeze']), -x['vol_ratio']))
     return candidates
 # ── [2단계] 1분봉 진입 타이밍 확인 ──────────────────────────────
 def check_1min_entry(token, code, name, market="J"):
@@ -653,7 +667,8 @@ def main():
         save_dashboard(dash)
         ma200_str   = f"{chosen['ma200']:,.0f}" if chosen['ma200'] else "N/A"
         squeeze_tag = "🔥스퀴즈" if chosen['in_squeeze'] else "📈BB상단"
-        msg = (f"📥 매수 {squeeze_tag}\n{chosen['name']} {qty}주\n"
+        breakout_tag = "🆕당일돌파" if chosen['is_new_breakout'] else "기존상단"
+        msg = (f"📥 매수 {squeeze_tag} {breakout_tag}\n{chosen['name']} {qty}주\n"
                f"가격: {price:,.0f}원\n"
                f"거래량: {chosen['vol_ratio']:.1f}배\n"
                f"갭: {chosen['gap']:+.1f}% | MA200(참고): {ma200_str}\n"
