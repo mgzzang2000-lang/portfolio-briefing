@@ -454,9 +454,36 @@ def scan_signals(token):
       ③ MACD 골든크로스 5일 이내 + 현재 MACD > Signal
       ④ 볼린저밴드 스퀴즈 OR BB 상단 근접(98%) [기존 RSI 단독 조건 제거]
       ⑤ 거래량 20일 평균 2배 이상
-      ⑥ 시초가 갭 +3% 미만
+      ⑥ 시간대별 갭 필터: 09:00~09:10(3%), 09:10~11:00(5%), 14:00~14:30(고가98%)
     정렬: 스퀴즈 종목 우선 + 거래량 비율 순
     """
+    # [2026-07-02 추가] 시간대별 진입 가능 여부 판정
+    now = datetime.now(KST)
+    now_hour = now.hour
+    now_minute = now.minute
+    
+    # 진입 시간대 판정
+    if 9 <= now_hour < 11:  # 09:00~11:00 (두 단계)
+        can_entry = True
+    elif 14 <= now_hour < 15 and now_minute < 30:  # 14:00~14:30
+        can_entry = True
+    else:  # 11:00~14:00, 14:30~15:30, 기타 (신규 진입 없음)
+        can_entry = False
+    
+    if not can_entry:
+        print(f"[{now.strftime('%H:%M')}] 신규 진입 시간 아님 — 스캔 스킵")
+        return []
+    
+    # 갭 필터 임계값 설정
+    if 9 <= now_hour < 9 or (now_hour == 9 and now_minute < 10):
+        gap_threshold = 3.0  # 09:00~09:10: 엄격
+    elif 9 <= now_hour < 11:
+        gap_threshold = 5.0  # 09:10~11:00: 보통
+    elif 14 <= now_hour < 15 and now_minute < 30:
+        gap_threshold = float('inf')  # 14:00~14:30: 갭 조건 제거 (대신 고가근접 사용)
+    else:
+        gap_threshold = 3.0  # 기본값 (도달 불가)
+    
     candidates = []
     kospi  = get_volume_rank(token, "J")
     time.sleep(1)
@@ -510,11 +537,14 @@ def scan_signals(token):
                 continue
             if vol_avg20 and cur['volume'] < vol_avg20 * 2:
                 continue
-            # [2026-07-02 개선] 시간대별 갭 필터 (일봉 근사)
-            # 09:00~09:10: 갭 < 3%, 09:10~11:00: 갭 < 5%
-            # 일봉으로는 -1%~5% 범위만 허용
-            if gap <= -1.0 or gap >= 5.0:
+            # [2026-07-02] 시간대별 갭 필터 적용
+            if gap >= gap_threshold:
                 continue
+            # 14:00~14:30 구간: 갭 조건 대신 당일 고가 98% 이상 근접 확인
+            if now_hour == 14 and now_minute < 30 and gap_threshold == float('inf'):
+                today_high = highs[0]
+                if today_high < cur['open'] * 0.98:
+                    continue  # 고가 98% 이상 미달 → 진입 안 함
 
             vol_ratio = cur['volume'] / vol_avg20 if vol_avg20 else 0
             ma200_str  = f"{ma200:,.0f}" if ma200 else "N/A"
