@@ -8,21 +8,20 @@
 청산 기준 : 일봉 고가>=익절가 -> 익절가로 청산
             일봉 저가<=손절가 -> 손절가로 청산
             익절/손절 미달 + 다음날도 포지션 -> 종가 강제청산
+
+[2026-07-02 수정] 최소 손절폭 하한 -0.5% -> -1.5%로 상향.
+  저변동성 종목에서 ATR 기반 손절이 지나치게 타이트해지는 것을 방지.
 =====================================================
 """
-
 import os, json, time, requests
 from datetime import datetime, timezone, timedelta, date
-
 # -- 설정 --
 KST      = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
 MAX_BET  = 500_000
-
 KIS_APP_KEY    = os.environ['KIS_APP_KEY']
 KIS_APP_SECRET = os.environ['KIS_APP_SECRET']
 TOKEN_FILE     = "kis_token.json"
-
 BACKTEST_DAYS = [
     date(2026, 6, 23),
     date(2026, 6, 24),
@@ -32,8 +31,6 @@ BACKTEST_DAYS = [
 ]
 DATA_START   = "20260101"   # FHKST03010100 시작일 (약 120 거래일)
 BACKTEST_END = "20260627"   # 마지막 백테스트일
-
-
 # -- KIS 인증 --
 def get_kis_token():
     try:
@@ -56,8 +53,6 @@ def get_kis_token():
         json.dump({'access_token': data['access_token'],
                    'issued_at': datetime.now(KST).isoformat()}, f)
     return data['access_token']
-
-
 def kis_get(token, path, params, tr_id, retries=3):
     headers = {
         "authorization": f"Bearer {token}",
@@ -75,8 +70,6 @@ def kis_get(token, path, params, tr_id, retries=3):
             if attempt < retries - 1:
                 time.sleep(2)
     return {}
-
-
 # -- 데이터 수집 --
 def get_volume_rank(token, market="J"):
     scr_code = "20172" if market == "Q" else "20171"
@@ -91,8 +84,6 @@ def get_volume_rank(token, market="J"):
         "FID_VOL_CNT": "", "FID_INPUT_DATE_1": ""
     }, "FHPST01710000")
     return [x['mksc_shrn_iscd'] for x in data.get('output', [])[:100]]
-
-
 def get_daily_raw(token, code, market="J"):
     """일봉 원시 데이터 반환 (최신순). FHKST03010100 날짜범위 API 사용. KOSDAQ 폴백 포함."""
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice", {
@@ -107,15 +98,11 @@ def get_daily_raw(token, code, market="J"):
     if not rows and market == "J":
         return get_daily_raw(token, code, market="Q")
     return rows
-
-
 # -- 지표 계산 --
 def calc_ma(closes, period):
     if len(closes) < period:
         return None
     return sum(closes[:period]) / period
-
-
 def calc_macd(closes, fast=12, slow=26, signal=9):
     if len(closes) < slow + signal + 6:
         return None, None, None
@@ -145,8 +132,6 @@ def calc_macd(closes, fast=12, slow=26, signal=9):
             golden = i
             break
     return macd_s[-1], sig_s[-1], golden
-
-
 def calc_bb(closes, period=20, mult=2.0):
     if len(closes) < period:
         return None, None, None, None
@@ -157,8 +142,6 @@ def calc_bb(closes, period=20, mult=2.0):
     lower = mid - mult*std
     bw    = (upper-lower)/mid if mid else 0
     return upper, mid, lower, bw
-
-
 def is_bb_squeeze(closes, period=20, lookback=20):
     if len(closes) < period + lookback:
         return False
@@ -174,8 +157,6 @@ def is_bb_squeeze(closes, period=20, lookback=20):
         return False
     threshold = sorted(hist)[int(len(hist)*0.3)]
     return bw_now <= threshold
-
-
 def calc_atr(highs, lows, closes, period=14):
     if len(closes) < period+1:
         return None
@@ -183,14 +164,11 @@ def calc_atr(highs, lows, closes, period=14):
                abs(highs[i]-closes[i+1]),
                abs(lows[i]-closes[i+1])) for i in range(period)]
     return sum(trs) / period
-
-
 # -- 메인 백테스트 --
 def run_backtest():
     print("=" * 55)
     print("  백테스트: 2026-06-23 ~ 06-27 (저번주)")
     print("=" * 55)
-
     token = get_kis_token()
     print("\n[1] 스캔 대상 수집 중...")
     kospi  = get_volume_rank(token, "J")
@@ -198,9 +176,7 @@ def run_backtest():
     kosdaq = get_volume_rank(token, "Q")
     universe = list(dict.fromkeys(kospi + kosdaq))
     print(f"    코스피 {len(kospi)} + 코스닥 {len(kosdaq)} = {len(universe)}종목")
-
     scan_list = universe[:80]
-
     print(f"\n[2] 일봉 데이터 로딩 중 ({len(scan_list)}종목)...")
     print(f"    기간: {DATA_START} ~ {BACKTEST_END}")
     stock_data = {}
@@ -215,19 +191,15 @@ def run_backtest():
         if (i+1) % 20 == 0:
             print(f"    {i+1}/{len(scan_list)}...")
     print(f"    유효 데이터: {len(stock_data)}종목\n")
-
     date_index = {}
     for code, rows in stock_data.items():
         date_index[code] = {r['stck_bsop_date']: idx for idx, r in enumerate(rows)}
-
     portfolio = {'cash': MAX_BET, 'position': None}
     trade_log = []
     daily_log = []
-
     for bday in BACKTEST_DAYS:
         day_str  = bday.strftime('%Y%m%d')
         day_disp = bday.strftime('%m/%d(%a)')
-
         # 전날 강제청산
         if portfolio['position']:
             pos = portfolio['position']
@@ -237,7 +209,6 @@ def run_backtest():
                     idx   = date_index[pcode][day_str]
                     close = float(stock_data[pcode][idx].get('stck_clpr', pos['entry']))
                     _close_position(portfolio, trade_log, bday, close, "강제청산")
-
         # 당일 익절/손절
         if portfolio['position']:
             pos   = portfolio['position']
@@ -251,7 +222,6 @@ def run_backtest():
                     _close_position(portfolio, trade_log, bday, pos['target'], "익절 +4%")
                 elif low <= pos['stop']:
                     _close_position(portfolio, trade_log, bday, pos['stop'], "ATR손절")
-
         # 신규 매수
         candidates = []
         f_no_data = 0
@@ -262,7 +232,6 @@ def run_backtest():
         f_vol     = 0
         f_gap     = 0
         f_pass    = 0
-
         if portfolio['position'] is None:
             for code, rows in stock_data.items():
                 try:
@@ -270,40 +239,32 @@ def run_backtest():
                         f_no_data += 1
                         continue
                     idx = date_index[code][day_str]
-
                     today = rows[idx]
                     past  = rows[idx+1:]
                     if len(past) < 30:
                         f_no_data += 1
                         continue
-
                     today_open  = float(today.get('stck_oprc', 0))
                     today_close = float(today.get('stck_clpr', 0))
                     today_vol   = int(today.get('acml_vol', 0))
                     prev_close  = float(past[0].get('stck_clpr', 0))
-
                     if today_open == 0 or prev_close == 0:
                         f_no_data += 1
                         continue
-
                     closes  = [float(r['stck_clpr']) for r in past]
                     highs   = [float(r.get('stck_hgpr', r['stck_clpr'])) for r in past]
                     lows    = [float(r.get('stck_lwpr', r['stck_clpr'])) for r in past]
                     volumes = [int(r.get('acml_vol', 0)) for r in past]
-
                     ma20  = calc_ma(closes, 20)
                     ma200 = calc_ma(closes, 200)
                     macd, sig_line, golden = calc_macd(closes)
                     bb_upper, _, _, _ = calc_bb(closes, 20)
                     squeeze = is_bb_squeeze(closes)
-
                     if ma20 is None or macd is None or bb_upper is None:
                         f_no_data += 1
                         continue
-
                     vol_avg20 = sum(volumes[:20]) / 20 if len(volumes) >= 20 else None
                     gap = (today_open - prev_close) / prev_close * 100
-
                     if today_close <= ma20:
                         f_ma20 += 1
                         continue
@@ -323,12 +284,11 @@ def run_backtest():
                         f_gap += 1
                         continue
                     f_pass += 1
-
                     vol_ratio = today_vol / vol_avg20 if vol_avg20 else 0
                     atr = calc_atr(highs[:15], lows[:15], closes[:15])
                     stop_price = today_open - (atr * 1.5 if atr else today_open * 0.02)
-                    stop_price = min(stop_price, today_open * 0.995)
-
+                    # [2026-07-02 수정] 최소 손절폭 하한: -0.5% -> -1.5%
+                    stop_price = min(stop_price, today_open * 0.985)
                     candidates.append({
                         'code': code,
                         'open': today_open,
@@ -340,9 +300,7 @@ def run_backtest():
                     })
                 except Exception:
                     continue
-
             candidates.sort(key=lambda x: (-int(x['squeeze']), -x['vol_ratio']))
-
             if candidates:
                 c   = candidates[0]
                 qty = int(min(portfolio['cash'], MAX_BET) / c['open'])
@@ -361,7 +319,6 @@ def run_backtest():
                         'tag': 'squeeze' if c['squeeze'] else 'BB상단',
                         'vol_ratio': c['vol_ratio'],
                     })
-
         pos_val = 0
         if portfolio['position']:
             p = portfolio['position']
@@ -376,7 +333,6 @@ def run_backtest():
             'f_macd': f_macd, 'f_bb': f_bb, 'f_vol': f_vol, 'f_gap': f_gap,
             'f_pass': f_pass,
         })
-
     # 마지막 포지션 청산
     if portfolio['position']:
         p = portfolio['position']
@@ -388,13 +344,11 @@ def run_backtest():
         else:
             close = p['entry']
         _close_position(portfolio, trade_log, last_day, close, "기간종료 청산")
-
     # 결과 출력
     sells     = [t for t in trade_log if t['action'] == 'SELL']
     wins      = [t for t in sells if t['pnl'] > 0]
     total_pnl = sum(t['pnl'] for t in sells)
     final     = MAX_BET + total_pnl
-
     print("=" * 55)
     print("  결과 요약")
     print("=" * 55)
@@ -408,7 +362,6 @@ def run_backtest():
         worst = min(sells, key=lambda t: t['pnl_pct'])
         print(f"  최대 익절  : {best['pnl_pct']:+.1f}% ({best['code']} {best['date']})")
         print(f"  최대 손절  : {worst['pnl_pct']:+.1f}% ({worst['code']} {worst['date']})")
-
     print("\n  일별 포트폴리오 (필터 통계)")
     print("  " + "-"*52)
     for d in daily_log:
@@ -416,7 +369,6 @@ def run_backtest():
         print(f"  {d['date']}  평가액 {d['total']:>9,.0f}원  ({chg:>+8,.0f})  후보 {d['candidates']}종목")
         print(f"    [필터] 데이터={d['f_no_data']} MA20={d['f_ma20']} MA200={d['f_ma200']} "
               f"MACD={d['f_macd']} BB={d['f_bb']} 거래량={d['f_vol']} 갭={d['f_gap']} 통과={d['f_pass']}")
-
     print("\n  거래 내역")
     print("  " + "-"*40)
     for t in trade_log:
@@ -428,11 +380,8 @@ def run_backtest():
             sign = "OK" if t['pnl'] > 0 else "NG"
             print(f"  {t['date']} 매도 {t['code']} {t['pnl_pct']:+.1f}%"
                   f"  ({t['pnl']:>+,.0f}원)  {t['reason']}  {sign}")
-
     print("\n주의: 1분봉 진입 조건(StochRSI/BB중심선) 미적용 - 실제 결과와 다를 수 있음")
     print("=" * 55)
-
-
 def _close_position(portfolio, trade_log, bday, price, reason):
     pos = portfolio['position']
     qty = pos['qty']
@@ -445,7 +394,5 @@ def _close_position(portfolio, trade_log, bday, price, reason):
         'code': pos['code'], 'price': price, 'qty': qty,
         'pnl': pnl, 'pnl_pct': pnl_pct, 'reason': reason,
     })
-
-
 if __name__ == '__main__':
     run_backtest()
