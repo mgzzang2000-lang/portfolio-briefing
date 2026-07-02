@@ -1,9 +1,9 @@
 # 자동매매 — 2단계 추세 추종 단타 전략
 # ═══════════════════════════════════════════════════════════
 # [1단계: 일봉] 종목 선정
-#   MA20/MA200 상단, MACD 골든크로스(5일내),
-#   볼린저밴드 스퀴즈 or BB 상단 근접,
-#   거래량 2배, 갭 +3% 미만
+#   MA20 상단, 볼린저밴드 스퀴즈 or BB 상단 근접,
+#   거래량 2배(시간 경과 비례 보정), 갭 +3% 미만
+#   [2026-07-02] MA200 필터 제거, MACD 관련 조건/계산 전체 삭제
 # -------------------------------------------------------
 # [2단계: 1분봉] 진입 타이밍 확인 (상위 3 후보에만 적용)
 #   스토캐스틱RSI: K > D AND K > 20 (과매도 탈출 후 상승)
@@ -272,39 +272,6 @@ def calc_rsi(closes, period=14):
     if losses == 0:
         return 100.0
     return 100 - (100 / (1 + gains / losses))
-def calc_macd(closes_desc, fast=12, slow=26, signal=9):
-    """returns: (macd, signal_line, golden_days_ago)"""
-    if len(closes_desc) < slow + signal + 6:
-        return None, None, None
-    asc = list(reversed(closes_desc))
-    n = len(asc)
-    k_f   = 2 / (fast + 1)
-    k_s   = 2 / (slow + 1)
-    k_sig = 2 / (signal + 1)
-    ema_f = sum(asc[:fast]) / fast
-    ema_s = sum(asc[:slow]) / slow
-    for i in range(fast, slow):
-        ema_f = asc[i] * k_f + ema_f * (1 - k_f)
-    macd_series = []
-    for i in range(slow, n):
-        ema_f = asc[i] * k_f + ema_f * (1 - k_f)
-        ema_s = asc[i] * k_s + ema_s * (1 - k_s)
-        macd_series.append(ema_f - ema_s)
-    if len(macd_series) < signal:
-        return None, None, None
-    sig = sum(macd_series[:signal]) / signal
-    sig_series = [sig]
-    for v in macd_series[signal:]:
-        sig = v * k_sig + sig * (1 - k_sig)
-        sig_series.append(sig)
-    golden_days = None
-    check = min(6, len(macd_series) - 1, len(sig_series) - 1)
-    for i in range(1, check + 1):
-        if (macd_series[-(i+1)] < sig_series[-(i+1)] and
-                macd_series[-i] >= sig_series[-i]):
-            golden_days = i
-            break
-    return macd_series[-1], sig_series[-1], golden_days
 def calc_atr(highs, lows, closes, period=14):
     """ATR. 모두 최신이 index 0. TR = max(H-L, |H-prevC|, |L-prevC|)"""
     if len(closes) < period + 1:
@@ -413,10 +380,10 @@ def scan_signals(token):
     """
     일봉 종목 선정 조건:
       ① MA20 상단
-      ② MA200 상단 (데이터 충분할 때)
-      ③ MACD 골든크로스 5일 이내 + 현재 MACD > Signal
-      ④ 볼린저밴드 스퀴즈 OR BB 상단 근접(98%) [기존 RSI 단독 조건 제거]
-      ⑤ 거래량 20일 평균 2배 이상
+      ② [2026-07-02 제거] MA200 필터 — 장기추세 조건 없음
+      ③ [2026-07-02 제거] MACD 관련 조건 전체 삭제
+      ④ 볼린저밴드 스퀴즈 OR BB 상단 근접(98%)
+      ⑤ 거래량 20일 평균 2배 이상 (시간 경과 비례 보정)
       ⑥ 시간대별 갭 필터: 09:00~09:10(3%), 09:10~11:00(5%), 14:00~14:30(고가98%)
     정렬: 스퀴즈 종목 우선 + 거래량 비율 순
     """
@@ -475,11 +442,10 @@ def scan_signals(token):
             lows    = ohlcv['lows']
             volumes = ohlcv['volumes']
             ma20  = calc_ma(closes, 20)
-            ma200 = calc_ma(closes, 200)
-            macd, signal_line, golden_days = calc_macd(closes)
+            ma200 = calc_ma(closes, 200)  # [2026-07-02] 필터에는 미사용, 표시/메시지용으로만 계산
             bb_upper, bb_mid, _, bw = calc_bb(closes, 20)
             in_squeeze = is_daily_bb_squeeze(closes)
-            if ma20 is None or macd is None or bb_upper is None:
+            if ma20 is None or bb_upper is None:
                 continue
             vol_avg20 = sum(volumes[1:21]) / 20 if len(volumes) >= 21 else None
             cur = get_current_price(token, code, market)
@@ -490,10 +456,10 @@ def scan_signals(token):
             # ── 필터 ──────────────────────────────────────────
             if price <= ma20:
                 continue
-            if ma200 is not None and price <= ma200:
-                continue
-            if golden_days is None or macd <= signal_line:
-                continue
+            # [2026-07-02 제거] MA200 필터 — 아래 조건 비활성화
+            # if ma200 is not None and price <= ma200:
+            #     continue
+            # [2026-07-02 제거] MACD 관련 조건 전체 삭제 (calc_macd 호출도 제거됨)
             # BB: 스퀴즈 상태 OR BB 상단 근접 (기존 RSI 조건 대체)
             bb_near_upper = (price >= bb_upper * 0.98)
             if not (in_squeeze or bb_near_upper):
@@ -511,13 +477,12 @@ def scan_signals(token):
             vol_ratio = cur['volume'] / vol_avg20 if vol_avg20 else 0
             ma200_str  = f"{ma200:,.0f}" if ma200 else "N/A"
             bb_tag     = "스퀴즈" if in_squeeze else "BB상단근접"
-            print(f"  [일봉] {cur['name']} MACD={golden_days}일전 "
+            print(f"  [일봉] {cur['name']} "
                   f"갭={gap:+.1f}% 거래량={vol_ratio:.1f}배 "
-                  f"BB={bb_tag} MA200={ma200_str}")
+                  f"BB={bb_tag} MA200(참고)={ma200_str}")
             candidates.append({
                 'code': code, 'name': cur['name'], 'market': market,
                 'price': price, 'ma20': ma20, 'ma200': ma200,
-                'macd': macd, 'golden_days': golden_days,
                 'gap': gap, 'vol_ratio': vol_ratio,
                 'in_squeeze': in_squeeze, 'bw': bw,
             })
@@ -690,8 +655,8 @@ def main():
         squeeze_tag = "🔥스퀴즈" if chosen['in_squeeze'] else "📈BB상단"
         msg = (f"📥 매수 {squeeze_tag}\n{chosen['name']} {qty}주\n"
                f"가격: {price:,.0f}원\n"
-               f"MACD크로스: {chosen['golden_days']}일전 | 거래량: {chosen['vol_ratio']:.1f}배\n"
-               f"갭: {chosen['gap']:+.1f}% | MA200: {ma200_str}\n"
+               f"거래량: {chosen['vol_ratio']:.1f}배\n"
+               f"갭: {chosen['gap']:+.1f}% | MA200(참고): {ma200_str}\n"
                f"익절: {chosen['target_price']:,.0f} | ATR손절: {chosen['stop_price']:,.0f}\n"
                f"💰 투입: {used:,.0f}원")
         send_kakao(kakao_token, msg)
