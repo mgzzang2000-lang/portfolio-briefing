@@ -183,9 +183,10 @@ def update_position_price(dash, current_price):
 
 # ── 시장 데이터 ───────────────────────────────────────────────
 def get_volume_rank(token, market="J"):
+    scr_code = "20172" if market == "Q" else "20171"
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/volume-rank", {
         "FID_COND_MRKT_DIV_CODE": market,
-        "FID_COND_SCR_DIV_CODE": "20171",
+        "FID_COND_SCR_DIV_CODE": scr_code,
         "FID_INPUT_ISCD": "0000",
         "FID_DIV_CLS_CODE": "0",
         "FID_BLNG_CLS_CODE": "0",
@@ -201,34 +202,38 @@ def get_volume_rank(token, market="J"):
         print(f"[경고] 거래량 순위 빈 결과 (market={market}): {data}")
     return [item['mksc_shrn_iscd'] for item in output[:100]]
 
-def get_daily_ohlcv(token, code):
-    """일봉 OHLCV (High/Low 포함) — ATR·BB 계산용"""
+def get_daily_ohlcv(token, code, market="J"):
+    """일봉 OHLCV — FHKST03010100 날짜범위 API (충분한 데이터 확보)"""
+    today = datetime.now(KST).strftime('%Y%m%d')
     start = (datetime.now(KST) - timedelta(days=500)).strftime('%Y%m%d')
-    data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-daily-price", {
-        "FID_COND_MRKT_DIV_CODE": "J",
+    data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice", {
+        "FID_COND_MRKT_DIV_CODE": market,
         "FID_INPUT_ISCD": code,
+        "FID_INPUT_DATE_1": start,
+        "FID_INPUT_DATE_2": today,
         "FID_PERIOD_DIV_CODE": "D",
         "FID_ORG_ADJ_PRC": "0",
-        "FID_INPUT_DATE_1": start,
-    }, "FHKST01010400")
-    output = data.get('output', [])
-    if len(output) < 30:
+    }, "FHKST03010100")
+    output = data.get('output2', [])
+    # KOSPI로 조회했는데 빈 결과면 KOSDAQ으로 재시도
+    if not output and market == "J":
+        return get_daily_ohlcv(token, code, market="Q")
+    if len(output) < 42:
         return None
-    # output[0]=최신, output[-1]=과거
     closes  = [float(x['stck_clpr']) for x in output]
     highs   = [float(x.get('stck_hgpr', x['stck_clpr'])) for x in output]
     lows    = [float(x.get('stck_lwpr', x['stck_clpr'])) for x in output]
     volumes = [int(x.get('acml_vol', 0)) for x in output]
     return {'closes': closes, 'highs': highs, 'lows': lows, 'volumes': volumes}
 
-def get_minute_ohlcv(token, code, n=30):
+def get_minute_ohlcv(token, code, market="J", n=30):
     """
     1분봉 OHLCV (최신이 index 0)
     스토캐스틱RSI·BB·ATR 계산용
     """
     now = datetime.now(KST)
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice", {
-        "FID_COND_MRKT_DIV_CODE": "J",
+        "FID_COND_MRKT_DIV_CODE": market,
         "FID_INPUT_ISCD": code,
         "FID_INPUT_HOUR_1": now.strftime('%H%M%S'),
         "FID_PW_DATA_INCU_YN": "Y",
@@ -247,9 +252,9 @@ def get_minute_ohlcv(token, code, n=30):
         return None
     return {'closes': closes, 'highs': highs, 'lows': lows}
 
-def get_current_price(token, code):
+def get_current_price(token, code, market="J"):
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-price", {
-        "FID_COND_MRKT_DIV_CODE": "J",
+        "FID_COND_MRKT_DIV_CODE": market,
         "FID_INPUT_ISCD": code
     }, "FHKST01010100")
     o = data.get('output', {})
@@ -451,16 +456,19 @@ def scan_signals(token):
     """
     candidates = []
     kospi  = get_volume_rank(token, "J")
+    time.sleep(1)
     kosdaq = get_volume_rank(token, "Q")
+    kospi_set = set(kospi)
     stocks = list(dict.fromkeys(kospi + kosdaq))
-    print(f"스캔 대상: {len(stocks)}종목")
+    print(f"스캔 대상: 코스피 {len(kospi)} + 코스닥 {len(kosdaq)} = {len(stocks)}종목")
     if not stocks:
         print("[경고] 스캔 대상 없음")
         return []
 
     for code in stocks:
         try:
-            ohlcv = get_daily_ohlcv(token, code)
+            market = "J" if code in kospi_set else "Q"
+            ohlcv = get_daily_ohlcv(token, code, market)
             if not ohlcv:
                 continue
 
@@ -479,7 +487,7 @@ def scan_signals(token):
                 continue
 
             vol_avg20 = sum(volumes[1:21]) / 20 if len(volumes) >= 21 else None
-            cur = get_current_price(token, code)
+            cur = get_current_price(token, code, market)
             price = cur['price']
             if price == 0 or cur['open'] == 0 or cur['prev_close'] == 0:
                 continue
@@ -510,7 +518,7 @@ def scan_signals(token):
                   f"BB={bb_tag} MA200={ma200_str}")
 
             candidates.append({
-                'code': code, 'name': cur['name'],
+                'code': code, 'name': cur['name'], 'market': market,
                 'price': price, 'ma20': ma20, 'ma200': ma200,
                 'macd': macd, 'golden_days': golden_days,
                 'gap': gap, 'vol_ratio': vol_ratio,
@@ -527,7 +535,7 @@ def scan_signals(token):
     return candidates
 
 # ── [2단계] 1분봉 진입 타이밍 확인 ──────────────────────────────
-def check_1min_entry(token, code, name):
+def check_1min_entry(token, code, name, market="J"):
     """
     1분봉 기준 진입 최종 확인
       ① 스토캐스틱RSI: K > D AND K > 20
@@ -535,7 +543,7 @@ def check_1min_entry(token, code, name):
     ATR(14) × 1.5 = 동적 손절가 계산
     returns: (ok, stop_price, target_price, info_str)
     """
-    minute = get_minute_ohlcv(token, code)
+    minute = get_minute_ohlcv(token, code, market)
     if not minute:
         return False, 0, 0, "1분봉 데이터 없음"
 
@@ -661,7 +669,7 @@ def main():
         for c in candidates[:top_n]:
             time.sleep(0.1)
             ok, stop_px, target_px, info = check_1min_entry(
-                kis_token, c['code'], c['name'])
+                kis_token, c['code'], c['name'], c.get('market', 'J'))
             if ok:
                 chosen = {**c, 'stop_price': stop_px, 'target_price': target_px}
                 print(f"  → 진입 결정: {c['name']}")
@@ -696,7 +704,7 @@ def main():
         send_kakao(kakao_token, msg)
 
     except Exception as e:
-        err_msg = f"⚠️ 자동매매 오류\n{str(e)[:150]}"
+        err_msg = f"\u26a0\ufe0f \uc790\ub3d9\ub9e4\ub9e4 \uc624\ub958\\n{str(e)[:150]}"
         print(err_msg)
         try:
             send_kakao(kakao_token, err_msg)
