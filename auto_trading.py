@@ -60,7 +60,7 @@ def get_kis_token():
     print("[토큰] 발급 및 저장 완료")
     return data['access_token']
 
-def kis_get(token, path, params, tr_id):
+def kis_get(token, path, params, tr_id, retries=3):
     headers = {
         "authorization": f"Bearer {token}",
         "appkey": KIS_APP_KEY,
@@ -68,16 +68,23 @@ def kis_get(token, path, params, tr_id):
         "tr_id": tr_id,
         "custtype": "P"
     }
-    r = requests.get(f"{BASE_URL}{path}", headers=headers, params=params, timeout=10)
-    print(f"[API] {tr_id} status={r.status_code} len={len(r.text)}")
-    if not r.text.strip():
-        print(f"[경고] 빈 응답: {tr_id}")
-        return {}
-    try:
-        return r.json()
-    except Exception as e:
-        print(f"[오류] JSON 파싱 실패 {tr_id}: {e} | body={r.text[:200]}")
-        return {}
+    for attempt in range(retries):
+        try:
+            r = requests.get(f"{BASE_URL}{path}", headers=headers, params=params, timeout=10)
+            print(f"[API] {tr_id} status={r.status_code} len={len(r.text)}")
+            if not r.text.strip():
+                print(f"[경고] 빈 응답: {tr_id}")
+                return {}
+            try:
+                return r.json()
+            except Exception as e:
+                print(f"[오류] JSON 파싱 실패 {tr_id}: {e} | body={r.text[:200]}")
+                return {}
+        except Exception as e:
+            print(f"[재시도 {attempt+1}/{retries}] {tr_id}: {e}")
+            if attempt < retries - 1:
+                time.sleep(2)
+    return {}
 
 def kis_post(token, path, body, tr_id):
     headers = {
@@ -587,10 +594,10 @@ def main():
 
     kis_token   = get_kis_token()
     kakao_token = get_kakao_token()
-    holdings, cash = get_balance(kis_token)
     dash = load_dashboard()
 
     try:
+        holdings, cash = get_balance(kis_token)
         # ① 보유 포지션 관리 ──────────────────────────────────
         active = [h for h in holdings if int(h.get('hldg_qty', 0)) > 0]
         if active:
@@ -685,7 +692,7 @@ def main():
                f"MACD크로스: {chosen['golden_days']}일전 | 거래량: {chosen['vol_ratio']:.1f}배\n"
                f"갭: {chosen['gap']:+.1f}% | MA200: {ma200_str}\n"
                f"익절: {chosen['target_price']:,.0f} | ATR손절: {chosen['stop_price']:,.0f}\n"
-               f"💰 투입: {used:,.0f}원 | 잔고: {cash-used:,.0f}원")
+               f"💰 투입: {used:,.0f}원")
         send_kakao(kakao_token, msg)
 
     except Exception as e:
