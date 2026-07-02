@@ -1,0 +1,20 @@
+name: intraday-backtest
+
+on:
+  workflow_dispatch:
+
+jobs:
+  intraday-backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: install
+        run: pip install requests
+      - name: run
+        env:
+          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+        run: python intraday_backtest.py
