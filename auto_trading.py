@@ -549,7 +549,7 @@ def check_1min_entry(token, code, name, market="J"):
     atr_1m = calc_atr(highs, lows, closes, period=14)
     if atr_1m:
         stop_price = price - atr_1m * 1.5
-        stop_price = min(stop_price, price * 0.995)  # 최소 -0.5% 보호
+        stop_price = min(stop_price, price * 0.985)  # 최소 -1.5% 보호
     else:
         stop_price = price * 0.98  # ATR 계산 불가 시 폴백
     target_price = price * 1.04
@@ -571,7 +571,6 @@ def main():
     market_open   = now.replace(hour=9,  minute=0,  second=0, microsecond=0)
     force_sell_at = now.replace(hour=15, minute=20, second=0, microsecond=0)
     market_close  = now.replace(hour=15, minute=30, second=0, microsecond=0)
-    entry_cutoff  = now.replace(hour=11, minute=0,  second=0, microsecond=0)
     if now < market_open or now > market_close:
         print("장 시간 외 — 종료")
         return
@@ -647,10 +646,7 @@ def main():
             else:
                 save_dashboard(dash)
             return
-        # ② 신규 진입 스캔 (11시 이전만) ─────────────────────
-        if now >= entry_cutoff:
-            print("11시 이후 — 신규 진입 없음")
-            return
+        # ② 신규 진입 스캔 (시간대별 진입 가능 여부는 scan_signals 내부에서 판정)
         print("포지션 없음 → [1단계] 일봉 신호 스캔")
         candidates = scan_signals(kis_token)
         if not candidates:
