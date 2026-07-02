@@ -510,7 +510,10 @@ def scan_signals(token):
                 continue
             if vol_avg20 and cur['volume'] < vol_avg20 * 2:
                 continue
-            if gap >= 3.0:
+            # [2026-07-02 개선] 시간대별 갭 필터 (일봉 근사)
+            # 09:00~09:10: 갭 < 3%, 09:10~11:00: 갭 < 5%
+            # 일봉으로는 -1%~5% 범위만 허용
+            if gap <= -1.0 or gap >= 5.0:
                 continue
 
             vol_ratio = cur['volume'] / vol_avg20 if vol_avg20 else 0
