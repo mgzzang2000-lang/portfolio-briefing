@@ -1,0 +1,45 @@
+name: Collect Intraday Minute Data
+
+on:
+  schedule:
+    # 00:00~06:59 UTC = 09:00~15:59 KST, 평일(월~금), 15분 간격
+    - cron: '*/15 0-6 * * 1-5'
+  workflow_dispatch: {}
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Restore KIS token cache
+        uses: actions/cache@v4
+        with:
+          path: kis_token.json
+          key: kis-token-${{ github.run_id }}
+          restore-keys: kis-token-
+
+      - name: Collect minute data
+        env:
+          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+        run: python collect_intraday_data.py
+
+      - name: Commit collected data
+        run: |
+          git config user.name "Auto Update"
+          git config user.email "actions@github.com"
+          git add minute_data/ || true
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: collect intraday minute data [skip ci]"
+            git push
+          else
+            echo "변경 없음 - 커밋 스킵"
+          fi
