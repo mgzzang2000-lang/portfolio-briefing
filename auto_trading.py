@@ -226,7 +226,7 @@ def get_minute_ohlcv(token, code, market="J", n=30):
         "FID_PW_DATA_INCU_YN": "Y",
         "FID_ETC_CLS_CODE": "0",
         "FID_INPUT_DATE_1": now.strftime('%Y%m%d'),
-    }, "FHKST03010100")
+    }, "FHKST03010200")  # [2026-07-03] 버그 수정: 일봉 TR ID(FHKST03010100)가 잘못 들어가 있어 1분봉 조회가 항상 실패했음
     output = data.get('output2', [])
     if not output or len(output) < 10:
         print(f"  [1분봉] {code} 데이터 부족 ({len(output)}봉)")
