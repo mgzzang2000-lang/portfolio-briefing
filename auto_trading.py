@@ -11,6 +11,7 @@
 #                주문 실패 시 카톡 알림만 보내고 상태를 변경하지 않도록 수정
 #   [2026-07-05] 보유 포지션 식별을 holdings[0] 대신 dash['position']['code']와
 #                일치하는 종목으로 한정 — 계좌에 봇이 사지 않은 종목이 있어도 오작동 방지
+#   [2026-07-06] 하루 연속 손절 2회 도달 시 당일 신규 진입 중단 (daily_loss_guard)
 # -------------------------------------------------------
 # [2단계: 1분봉] 진입 타이밍 확인 (상위 3 후보에만 적용)
 #   스토캐스틱RSI: K > D AND K > 20 (과매도 탈출 후 상승)
@@ -143,6 +144,16 @@ def save_dashboard(data):
     with open(DASHBOARD_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     print("[대시보드] 저장 완료")
+DAILY_LOSS_LIMIT = 2  # [2026-07-06] 하루 연속 손절 한도 — 도달하면 당일 신규 진입 중단
+def check_daily_guard(dash, now):
+    """오늘 날짜 기준 연속 손절 횟수 관리. 날짜가 바뀌면 초기화."""
+    today_str = now.strftime('%m/%d')
+    guard = dash.setdefault('daily_loss_guard', {})
+    if guard.get('date') != today_str:
+        guard['date'] = today_str
+        guard['consecutive_losses'] = 0
+        guard['notified'] = False
+    return guard
 def log_buy(dash, code, name, qty, price, cash_after, stop_price, target_price):
     """stop_price: ATR×1.5 동적 손절가, target_price: +4% 익절가"""
     entry_time = datetime.now(KST)
@@ -569,6 +580,7 @@ def main():
     kis_token   = get_kis_token()
     kakao_token = get_kakao_token()
     dash = load_dashboard()
+    guard = check_daily_guard(dash, now)
     try:
         holdings, cash = get_balance(kis_token)
         # ① 보유 포지션 관리 ──────────────────────────────────
@@ -653,6 +665,7 @@ def main():
                 pnl_amt = int((cur_price - avg_price) * qty)
                 log_sell(dash, name, qty, avg_price, cur_price,
                          pnl, pnl_amt, reason, new_cash)
+                guard['consecutive_losses'] = guard.get('consecutive_losses', 0) + 1 if pnl < 0 else 0
                 save_dashboard(dash)
                 msg = (f"📤 매도\n{name} {qty}주\n"
                        f"사유: {reason}\n"
@@ -663,6 +676,14 @@ def main():
                 save_dashboard(dash)
             return
         # ② 신규 진입 스캔 (시간대별 진입 가능 여부는 scan_signals 내부에서 판정)
+        if guard.get('consecutive_losses', 0) >= DAILY_LOSS_LIMIT:
+            if not guard.get('notified'):
+                guard['notified'] = True
+                save_dashboard(dash)
+                send_kakao(kakao_token,
+                           f"🛑 오늘 연속 손절 {guard['consecutive_losses']}회 — 신규 진입을 중단합니다 (내일 재개)")
+            print(f"[일일 가드] 연속 손절 {guard['consecutive_losses']}회 — 신규 진입 중단")
+            return
         print("포지션 없음 → [1단계] 일봉 신호 스캔")
         candidates = scan_signals(kis_token)
         if not candidates:
