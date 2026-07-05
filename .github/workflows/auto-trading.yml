@@ -1,3 +1,6 @@
+# [2026-07-05] GitHub Actions 스케줄 트리거는 5분이 최소 간격이라 */1은 무의미함.
+# 대신 트리거 사이(5분)를 스크립트 안에서 60초 간격 5회 반복으로 채워서
+# 체감상 1분 간격 매매를 구현함 (아래 '매매 실행' 스텝 참고).
 name: 자동매매
 on:
   schedule:
@@ -24,7 +27,7 @@ jobs:
           key: kis-token-${{ github.run_id }}
           restore-keys: |
             kis-token-
-      - name: 매매 실행
+      - name: 매매 실행 (60초 간격 5회 반복 = 체감 1분 간격)
         env:
           KIS_APP_KEY:         ${{ secrets.KIS_APP_KEY }}
           KIS_APP_SECRET:      ${{ secrets.KIS_APP_SECRET }}
@@ -32,7 +35,11 @@ jobs:
           KAKAO_CLIENT_ID:     ${{ secrets.KAKAO_CLIENT_ID }}
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
           KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
-        run: python auto_trading.py
+        run: |
+          for i in 1 2 3 4 5; do
+            python auto_trading.py
+            if [ $i -lt 5 ]; then sleep 60; fi
+          done
       - name: 토큰 캐시 저장
         if: always()
         uses: actions/cache/save@v4

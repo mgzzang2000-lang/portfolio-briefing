@@ -7,6 +7,10 @@
 #   [2026-07-02] MA20 "당일 신규 돌파" 여부는 제외 조건이 아니라
 #                정렬 우선순위로 사용 (1순위: 당일 신규 돌파, 2순위: 기존 상단 유지)
 #   [2026-07-02] 09:00~09:10 갭 기준 3% -> 5%로 완화 (09:10~11:00과 동일)
+#   [2026-07-05] 주문(rt_cd) 성공여부 미확인 버그 수정 — 매수/매도/2시간부분청산 모두
+#                주문 실패 시 카톡 알림만 보내고 상태를 변경하지 않도록 수정
+#   [2026-07-05] 보유 포지션 식별을 holdings[0] 대신 dash['position']['code']와
+#                일치하는 종목으로 한정 — 계좌에 봇이 사지 않은 종목이 있어도 오작동 방지
 # -------------------------------------------------------
 # [2단계: 1분봉] 진입 타이밍 확인 (상위 3 후보에만 적용)
 #   스토캐스틱RSI: K > D AND K > 20 (과매도 탈출 후 상승)
@@ -369,6 +373,7 @@ def get_balance(token):
     return holdings, cash
 # ── 주문 ──────────────────────────────────────────────────────
 def place_order(token, code, qty, side="buy"):
+    """returns: (ok, result) — ok=True는 rt_cd == '0'(정상접수)일 때만"""
     tr_id = "TTTC0802U" if side == "buy" else "TTTC0801U"
     body = {
         "CANO": ACCOUNT_NO, "ACNT_PRDT_CD": ACCOUNT_PROD,
@@ -376,8 +381,9 @@ def place_order(token, code, qty, side="buy"):
         "ORD_QTY": str(qty), "ORD_UNPR": "0"
     }
     result = kis_post(token, "/uapi/domestic-stock/v1/trading/order-cash", body, tr_id)
-    print(f"[주문] {side} {code} {qty}주 → {result}")
-    return result
+    ok = result.get('rt_cd') == '0'
+    print(f"[주문] {side} {code} {qty}주 → {'성공' if ok else '실패'} {result}")
+    return ok, result
 # ── [1단계] 일봉 신호 스캔 ────────────────────────────────────
 def scan_signals(token):
     """
@@ -566,7 +572,19 @@ def main():
     try:
         holdings, cash = get_balance(kis_token)
         # ① 보유 포지션 관리 ──────────────────────────────────
-        active = [h for h in holdings if int(h.get('hldg_qty', 0)) > 0]
+        # [2026-07-05] 계좌 보유종목 중 "봇이 직접 산 종목(dash['position']['code'])"만
+        # 내 포지션으로 취급. 사용자가 계좌에 다른 종목을 들고 있어도 그건 건드리지 않는다.
+        dash_position = dash.get('position')
+        bot_code = dash_position['code'] if dash_position else None
+        matched = [h for h in holdings
+                   if bot_code and h.get('pdno') == bot_code and int(h.get('hldg_qty', 0)) > 0]
+        if not matched and dash_position:
+            # 대시보드엔 포지션이 남아있는데 실제 계좌엔 없음(수동 매도 등) — 상태만 정리
+            print(f"[경고] 대시보드 포지션({bot_code})이 실제 계좌에 없음 — 상태 초기화")
+            dash['position'] = None
+            save_dashboard(dash)
+            return
+        active = matched
         if active:
             h = active[0]
             code      = h['pdno']
@@ -601,7 +619,13 @@ def main():
                     if 0 <= pnl <= 1.0:
                         sell_qty = qty // 2
                         if sell_qty >= 1:
-                            place_order(kis_token, code, sell_qty, "sell")
+                            ok, order_result = place_order(kis_token, code, sell_qty, "sell")
+                            if not ok:
+                                err_msg = f"⚠️ 2시간 부분청산 주문 실패\n{name} {sell_qty}주\n{order_result.get('msg1', '')}"
+                                print(err_msg)
+                                send_kakao(kakao_token, err_msg)
+                                save_dashboard(dash)
+                                return
                             time.sleep(1)
                             _, new_cash = get_balance(kis_token)
                             pos['stop_price'] = avg_price * 1.004
@@ -617,7 +641,13 @@ def main():
             elif now >= force_sell_at:
                 sell, reason = True, "강제청산 (15:20)"
             if sell:
-                place_order(kis_token, code, qty, "sell")
+                ok, order_result = place_order(kis_token, code, qty, "sell")
+                if not ok:
+                    err_msg = f"⚠️ 매도 주문 실패\n{name} {qty}주\n사유: {reason}\n{order_result.get('msg1', '')}"
+                    print(err_msg)
+                    send_kakao(kakao_token, err_msg)
+                    save_dashboard(dash)
+                    return
                 time.sleep(1)
                 _, new_cash = get_balance(kis_token)
                 pnl_amt = int((cur_price - avg_price) * qty)
@@ -660,7 +690,12 @@ def main():
         if qty < 1:
             print(f"매수 수량 부족 (가격:{price:,}원)")
             return
-        place_order(kis_token, chosen['code'], qty, "buy")
+        ok, order_result = place_order(kis_token, chosen['code'], qty, "buy")
+        if not ok:
+            err_msg = f"⚠️ 매수 주문 실패\n{chosen['name']} {qty}주\n{order_result.get('msg1', '')}"
+            print(err_msg)
+            send_kakao(kakao_token, err_msg)
+            return
         used = int(price * qty)
         log_buy(dash, chosen['code'], chosen['name'], qty, price,
                 cash - used, chosen['stop_price'], chosen['target_price'])
