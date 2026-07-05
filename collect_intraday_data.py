@@ -20,6 +20,11 @@
 [주의] GitHub Actions 스케줄은 1분 단위 보장이 안 되고 부하 시 지연될
 수 있음 - 그래도 한 번 호출에 최근 30개 봉이 오므로 15분 간격이면
 빠지는 구간 없이 커버됨.
+
+[2026-07-06] 워치리스트 필터를 라이브(auto_trading.py)와 동기화.
+MA200/MACD 조건 제거, 거래량 필터를 경과시간 비례로 수정 — 이전엔
+라이브에서 이미 뺀 조건들이 남아있어서 여기서 쌓는 데이터가 실제
+라이브 전략의 후보군과 어긋나 있었음.
 =====================================================
 """
 import os, json, time
@@ -137,37 +142,6 @@ def calc_ma(closes, period):
     return sum(closes[:period]) / period
 
 
-def calc_macd(closes, fast=12, slow=26, signal=9):
-    if len(closes) < slow + signal + 6:
-        return None, None, None
-    asc = list(reversed(closes))
-    n = len(asc)
-    kf, ks, ksig = 2/(fast+1), 2/(slow+1), 2/(signal+1)
-    ef = sum(asc[:fast]) / fast
-    es = sum(asc[:slow]) / slow
-    for i in range(fast, slow):
-        ef = asc[i]*kf + ef*(1-kf)
-    macd_s = []
-    for i in range(slow, n):
-        ef = asc[i]*kf + ef*(1-kf)
-        es = asc[i]*ks + es*(1-ks)
-        macd_s.append(ef - es)
-    if len(macd_s) < signal:
-        return None, None, None
-    sig = sum(macd_s[:signal]) / signal
-    sig_s = [sig]
-    for v in macd_s[signal:]:
-        sig = v*ksig + sig*(1-ksig)
-        sig_s.append(sig)
-    golden = None
-    check = min(6, len(macd_s)-1, len(sig_s)-1)
-    for i in range(1, check+1):
-        if macd_s[-(i+1)] < sig_s[-(i+1)] and macd_s[-i] >= sig_s[-i]:
-            golden = i
-            break
-    return macd_s[-1], sig_s[-1], golden
-
-
 def calc_bb(closes, period=20, mult=2.0):
     if len(closes) < period:
         return None, None, None, None
@@ -198,7 +172,16 @@ def is_bb_squeeze(closes, period=20, lookback=20):
 
 
 def build_watchlist(token):
-    """일봉 공통 필터(시간대/갭 필터 제외) 통과 종목을 산출."""
+    """
+    일봉 공통 필터(시간대/갭 필터 제외) 통과 종목을 산출.
+    [2026-07-06] 라이브(auto_trading.py)와 동일한 필터로 동기화:
+    MA200/MACD 조건 제거, 거래량 필터를 경과시간 비례로 수정.
+    (그래야 이 워치리스트로 쌓은 1분봉이 실제 라이브 전략의 백테스트에 쓸모있음)
+    """
+    now = datetime.now(KST)
+    market_open_dt = now.replace(hour=9, minute=0, second=0, microsecond=0)
+    elapsed_minutes = max(1.0, min(390.0, (now - market_open_dt).total_seconds() / 60))
+
     kospi = get_volume_rank(token, "J")
     time.sleep(1)
     kosdaq = get_volume_rank(token, "Q")
@@ -212,23 +195,17 @@ def build_watchlist(token):
             continue
         closes, highs, lows, volumes = ohlcv['closes'], ohlcv['highs'], ohlcv['lows'], ohlcv['volumes']
         ma20 = calc_ma(closes, 20)
-        ma200 = calc_ma(closes, 200)
-        macd, sig_line, golden = calc_macd(closes)
         bb_upper, _, _, _ = calc_bb(closes, 20)
         squeeze = is_bb_squeeze(closes)
-        if ma20 is None or macd is None or bb_upper is None:
+        if ma20 is None or bb_upper is None:
             continue
         price = closes[0]
         if price <= ma20:
             continue
-        if ma200 and price <= ma200:
-            continue
-        if golden is None or macd <= sig_line:
-            continue
         if not (squeeze or price >= bb_upper * 0.98):
             continue
         vol_avg20 = sum(volumes[1:21]) / 20 if len(volumes) >= 21 else None
-        if vol_avg20 and volumes[0] < vol_avg20 * 2:
+        if vol_avg20 and volumes[0] < vol_avg20 * (elapsed_minutes / 390) * 2:
             continue
         passed.append({'code': code, 'name': name, 'market': market, 'squeeze': squeeze})
         time.sleep(0.06)
