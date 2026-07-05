@@ -17,6 +17,13 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install requests
+      - name: 토큰 캐시 복원
+        uses: actions/cache/restore@v4
+        with:
+          path: kis_token.json
+          key: kis-token-${{ github.run_id }}
+          restore-keys: |
+            kis-token-
       - name: 매매 실행
         env:
           KIS_APP_KEY:         ${{ secrets.KIS_APP_KEY }}
@@ -26,10 +33,16 @@ jobs:
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
           KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
         run: python auto_trading.py
+      - name: 토큰 캐시 저장
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: kis_token.json
+          key: kis-token-${{ github.run_id }}
       - name: 대시보드 데이터 푸시
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add dashboard_data.json kis_token.json
+          git add dashboard_data.json
           git diff --cached --quiet || git commit -m "chore: update dashboard data [skip ci]"
           git push
