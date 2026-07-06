@@ -24,7 +24,7 @@ import os, json, time, requests
 from datetime import datetime, timezone, timedelta
 KST = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
-MAX_BET = 500_000
+MAX_BET = 480_000  # [2026-07-06] 시장가 체결 시 신호가 대비 상승분으로 50만원 초과 → 잔액부족 실패 방지 버퍼
 ACCOUNT_NO   = os.environ['KIS_ACCOUNT_NO']
 ACCOUNT_PROD = "01"
 KIS_APP_KEY    = os.environ['KIS_APP_KEY']
