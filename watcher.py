@@ -4,6 +4,10 @@
 import os, sys, time, subprocess
 from datetime import datetime
 
+# Windows 콘솔(cp949)에서 이모지 등 유니코드 출력 시 크래시 방지
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
 REPO_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(REPO_DIR)
 
