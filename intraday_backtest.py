@@ -195,6 +195,36 @@ def calc_stoch_rsi(closes, rsi_period=14, stoch_period=5, smooth_k=3, smooth_d=3
               for i in range(smooth_d - 1, len(k_vals))]
     return k_vals[-1], d_vals[-1]
 
+def check_pullback_reclaim(closes, highs, lows, volumes, lookback=15):
+    """auto_trading.py의 check_pullback_reclaim과 동일 로직(2026-07-06 눌림목+불플래그 진입 필터)"""
+    if len(closes) < lookback + 3 or len(volumes) < lookback + 3:
+        return False, "데이터 부족"
+    asc_c = list(reversed(closes[:lookback]))
+    asc_h = list(reversed(highs[:lookback]))
+    asc_l = list(reversed(lows[:lookback]))
+    asc_v = list(reversed(volumes[:lookback]))
+    search_end = lookback - 3
+    if search_end < 3:
+        return False, "탐색 구간 부족"
+    peak_idx = max(range(search_end), key=lambda i: asc_h[i])
+    peak_price = asc_h[peak_idx]
+    flag_start = max(0, peak_idx - 3)
+    flagpole_vol = sum(asc_v[flag_start:peak_idx + 1]) / max(1, peak_idx + 1 - flag_start)
+    pullback_range = range(peak_idx + 1, lookback - 1)
+    if len(list(pullback_range)) < 2:
+        return False, "눌림 구간 부족"
+    trough_price = min(asc_l[i] for i in pullback_range)
+    pullback_vol = sum(asc_v[i] for i in pullback_range) / len(list(pullback_range))
+    pullback_pct = (peak_price - trough_price) / peak_price * 100 if peak_price else 0
+    cur_close = asc_c[-1]
+    cur_vol = asc_v[-1]
+    healthy_pullback = 0.2 <= pullback_pct <= 4.0
+    volume_dried_up = pullback_vol < flagpole_vol * 0.8
+    reclaim = cur_close >= peak_price * 0.997
+    volume_surge = cur_vol >= pullback_vol * 1.5
+    ok = healthy_pullback and volume_dried_up and reclaim and volume_surge
+    return ok, f"눌림{pullback_pct:.1f}% 거래량감소{volume_dried_up} 재돌파{reclaim} 거래량급증{volume_surge}"
+
 def calc_atr_from_minutes(minute_bars_desc, period=14):
     """1분봉 원본 dict 리스트(최신이 index0) 기준 ATR"""
     if len(minute_bars_desc) < period + 1:
@@ -271,19 +301,21 @@ def passes_volume_pace(info, cum_vol, elapsed_minutes):
     pace_needed = info['vol_avg20'] * (elapsed_minutes / TRADING_MINUTES_PER_DAY) * 2
     return cum_vol >= pace_needed
 
-# ── 청산 규칙 (auto_trading.py의 main()과 동일 로직) ─────────────────
+# ── 청산 규칙 (auto_trading.py의 manage_position과 동일 로직, 2026-07-06 갱신) ──
 def apply_exit_rules(position, cur_price, cur_high, cur_low, now_dt, elapsed_since_entry):
     """
-    position: dict(entry, qty, stop, target, entry_dt, breakeven_applied, time_rule_checked)
-    반환: (action, pnl_pct) — action in {None, 'STOP', 'TARGET', 'TIME_PARTIAL', 'FORCED'}
+    [2026-07-06] +2% 도달 시 50% 부분익절(신규)로 갱신.
+    position: dict(entry, qty, stop, target, entry_dt, breakeven_applied, time_rule_checked, partial_2pct_done)
+    반환: (action, pnl_pct) — action in {None, 'STOP', 'TARGET', 'PARTIAL_2PCT', 'TIME_PARTIAL', 'FORCED'}
     """
     entry = position['entry']
     pnl_pct = (cur_price - entry) / entry * 100
 
-    if not position.get('breakeven_applied') and pnl_pct >= 2.0:
-        breakeven_stop = entry * 1.004
-        position['stop'] = max(position['stop'], breakeven_stop)
+    if not position.get('partial_2pct_done') and cur_high >= entry * 1.02:
+        position['stop'] = max(position['stop'], entry * 1.004)
         position['breakeven_applied'] = True
+        position['partial_2pct_done'] = True
+        return 'PARTIAL_2PCT', pnl_pct
 
     if not position.get('time_rule_checked') and elapsed_since_entry >= timedelta(hours=2):
         position['time_rule_checked'] = True
@@ -299,6 +331,59 @@ def apply_exit_rules(position, cur_price, cur_high, cur_low, now_dt, elapsed_sin
     if cur_low <= position['stop']:
         return 'STOP', pnl_pct
     return None, pnl_pct
+
+def apply_exit_rules_old(position, cur_price, cur_high, cur_low, now_dt, elapsed_since_entry):
+    """
+    [비교용] 2026-07-06 이전 방식 — +2%에서 손절선만 올리고 팔지는 않음(전량 유지).
+    실제 매매엔 쓰이지 않고, "부분익절 안 했으면 어땠을까" 비교 통계용으로만 사용.
+    """
+    entry = position['entry']
+    pnl_pct = (cur_price - entry) / entry * 100
+    if not position.get('breakeven_applied') and pnl_pct >= 2.0:
+        position['stop'] = max(position['stop'], entry * 1.004)
+        position['breakeven_applied'] = True
+    if not position.get('time_rule_checked') and elapsed_since_entry >= timedelta(hours=2):
+        position['time_rule_checked'] = True
+        if 0.0 <= pnl_pct <= 1.0:
+            position['stop'] = max(position['stop'], entry * 1.004)
+            position['breakeven_applied'] = True
+            return 'TIME_PARTIAL', pnl_pct
+    if now_dt.time() >= T_1520:
+        return 'FORCED', pnl_pct
+    if cur_high >= position['target']:
+        return 'TARGET', pnl_pct
+    if cur_low <= position['stop']:
+        return 'STOP', pnl_pct
+    return None, pnl_pct
+
+def simulate_shadow_old(entry_price, target, initial_stop, entry_dt, bars_from_entry):
+    """
+    [2026-07-06 추가] 특정 트레이드의 진입~청산 구간 1분봉을 그대로 재생해서,
+    "+2% 부분익절 없이 옛날 방식(트레일링만)이었다면" 결과가 어땠을지 계산.
+    bars_from_entry: 진입 시점 이후의 1분봉(시간 오름차순), 마지막 봉까지 청산 안 되면 마지막 종가로 강제청산 처리.
+    반환: (old_pnl_pct, case) — case는 'A_LOSS'(손절) / 'B_REVERSAL'(+2%후 반락) / 'C_FULL'(+4%도달) / 'FORCED'
+    """
+    pos = {'entry': entry_price, 'target': target, 'stop': initial_stop,
+           'breakeven_applied': False, 'time_rule_checked': False}
+    reached_2pct = False
+    for b in bars_from_entry:
+        now_dt = datetime.combine(entry_dt.date(),
+                                   dtime(int(b['stck_cntg_hour'][0:2]), int(b['stck_cntg_hour'][2:4]), int(b['stck_cntg_hour'][4:6])))
+        cur_price = float(b['stck_prpr']); cur_high = float(b['stck_hgpr']); cur_low = float(b['stck_lwpr'])
+        if cur_high >= entry_price * 1.02:
+            reached_2pct = True
+        elapsed = now_dt - entry_dt
+        action, pnl_pct = apply_exit_rules_old(pos, cur_price, cur_high, cur_low, now_dt, elapsed)
+        if action == 'TARGET':
+            return (target - entry_price) / entry_price * 100, 'C_FULL'
+        if action == 'STOP':
+            stop_pnl = (pos['stop'] - entry_price) / entry_price * 100
+            return stop_pnl, ('B_REVERSAL' if reached_2pct else 'A_LOSS')
+        if action in ('FORCED', 'TIME_PARTIAL'):
+            return pnl_pct, 'FORCED'
+    # 데이터 소진 — 마지막 봉 종가로 마감
+    last_pnl = (float(bars_from_entry[-1]['stck_prpr']) - entry_price) / entry_price * 100 if bars_from_entry else 0.0
+    return last_pnl, ('B_REVERSAL' if reached_2pct else 'A_LOSS')
 
 def _record_sell(portfolio, trade_log, pos, day_disp, price, qty, reason):
     pnl = (price - pos['entry']) * qty
@@ -335,6 +420,7 @@ def run_intraday_backtest():
     portfolio = {'cash': MAX_BET, 'position': None}
     trade_log = []
     skipped_days = []
+    shadow_log = []  # [2026-07-06] +2% 부분익절 신규 vs 구(舊)방식 비교용
 
     for ymd in days:
         bday = datetime.strptime(ymd, '%Y%m%d').date()
@@ -389,15 +475,33 @@ def run_intraday_backtest():
                     cur_low   = float(bar['stck_lwpr'])
                     elapsed = now_dt - pos['entry_dt']
                     action, pnl_pct = apply_exit_rules(pos, cur_price, cur_high, cur_low, now_dt, elapsed)
-                    if action == 'TIME_PARTIAL':
+                    if action == 'PARTIAL_2PCT':
+                        half_qty = pos['qty'] // 2
+                        if half_qty >= 1:
+                            _record_sell(portfolio, trade_log, pos, day_disp, cur_price, half_qty, "+2% 50%부분익절")
+                            pos['realized_amt'] = pos.get('realized_amt', 0.0) + (cur_price - pos['entry']) * half_qty
+                            pos['qty'] -= half_qty
+                    elif action == 'TIME_PARTIAL':
                         half_qty = pos['qty'] // 2
                         if half_qty >= 1:
                             _record_sell(portfolio, trade_log, pos, day_disp, cur_price, half_qty, "2시간횡보 50%부분익절")
+                            pos['realized_amt'] = pos.get('realized_amt', 0.0) + (cur_price - pos['entry']) * half_qty
                             pos['qty'] -= half_qty
                     elif action in ('TARGET', 'STOP', 'FORCED'):
                         exit_price = {'TARGET': pos['target'], 'STOP': pos['stop'], 'FORCED': cur_price}[action]
                         reason = {'TARGET': '익절 +4%', 'STOP': '손절(트레일링/ATR)', 'FORCED': '15:20 강제청산'}[action]
                         _record_sell(portfolio, trade_log, pos, day_disp, exit_price, pos['qty'], reason)
+                        # [2026-07-06] +2% 부분익절 신규 방식(new) vs 없었다면(old) 비교 계산
+                        total_realized = pos.get('realized_amt', 0.0) + (exit_price - pos['entry']) * pos['qty']
+                        new_pnl_pct = total_realized / (pos['entry'] * pos['orig_qty']) * 100
+                        entry_bars = [b for b in minute_data.get(code, [])
+                                      if pos['entry_hms'] <= b['stck_cntg_hour'] <= hms]
+                        old_pnl_pct, case = simulate_shadow_old(
+                            pos['entry'], pos['entry'] * 1.04, pos['initial_stop'], pos['entry_dt'], entry_bars)
+                        shadow_log.append({
+                            'date': day_disp, 'code': code, 'new_reason': reason,
+                            'new_pnl_pct': new_pnl_pct, 'old_pnl_pct': old_pnl_pct, 'case': case,
+                        })
                         portfolio['position'] = None
 
             # ② 신규 진입 (상위 3후보만 1분봉 타이밍 확인 — auto_trading.py와 동일)
@@ -423,12 +527,16 @@ def run_intraday_backtest():
                                                     -int(c[1]['in_squeeze']), -c[3]))
                     for code, info, bars_asc, _ in candidates[:3]:
                         bars_desc = list(reversed(bars_asc))
-                        closes_desc = [float(b['stck_prpr']) for b in bars_desc]
+                        closes_desc  = [float(b['stck_prpr']) for b in bars_desc]
+                        highs_desc   = [float(b['stck_hgpr']) for b in bars_desc]
+                        lows_desc    = [float(b['stck_lwpr']) for b in bars_desc]
+                        volumes_desc = [int(b.get('cntg_vol', 0)) for b in bars_desc]
                         stoch_k, stoch_d = calc_stoch_rsi(closes_desc)
                         if stoch_k is None or not (stoch_k > stoch_d and stoch_k > 20):
                             continue
-                        _, bb_mid, _, _ = calc_bb(closes_desc, period=20)
-                        if bb_mid is None or closes_desc[0] < bb_mid:
+                        # [2026-07-06] 눌림목+불플래그 재돌파 확인 (기존 "BB중심선 위" 단순조건 대체)
+                        pullback_ok, _ = check_pullback_reclaim(closes_desc, highs_desc, lows_desc, volumes_desc)
+                        if not pullback_ok:
                             continue
                         entry_price = closes_desc[0]
                         atr = calc_atr_from_minutes(bars_desc)
@@ -438,10 +546,11 @@ def run_intraday_backtest():
                         if qty >= 1:
                             portfolio['cash'] -= entry_price * qty
                             portfolio['position'] = {
-                                'code': code, 'entry': entry_price, 'qty': qty,
-                                'stop': stop, 'target': entry_price * 1.04,
-                                'entry_dt': now_dt, 'window': window,
+                                'code': code, 'entry': entry_price, 'qty': qty, 'orig_qty': qty,
+                                'stop': stop, 'target': entry_price * 1.04, 'initial_stop': stop,
+                                'entry_dt': now_dt, 'entry_hms': hms, 'window': window,
                                 'breakeven_applied': False, 'time_rule_checked': False,
+                                'partial_2pct_done': False,
                             }
                             trade_log.append({
                                 'action': 'BUY', 'date': day_disp, 'time': hms,
@@ -458,6 +567,15 @@ def run_intraday_backtest():
             last_bar = minute_data.get(code, [None])[-1] if minute_data.get(code) else None
             close_price = float(last_bar['stck_prpr']) if last_bar else pos['entry']
             _record_sell(portfolio, trade_log, pos, day_disp, close_price, pos['qty'], "15:30 마감청산")
+            total_realized = pos.get('realized_amt', 0.0) + (close_price - pos['entry']) * pos['qty']
+            new_pnl_pct = total_realized / (pos['entry'] * pos['orig_qty']) * 100
+            entry_bars = [b for b in minute_data.get(code, []) if b['stck_cntg_hour'] >= pos['entry_hms']]
+            old_pnl_pct, case = simulate_shadow_old(
+                pos['entry'], pos['entry'] * 1.04, pos['initial_stop'], pos['entry_dt'], entry_bars)
+            shadow_log.append({
+                'date': day_disp, 'code': code, 'new_reason': '15:30 마감청산',
+                'new_pnl_pct': new_pnl_pct, 'old_pnl_pct': old_pnl_pct, 'case': case,
+            })
             portfolio['position'] = None
 
     # ── 결과 집계 ──
@@ -472,6 +590,30 @@ def run_intraday_backtest():
     print(f"  총 매도 수 : {len(sells)}회 (부분청산 포함)")
     if sells:
         print(f"  승률       : {len(wins)}/{len(sells)} ({len(wins)/len(sells)*100:.0f}%)")
+
+    # [2026-07-06] +2% 부분익절 신규 방식 vs 옛날 방식(부분익절 없음) 비교
+    if shadow_log:
+        print("\n" + "=" * 60)
+        print("  +2% 부분익절 신규(new) vs 기존(old) 비교")
+        print("=" * 60)
+        new_avg = sum(s['new_pnl_pct'] for s in shadow_log) / len(shadow_log)
+        old_avg = sum(s['old_pnl_pct'] for s in shadow_log) / len(shadow_log)
+        print(f"  완결 트레이드 수 : {len(shadow_log)}건")
+        print(f"  신규(부분익절)   평균손익 : {new_avg:+.2f}%")
+        print(f"  기존(전량유지)   평균손익 : {old_avg:+.2f}%")
+        print(f"  차이 (신규-기존) : {new_avg - old_avg:+.2f}%p  {'-> 부분익절이 유리' if new_avg > old_avg else '-> 부분익절 없는 쪽이 유리'}")
+        case_counts = {}
+        for s in shadow_log:
+            case_counts[s['case']] = case_counts.get(s['case'], 0) + 1
+        print(f"  케이스 분포 : A(손절)={case_counts.get('A_LOSS',0)} "
+              f"B(+2%후반락)={case_counts.get('B_REVERSAL',0)} "
+              f"C(+4%완주)={case_counts.get('C_FULL',0)} "
+              f"기타(강제청산)={case_counts.get('FORCED',0)}")
+        b_count = case_counts.get('B_REVERSAL', 0)
+        c_count = case_counts.get('C_FULL', 0)
+        if c_count > 0:
+            print(f"  B/C 비율 : {b_count}/{c_count} = {b_count/c_count:.2f} (1.25 이상이면 이론상 부분익절이 유리)")
+
     print("\n  거래 내역")
     for t in trade_log:
         if t['action'] == 'BUY':
