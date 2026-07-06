@@ -52,4 +52,12 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add dashboard_data.json
           git diff --cached --quiet || git commit -m "chore: update dashboard data [skip ci]"
+          # [2026-07-06] 실행 도중(최대 7분) 다른 커밋이 먼저 push되면 non-fast-forward로
+          # 거절될 수 있어, 최신 main을 rebase로 받아서 재시도
+          for i in 1 2 3 4 5; do
+            git push && exit 0
+            git fetch origin main
+            git rebase origin/main
+            sleep 3
+          done
           git push
