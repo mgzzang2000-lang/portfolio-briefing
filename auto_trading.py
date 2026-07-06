@@ -248,12 +248,13 @@ def get_minute_ohlcv(token, code, market="J", n=30):
         print(f"  [1분봉] {code} 데이터 부족 ({len(output)}봉)")
         return None
     result = output[:n]
-    closes = [float(x.get('stck_prpr', 0)) for x in result]
-    highs  = [float(x.get('stck_hgpr', 0)) for x in result]
-    lows   = [float(x.get('stck_lwpr', 0)) for x in result]
+    closes  = [float(x.get('stck_prpr', 0)) for x in result]
+    highs   = [float(x.get('stck_hgpr', 0)) for x in result]
+    lows    = [float(x.get('stck_lwpr', 0)) for x in result]
+    volumes = [int(x.get('cntg_vol', 0)) for x in result]  # 해당 1분봉 체결거래량
     if any(c == 0 for c in closes[:3]):
         return None
-    return {'closes': closes, 'highs': highs, 'lows': lows}
+    return {'closes': closes, 'highs': highs, 'lows': lows, 'volumes': volumes}
 def get_current_price(token, code, market="J"):
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-price", {
         "FID_COND_MRKT_DIV_CODE": market,
@@ -530,29 +531,77 @@ def scan_signals(token):
     candidates.sort(key=lambda x: (-int(x['is_new_breakout']), -int(x['in_squeeze']), -x['vol_ratio']))
     return candidates
 # ── [2단계] 1분봉 진입 타이밍 확인 ──────────────────────────────
+def check_pullback_reclaim(closes, highs, lows, volumes, lookback=15):
+    """
+    [2026-07-06 추가] 눌림목+불플래그 진입 필터.
+    "이미 26~30% 오른 상태에서 즉시 매수"하던 문제를 해결하기 위해,
+    돌파 즉시가 아니라 ①상승(깃대) → ②거래량 줄며 쉬는 눌림 → ③거래량 급증하며
+    직전 고점 재돌파, 이 3단계를 확인한 뒤에만 진입 신호를 준다.
+    closes/highs/lows/volumes: 최신이 index 0.
+    반환: (ok, info_str)
+    """
+    if len(closes) < lookback + 3 or len(volumes) < lookback + 3:
+        return False, "데이터 부족(눌림목 확인 불가)"
+    # 분석 편의를 위해 오래된 → 최신 순으로 변환
+    asc_c = list(reversed(closes[:lookback]))
+    asc_h = list(reversed(highs[:lookback]))
+    asc_l = list(reversed(lows[:lookback]))
+    asc_v = list(reversed(volumes[:lookback]))
+
+    # 최근 3봉은 "재돌파 확인" 구간으로 남겨두고, 그 이전 구간에서 고점(깃대 상단) 탐색
+    search_end = lookback - 3
+    if search_end < 3:
+        return False, "탐색 구간 부족"
+    peak_idx = max(range(search_end), key=lambda i: asc_h[i])
+    peak_price = asc_h[peak_idx]
+    flag_start = max(0, peak_idx - 3)
+    flagpole_vol = sum(asc_v[flag_start:peak_idx + 1]) / max(1, peak_idx + 1 - flag_start)
+
+    # 고점 이후 ~ 직전 봉까지가 눌림(횡보/조정) 구간
+    pullback_range = range(peak_idx + 1, lookback - 1)
+    if len(list(pullback_range)) < 2:
+        return False, "눌림 구간 부족"
+    trough_price = min(asc_l[i] for i in pullback_range)
+    pullback_vol = sum(asc_v[i] for i in pullback_range) / len(list(pullback_range))
+
+    pullback_pct = (peak_price - trough_price) / peak_price * 100 if peak_price else 0
+    cur_close = asc_c[-1]
+    cur_vol   = asc_v[-1]
+
+    healthy_pullback = 0.2 <= pullback_pct <= 4.0        # 너무 얕지도(노이즈) 깊지도(추세훼손) 않은 눌림
+    volume_dried_up  = pullback_vol < flagpole_vol * 0.8  # 눌림 구간엔 거래량이 줄어야 건강한 조정
+    reclaim          = cur_close >= peak_price * 0.997    # 직전 고점 근처까지 재돌파
+    volume_surge     = cur_vol >= pullback_vol * 1.5      # 재돌파 시 거래량 급증
+
+    ok = healthy_pullback and volume_dried_up and reclaim and volume_surge
+    info = (f"눌림{pullback_pct:.1f}%({'✓' if healthy_pullback else '✗'}) "
+            f"거래량감소{'✓' if volume_dried_up else '✗'} "
+            f"재돌파{'✓' if reclaim else '✗'} "
+            f"거래량급증{'✓' if volume_surge else '✗'}")
+    return ok, info
 def check_1min_entry(token, code, name, market="J"):
     """
     1분봉 기준 진입 최종 확인
       ① 스토캐스틱RSI: K > D AND K > 20
-      ② 현재가 >= 1분봉 볼린저밴드 중심선(MA20)
+      ② [2026-07-06 변경] 단순 "BB중심선 위" 대신 눌림목+불플래그(재돌파+거래량급증) 확인
     ATR(14) × 1.5 = 동적 손절가 계산
     returns: (ok, stop_price, target_price, info_str)
     """
     minute = get_minute_ohlcv(token, code, market)
     if not minute:
         return False, 0, 0, "1분봉 데이터 없음"
-    closes = minute['closes']
-    highs  = minute['highs']
-    lows   = minute['lows']
-    price  = closes[0]
+    closes  = minute['closes']
+    highs   = minute['highs']
+    lows    = minute['lows']
+    volumes = minute['volumes']
+    price   = closes[0]
     # ① 스토캐스틱 RSI
     stoch_k, stoch_d = calc_stoch_rsi(closes)
     if stoch_k is None:
         return False, 0, 0, "스토캐스틱RSI 계산 불가"
     stoch_ok = (stoch_k > stoch_d and stoch_k > 20)
-    # ② 1분봉 BB 중심선
-    _, bb_mid_1m, _, _ = calc_bb(closes, period=20)
-    bb_ok = (bb_mid_1m is not None and price >= bb_mid_1m)
+    # ② [2026-07-06] 눌림목+불플래그 재돌파 확인 (기존 "BB중심선 위" 단순조건 대체)
+    pullback_ok, pullback_info = check_pullback_reclaim(closes, highs, lows, volumes)
     # ③ ATR×1.5 손절가
     atr_1m = calc_atr(highs, lows, closes, period=14)
     if atr_1m:
@@ -562,14 +611,12 @@ def check_1min_entry(token, code, name, market="J"):
         stop_price = price * 0.98  # ATR 계산 불가 시 폴백
     target_price = price * 1.04
     atr_str = f"{atr_1m:.0f}" if atr_1m else "N/A"
-    mid_str = f"{bb_mid_1m:.0f}" if bb_mid_1m else "N/A"
     s_tag = "✓" if stoch_ok else "✗"
-    b_tag = "✓" if bb_ok else "✗"
     info = (f"StochRSI K={stoch_k:.1f}/D={stoch_d:.1f}({s_tag}) "
-            f"BB중심={mid_str}({b_tag}) "
+            f"{pullback_info} "
             f"ATR={atr_str} 손절={stop_price:,.0f}")
     print(f"  [1분봉] {name}: {info}")
-    if stoch_ok and bb_ok:
+    if stoch_ok and pullback_ok:
         return True, stop_price, target_price, info
     return False, 0, 0, info
 # ── 보유 포지션 관리 (GitHub Actions·로컬 감시 스크립트 공용) ──────
