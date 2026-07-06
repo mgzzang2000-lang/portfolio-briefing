@@ -25,6 +25,7 @@ from datetime import datetime, timezone, timedelta
 KST = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
 MAX_BET = 480_000  # [2026-07-06] 시장가 체결 시 신호가 대비 상승분으로 50만원 초과 → 잔액부족 실패 방지 버퍼
+DERIVATIVE_ETF_KEYWORDS = ["레버리지", "인버스", "ETN", "선물"]  # [2026-07-06] 파생상품 ETF/ETN 매수 제외
 ACCOUNT_NO   = os.environ['KIS_ACCOUNT_NO']
 ACCOUNT_PROD = "01"
 KIS_APP_KEY    = os.environ['KIS_APP_KEY']
@@ -472,6 +473,9 @@ def scan_signals(token):
             cur = get_current_price(token, code, market)
             price = cur['price']
             if price == 0 or cur['open'] == 0 or cur['prev_close'] == 0:
+                continue
+            # [2026-07-06] 파생상품 ETF/ETN(레버리지·인버스·선물 등) 거래 제외
+            if any(kw in cur['name'] for kw in DERIVATIVE_ETF_KEYWORDS):
                 continue
             gap = (cur['open'] - cur['prev_close']) / cur['prev_close'] * 100
             # ── 필터 ──────────────────────────────────────────
