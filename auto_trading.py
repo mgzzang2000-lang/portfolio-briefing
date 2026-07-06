@@ -155,7 +155,7 @@ def check_daily_guard(dash, now):
         guard['consecutive_losses'] = 0
         guard['notified'] = False
     return guard
-def log_buy(dash, code, name, qty, price, cash_after, stop_price, target_price):
+def log_buy(dash, code, name, qty, price, cash_after, stop_price, target_price, market="J"):
     """stop_price: ATR×1.5 동적 손절가, target_price: +4% 익절가"""
     entry_time = datetime.now(KST)
     dash['trades'].append({
@@ -165,7 +165,7 @@ def log_buy(dash, code, name, qty, price, cash_after, stop_price, target_price):
         'price': int(price), 'amount': int(price * qty)
     })
     dash['position'] = {
-        'code': code, 'name': name, 'qty': qty,
+        'code': code, 'name': name, 'qty': qty, 'market': market,
         'avg_price': int(price), 'current_price': int(price),
         'stop_price':   int(stop_price),    # ATR×1.5 손절가
         'target_price': int(target_price),  # +4% 익절가
@@ -261,11 +261,12 @@ def get_current_price(token, code, market="J"):
     }, "FHKST01010100")
     o = data.get('output', {})
     return {
-        'price':      float(o.get('stck_prpr', 0)),
-        'open':       float(o.get('stck_oprc', 0)),
-        'prev_close': float(o.get('stck_sdpr', 0)),
-        'name':       o.get('hts_kor_isnm', code),
-        'volume':     int(o.get('acml_vol', 0)),
+        'price':       float(o.get('stck_prpr', 0)),
+        'open':        float(o.get('stck_oprc', 0)),
+        'prev_close':  float(o.get('stck_sdpr', 0)),
+        'name':        o.get('hts_kor_isnm', code),
+        'volume':      int(o.get('acml_vol', 0)),
+        'upper_limit': float(o.get('stck_mxpr', 0)),  # 당일 상한가
     }
 # ── 지표 계산 ─────────────────────────────────────────────────
 def calc_ma(closes, period):
@@ -618,6 +619,11 @@ def main():
             update_position_price(dash, cur_price)
             sell, reason = False, ""
 
+            # [2026-07-06 추가] 상한가 익절 — 당일 상한가에 도달하면 다른 조건보다 우선 즉시 전량 익절
+            quote = get_current_price(kis_token, code, pos.get('market', 'J'))
+            if quote['upper_limit'] > 0 and cur_price >= quote['upper_limit'] * 0.995:
+                sell, reason = True, f"상한가 익절 ({pnl:+.2f}%)"
+
             # [2026-07-02 추가] 트레일링 스탑 (+2% 도달시)
             if not pos.get('trailing_activated') and pnl >= 2.0:
                 trailing_stop = avg_price * 1.004  # 본전+0.4%
@@ -650,7 +656,9 @@ def main():
                             save_dashboard(dash)
                             return
 
-            if cur_price >= target_price:
+            if sell:
+                pass  # 상한가 익절이 이미 확정된 경우 아래 조건으로 덮어쓰지 않음
+            elif cur_price >= target_price:
                 sell, reason = True, f"익절 ({pnl:+.2f}%)"
             elif cur_price <= stop_price:
                 sell, reason = True, f"손절 ({pnl:+.2f}%)"
@@ -723,7 +731,8 @@ def main():
             return
         used = int(price * qty)
         log_buy(dash, chosen['code'], chosen['name'], qty, price,
-                cash - used, chosen['stop_price'], chosen['target_price'])
+                cash - used, chosen['stop_price'], chosen['target_price'],
+                chosen.get('market', 'J'))
         save_dashboard(dash)
         ma200_str   = f"{chosen['ma200']:,.0f}" if chosen['ma200'] else "N/A"
         squeeze_tag = "🔥스퀴즈" if chosen['in_squeeze'] else "📈BB상단"
