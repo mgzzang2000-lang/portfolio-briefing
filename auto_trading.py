@@ -572,6 +572,93 @@ def check_1min_entry(token, code, name, market="J"):
     if stoch_ok and bb_ok:
         return True, stop_price, target_price, info
     return False, 0, 0, info
+# ── 보유 포지션 관리 (GitHub Actions·로컬 감시 스크립트 공용) ──────
+def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
+    code      = h['pdno']
+    name      = h['prdt_name']
+    qty       = int(h['hldg_qty'])
+    avg_price = float(h['pchs_avg_pric'])
+    cur_price = float(h['prpr'])
+    pnl       = (cur_price - avg_price) / avg_price * 100
+    # position 데이터에서 손절가·익절가 복원 (없으면 폴백)
+    pos          = dash.get('position') or {}
+    stop_price   = pos.get('stop_price',   avg_price * 0.98)
+    target_price = pos.get('target_price', avg_price * 1.04)
+    print(f"보유: {name} {qty}주 | 평균가:{avg_price:,.0f} 현재:{cur_price:,.0f} ({pnl:+.2f}%)")
+    print(f"  손절:{stop_price:,.0f} | 익절:{target_price:,.0f}")
+    update_position_price(dash, cur_price)
+    sell, reason = False, ""
+
+    # [2026-07-06 추가] 상한가 익절 — 당일 상한가에 도달하면 다른 조건보다 우선 즉시 전량 익절
+    # market 정보가 없는 구(舊) 포지션(이 기능 추가 이전 매수분) 대비, 조회 실패 시 반대 시장으로 재시도
+    quote = get_current_price(kis_token, code, pos.get('market', 'J'))
+    if quote['upper_limit'] == 0:
+        quote = get_current_price(kis_token, code, 'Q' if pos.get('market', 'J') == 'J' else 'J')
+    if quote['upper_limit'] > 0 and cur_price >= quote['upper_limit'] * 0.995:
+        sell, reason = True, f"상한가 익절 ({pnl:+.2f}%)"
+
+    # [2026-07-02 추가] 트레일링 스탑 (+2% 도달시)
+    if not pos.get('trailing_activated') and pnl >= 2.0:
+        trailing_stop = avg_price * 1.004  # 본전+0.4%
+        pos['stop_price'] = max(stop_price, trailing_stop)
+        pos['trailing_activated'] = True
+        stop_price = pos['stop_price']
+        print(f"  [트레일링] +2% 도달 → 손절선 상향: {stop_price:,.0f}")
+
+    # [2026-07-02 추가] 2시간 부분청산 (0~+1% 구간)
+    if pos.get('entry_time'):
+        entry_dt = datetime.fromisoformat(pos['entry_time'])
+        elapsed_sec = (now - entry_dt).total_seconds()
+        two_hours = 2 * 3600
+        if abs(elapsed_sec - two_hours) <= 120:  # ±2분
+            if 0 <= pnl <= 1.0:
+                sell_qty = qty // 2
+                if sell_qty >= 1:
+                    ok, order_result = place_order(kis_token, code, sell_qty, "sell")
+                    if not ok:
+                        err_msg = f"⚠️ 2시간 부분청산 주문 실패\n{name} {sell_qty}주\n{order_result.get('msg1', '')}"
+                        print(err_msg)
+                        send_kakao(kakao_token, err_msg)
+                        save_dashboard(dash)
+                        return
+                    time.sleep(1)
+                    _, new_cash = get_balance(kis_token)
+                    pos['stop_price'] = avg_price * 1.004
+                    dash['current_balance'] = int(new_cash)
+                    print(f"  [2시간] 50% 부분청산 ({sell_qty}주) → 나머지 손절: {pos['stop_price']:,.0f}")
+                    save_dashboard(dash)
+                    return
+
+    if sell:
+        pass  # 상한가 익절이 이미 확정된 경우 아래 조건으로 덮어쓰지 않음
+    elif cur_price >= target_price:
+        sell, reason = True, f"익절 ({pnl:+.2f}%)"
+    elif cur_price <= stop_price:
+        sell, reason = True, f"손절 ({pnl:+.2f}%)"
+    elif now >= force_sell_at:
+        sell, reason = True, "강제청산 (15:20)"
+    if sell:
+        ok, order_result = place_order(kis_token, code, qty, "sell")
+        if not ok:
+            err_msg = f"⚠️ 매도 주문 실패\n{name} {qty}주\n사유: {reason}\n{order_result.get('msg1', '')}"
+            print(err_msg)
+            send_kakao(kakao_token, err_msg)
+            save_dashboard(dash)
+            return
+        time.sleep(1)
+        _, new_cash = get_balance(kis_token)
+        pnl_amt = int((cur_price - avg_price) * qty)
+        log_sell(dash, name, qty, avg_price, cur_price,
+                 pnl, pnl_amt, reason, new_cash)
+        guard['consecutive_losses'] = guard.get('consecutive_losses', 0) + 1 if pnl < 0 else 0
+        save_dashboard(dash)
+        msg = (f"📤 매도\n{name} {qty}주\n"
+               f"사유: {reason}\n"
+               f"손익: {pnl:+.2f}% ({pnl_amt:+,}원)\n"
+               f"💰 잔고: {new_cash:,.0f}원")
+        send_kakao(kakao_token, msg)
+    else:
+        save_dashboard(dash)
 # ── 메인 ──────────────────────────────────────────────────────
 def main():
     now = datetime.now(KST)
@@ -603,92 +690,7 @@ def main():
             return
         active = matched
         if active:
-            h = active[0]
-            code      = h['pdno']
-            name      = h['prdt_name']
-            qty       = int(h['hldg_qty'])
-            avg_price = float(h['pchs_avg_pric'])
-            cur_price = float(h['prpr'])
-            pnl       = (cur_price - avg_price) / avg_price * 100
-            # position 데이터에서 손절가·익절가 복원 (없으면 폴백)
-            pos          = dash.get('position') or {}
-            stop_price   = pos.get('stop_price',   avg_price * 0.98)
-            target_price = pos.get('target_price', avg_price * 1.04)
-            print(f"보유: {name} {qty}주 | 평균가:{avg_price:,.0f} 현재:{cur_price:,.0f} ({pnl:+.2f}%)")
-            print(f"  손절:{stop_price:,.0f} | 익절:{target_price:,.0f}")
-            update_position_price(dash, cur_price)
-            sell, reason = False, ""
-
-            # [2026-07-06 추가] 상한가 익절 — 당일 상한가에 도달하면 다른 조건보다 우선 즉시 전량 익절
-            # market 정보가 없는 구(舊) 포지션(이 기능 추가 이전 매수분) 대비, 조회 실패 시 반대 시장으로 재시도
-            quote = get_current_price(kis_token, code, pos.get('market', 'J'))
-            if quote['upper_limit'] == 0:
-                quote = get_current_price(kis_token, code, 'Q' if pos.get('market', 'J') == 'J' else 'J')
-            if quote['upper_limit'] > 0 and cur_price >= quote['upper_limit'] * 0.995:
-                sell, reason = True, f"상한가 익절 ({pnl:+.2f}%)"
-
-            # [2026-07-02 추가] 트레일링 스탑 (+2% 도달시)
-            if not pos.get('trailing_activated') and pnl >= 2.0:
-                trailing_stop = avg_price * 1.004  # 본전+0.4%
-                pos['stop_price'] = max(stop_price, trailing_stop)
-                pos['trailing_activated'] = True
-                stop_price = pos['stop_price']
-                print(f"  [트레일링] +2% 도달 → 손절선 상향: {stop_price:,.0f}")
-
-            # [2026-07-02 추가] 2시간 부분청산 (0~+1% 구간)
-            if pos.get('entry_time'):
-                entry_dt = datetime.fromisoformat(pos['entry_time'])
-                elapsed_sec = (now - entry_dt).total_seconds()
-                two_hours = 2 * 3600
-                if abs(elapsed_sec - two_hours) <= 120:  # ±2분
-                    if 0 <= pnl <= 1.0:
-                        sell_qty = qty // 2
-                        if sell_qty >= 1:
-                            ok, order_result = place_order(kis_token, code, sell_qty, "sell")
-                            if not ok:
-                                err_msg = f"⚠️ 2시간 부분청산 주문 실패\n{name} {sell_qty}주\n{order_result.get('msg1', '')}"
-                                print(err_msg)
-                                send_kakao(kakao_token, err_msg)
-                                save_dashboard(dash)
-                                return
-                            time.sleep(1)
-                            _, new_cash = get_balance(kis_token)
-                            pos['stop_price'] = avg_price * 1.004
-                            dash['current_balance'] = int(new_cash)
-                            print(f"  [2시간] 50% 부분청산 ({sell_qty}주) → 나머지 손절: {pos['stop_price']:,.0f}")
-                            save_dashboard(dash)
-                            return
-
-            if sell:
-                pass  # 상한가 익절이 이미 확정된 경우 아래 조건으로 덮어쓰지 않음
-            elif cur_price >= target_price:
-                sell, reason = True, f"익절 ({pnl:+.2f}%)"
-            elif cur_price <= stop_price:
-                sell, reason = True, f"손절 ({pnl:+.2f}%)"
-            elif now >= force_sell_at:
-                sell, reason = True, "강제청산 (15:20)"
-            if sell:
-                ok, order_result = place_order(kis_token, code, qty, "sell")
-                if not ok:
-                    err_msg = f"⚠️ 매도 주문 실패\n{name} {qty}주\n사유: {reason}\n{order_result.get('msg1', '')}"
-                    print(err_msg)
-                    send_kakao(kakao_token, err_msg)
-                    save_dashboard(dash)
-                    return
-                time.sleep(1)
-                _, new_cash = get_balance(kis_token)
-                pnl_amt = int((cur_price - avg_price) * qty)
-                log_sell(dash, name, qty, avg_price, cur_price,
-                         pnl, pnl_amt, reason, new_cash)
-                guard['consecutive_losses'] = guard.get('consecutive_losses', 0) + 1 if pnl < 0 else 0
-                save_dashboard(dash)
-                msg = (f"📤 매도\n{name} {qty}주\n"
-                       f"사유: {reason}\n"
-                       f"손익: {pnl:+.2f}% ({pnl_amt:+,}원)\n"
-                       f"💰 잔고: {new_cash:,.0f}원")
-                send_kakao(kakao_token, msg)
-            else:
-                save_dashboard(dash)
+            manage_position(kis_token, kakao_token, dash, guard, now, active[0], force_sell_at)
             return
         # ② 신규 진입 스캔 (시간대별 진입 가능 여부는 scan_signals 내부에서 판정)
         if guard.get('consecutive_losses', 0) >= DAILY_LOSS_LIMIT:
