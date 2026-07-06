@@ -644,13 +644,30 @@ def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
     if quote['upper_limit'] > 0 and cur_price >= quote['upper_limit'] * 0.995:
         sell, reason = True, f"상한가 익절 ({pnl:+.2f}%)"
 
-    # [2026-07-02 추가] 트레일링 스탑 (+2% 도달시)
-    if not pos.get('trailing_activated') and pnl >= 2.0:
-        trailing_stop = avg_price * 1.004  # 본전+0.4%
-        pos['stop_price'] = max(stop_price, trailing_stop)
+    # [2026-07-06 변경] +2% 도달 시 50% 부분익절 + 나머지 손절선을 본전+0.4%로 상향
+    # (기존엔 손절선만 올리고 팔지는 않았음 — 사용자 요청으로 절반은 여기서 확정 실현)
+    # 상한가로 이미 전량 익절이 확정된 경우엔 건너뜀(중복 매도 방지)
+    if not sell and not pos.get('trailing_activated') and pnl >= 2.0:
         pos['trailing_activated'] = True
+        pos['stop_price'] = max(stop_price, avg_price * 1.004)  # 본전+0.4%
         stop_price = pos['stop_price']
-        print(f"  [트레일링] +2% 도달 → 손절선 상향: {stop_price:,.0f}")
+        half_qty = qty // 2
+        if half_qty >= 1:
+            ok, order_result = place_order(kis_token, code, half_qty, "sell")
+            if not ok:
+                err_msg = f"⚠️ +2% 부분익절 주문 실패\n{name} {half_qty}주\n{order_result.get('msg1', '')}"
+                print(err_msg)
+                send_kakao(kakao_token, err_msg)
+                save_dashboard(dash)
+                return
+            time.sleep(1)
+            _, new_cash = get_balance(kis_token)
+            dash['current_balance'] = int(new_cash)
+            print(f"  [+2%] 50% 부분익절 ({half_qty}주) → 나머지 손절선: {stop_price:,.0f}")
+            save_dashboard(dash)
+            return
+        else:
+            print(f"  [트레일링] +2% 도달 → 손절선 상향: {stop_price:,.0f} (수량 부족으로 부분익절 스킵)")
 
     # [2026-07-02 추가] 2시간 부분청산 (0~+1% 구간)
     if pos.get('entry_time'):
