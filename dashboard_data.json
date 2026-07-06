@@ -1,6 +1,28 @@
 {
   "initial_balance": 500000,
-  "trades": [],
-  "position": null,
+  "current_balance": 26450,
+  "trades": [
+    {
+      "action": "buy",
+      "date": "07/06 09:33",
+      "code": "037070",
+      "stock": "파세코",
+      "qty": 55,
+      "price": 8610,
+      "amount": 473550
+    }
+  ],
+  "position": {
+    "code": "037070",
+    "name": "파세코",
+    "qty": 55,
+    "market": "Q",
+    "avg_price": 8610,
+    "current_price": 8870,
+    "stop_price": 8644,
+    "target_price": 8944,
+    "entry_time": "2026-07-06T09:33:00+09:00",
+    "trailing_activated": true
+  },
   "last_updated": ""
 }
