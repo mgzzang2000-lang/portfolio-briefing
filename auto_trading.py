@@ -620,7 +620,10 @@ def main():
             sell, reason = False, ""
 
             # [2026-07-06 추가] 상한가 익절 — 당일 상한가에 도달하면 다른 조건보다 우선 즉시 전량 익절
+            # market 정보가 없는 구(舊) 포지션(이 기능 추가 이전 매수분) 대비, 조회 실패 시 반대 시장으로 재시도
             quote = get_current_price(kis_token, code, pos.get('market', 'J'))
+            if quote['upper_limit'] == 0:
+                quote = get_current_price(kis_token, code, 'Q' if pos.get('market', 'J') == 'J' else 'J')
             if quote['upper_limit'] > 0 and cur_price >= quote['upper_limit'] * 0.995:
                 sell, reason = True, f"상한가 익절 ({pnl:+.2f}%)"
 
