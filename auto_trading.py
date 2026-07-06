@@ -24,7 +24,7 @@ import os, json, time, requests
 from datetime import datetime, timezone, timedelta
 KST = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
-MAX_BET = 200_000  # [2026-07-06] 눌림목+불플래그 진입 로직 전면 개편 후 첫날 — 검증 전까지 축소 운용
+MAX_BET = 300_000  # [2026-07-06] 눌림목+불플래그 진입 로직 검증 전까지 축소 운용 (20만→30만 조정)
 DERIVATIVE_ETF_KEYWORDS = ["레버리지", "인버스", "ETN", "선물"]  # [2026-07-06] 파생상품 ETF/ETN 매수 제외
 ACCOUNT_NO   = os.environ['KIS_ACCOUNT_NO']
 ACCOUNT_PROD = "01"
