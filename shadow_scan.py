@@ -44,7 +44,9 @@ MARKET_CAP_MIN = 700  # 억원
 DERIVATIVE_ETF_KEYWORDS = ["레버리지", "인버스", "ETN", "선물"]
 
 MARKET_OPEN = (9, 0)
-MARKET_CLOSE = (15, 20)
+MARKET_CLOSE = (15, 30)  # [2026-07-07] collect_intraday_data.py와 동일하게 맞춤 —
+# 매매 실행 루프(5분 반복)가 먼저 도느라 섀도우 스캔 실행 시각이 15:27경까지
+# 밀리는데, 마감을 15:20으로 짧게 잡아서 장 막판 데이터가 계속 스킵되고 있었음
 
 
 # ── KIS API 공용 (collect_intraday_data.py와 동일 패턴 — 같은 kis_token.json 캐시 공유) ──
