@@ -57,6 +57,15 @@ jobs:
           KIS_APP_KEY:    ${{ secrets.KIS_APP_KEY }}
           KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
         run: python collect_intraday_data.py
+      - name: 섀도우 전략 비교 스캔 (실주문 없음)
+        # [2026-07-07 신설] 실거래 전략을 직접 바꾸지 않고, 대안 조건식(섀도우A: BB98%
+        # 대신 신고가 기준 / 섀도우B: 시가돌파형 초기모멘텀)으로 포착됐을 후보만 기록.
+        # 자금 투입 없이 minute_data와 대조해 나중에 성과를 비교하기 위함.
+        if: always()
+        env:
+          KIS_APP_KEY:    ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+        run: python shadow_scan.py
       - name: 토큰 캐시 저장
         if: always()
         uses: actions/cache/save@v4
@@ -73,7 +82,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add dashboard_data.json minute_data/
+          git add dashboard_data.json minute_data/ shadow_data/
           git diff --cached --quiet || git commit -m "chore: update dashboard data [skip ci]"
           # [2026-07-06] 실행 도중(최대 7분) 다른 커밋이 먼저 push되면 non-fast-forward로
           # 거절될 수 있어, 최신 main을 rebase로 받아서 재시도
