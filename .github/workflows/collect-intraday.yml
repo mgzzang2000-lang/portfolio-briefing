@@ -1,10 +1,11 @@
 name: Collect Intraday Minute Data
 
 on:
-  schedule:
-    # [2026-07-07] auto-trading.yml과 정각/15분 단위가 겹쳐 스케줄 경합 가능성이 있어 7분 오프셋
-    # 00:00~06:59 UTC = 09:00~15:59 KST, 평일(월~금), 15분 간격
-    - cron: '7,22,37,52 0-6 * * 1-5'
+  # [2026-07-07] 이 workflow의 schedule 트리거(GitHub 자체 크론)가 하루 종일 단 한 번도
+  # 발화하지 않는 사고 발생. auto-trading.yml은 외부 cron-job.org가 workflow_dispatch로
+  # 직접 호출해서 안정적으로 도는 반면, 이 워크플로우엔 그런 외부 호출자가 없어 GH 자체
+  # 스케줄러의 지연/드롭에 그대로 노출됐던 게 원인. 수집 로직을 auto-trading.yml 잡
+  # 안으로 옮겨 매 5분 사이클마다 실행되게 했으므로, 이 워크플로우는 수동 백필 전용으로만 유지.
   workflow_dispatch: {}
 
 permissions:
