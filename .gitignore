@@ -3,6 +3,9 @@ kis_token.json
 .env
 .env.local
 
+# 캐시 (GitHub Actions cache로 관리, 커밋 불필요)
+daily_filter_cache.json
+
 # OS
 .DS_Store
 Thumbs.db

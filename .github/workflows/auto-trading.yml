@@ -27,6 +27,13 @@ jobs:
           key: kis-token-${{ github.run_id }}
           restore-keys: |
             kis-token-
+      - name: 일봉 필터 캐시 복원
+        uses: actions/cache/restore@v4
+        with:
+          path: daily_filter_cache.json
+          key: daily-filter-${{ github.run_id }}
+          restore-keys: |
+            daily-filter-
       - name: 매매 실행 (60초 간격 5회 반복 = 체감 1분 간격)
         env:
           KIS_APP_KEY:         ${{ secrets.KIS_APP_KEY }}
@@ -46,6 +53,12 @@ jobs:
         with:
           path: kis_token.json
           key: kis-token-${{ github.run_id }}
+      - name: 일봉 필터 캐시 저장
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: daily_filter_cache.json
+          key: daily-filter-${{ github.run_id }}
       - name: 대시보드 데이터 푸시
         run: |
           git config user.name "github-actions[bot]"

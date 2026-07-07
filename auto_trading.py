@@ -35,6 +35,28 @@ KAKAO_CLIENT_SECRET = os.environ['KAKAO_CLIENT_SECRET']
 KAKAO_REFRESH_TOKEN = os.environ['KAKAO_REFRESH_TOKEN']
 DASHBOARD_FILE = "dashboard_data.json"
 TOKEN_FILE     = "kis_token.json"
+DAILY_CACHE_FILE = "daily_filter_cache.json"
+# [2026-07-07] MA20/BB스퀴즈/20일평균거래량은 어제 종가 기준이라 하루 안에서는
+# 사실상 안 바뀌는 값인데, 매 5분 사이클마다 상위 ~200종목 전부 다시 계산하느라
+# 스캔이 오래 걸렸음(사이클당 35~40초). 이 값들만 종목당 하루 1회 계산해 캐싱하고
+# 재사용 — 오늘 거래량순위·갭%·1분봉처럼 실시간으로 봐야 하는 값은 그대로 매번 확인.
+def load_daily_cache():
+    today_str = datetime.now(KST).strftime('%Y%m%d')
+    try:
+        with open(DAILY_CACHE_FILE, 'r', encoding='utf-8') as f:
+            cached = json.load(f)
+        if cached.get('date') == today_str:
+            return cached.get('data', {})
+    except Exception:
+        pass
+    return {}
+def save_daily_cache(cache):
+    today_str = datetime.now(KST).strftime('%Y%m%d')
+    try:
+        with open(DAILY_CACHE_FILE, 'w', encoding='utf-8') as f:
+            json.dump({'date': today_str, 'data': cache}, f)
+    except Exception as e:
+        print(f"[일봉 캐시 저장 실패] {e}")
 # ── KIS 인증 (토큰 캐싱 — 1일 1회 발급) ─────────────────────
 def get_kis_token():
     try:
@@ -264,6 +286,7 @@ def get_current_price(token, code, market="J"):
     return {
         'price':       float(o.get('stck_prpr', 0)),
         'open':        float(o.get('stck_oprc', 0)),
+        'high':        float(o.get('stck_hgpr', 0)),
         'prev_close':  float(o.get('stck_sdpr', 0)),
         'name':        o.get('hts_kor_isnm', code),
         'volume':      int(o.get('acml_vol', 0)),
@@ -483,23 +506,48 @@ def scan_signals(token):
     if not stocks:
         print("[경고] 스캔 대상 없음")
         return []
+    # [2026-07-07] MA20/BB스퀴즈/20일평균거래량(어제 종가 기준, 하루 안엔 안 바뀜)은
+    # 종목당 하루 1회만 계산해 캐싱 — 매 사이클 재계산으로 인한 스캔 지연(35~40초) 완화
+    daily_cache = load_daily_cache()
+    cache_hit = 0
     for code in stocks:
         try:
             market = "J" if code in kospi_set else "Q"
-            ohlcv = get_daily_ohlcv(token, code, market)
-            if not ohlcv:
-                continue
-            closes  = ohlcv['closes']
-            highs   = ohlcv['highs']
-            lows    = ohlcv['lows']
-            volumes = ohlcv['volumes']
-            ma20  = calc_ma(closes, 20)
-            ma200 = calc_ma(closes, 200)  # [2026-07-02] 필터에는 미사용, 표시/메시지용으로만 계산
-            bb_upper, bb_mid, _, bw = calc_bb(closes, 20)
-            in_squeeze = is_daily_bb_squeeze(closes)
-            if ma20 is None or bb_upper is None:
-                continue
-            vol_avg20 = sum(volumes[1:21]) / 20 if len(volumes) >= 21 else None
+            cached = daily_cache.get(code)
+            if cached:
+                ma20 = cached['ma20']; ma200 = cached['ma200']
+                bb_upper = cached['bb_upper']; bw = cached['bw']
+                in_squeeze = cached['in_squeeze']
+                vol_avg20 = cached['vol_avg20']
+                ma20_prev = cached['ma20_prev']
+                is_new_breakout = cached['is_new_breakout']
+                cache_hit += 1
+            else:
+                ohlcv = get_daily_ohlcv(token, code, market)
+                if not ohlcv:
+                    continue
+                closes  = ohlcv['closes']
+                volumes = ohlcv['volumes']
+                ma20  = calc_ma(closes, 20)
+                ma200 = calc_ma(closes, 200)  # [2026-07-02] 필터에는 미사용, 표시/메시지용으로만 계산
+                bb_upper, bb_mid, _, bw = calc_bb(closes, 20)
+                in_squeeze = is_daily_bb_squeeze(closes)
+                if ma20 is None or bb_upper is None:
+                    continue
+                vol_avg20 = sum(volumes[1:21]) / 20 if len(volumes) >= 21 else None
+                # [2026-07-02] 당일 신규 돌파 여부 — 제외하지 않고 "우선순위" 태그로만 사용.
+                # 어제 종가가 20일선 이하였다가 오늘 처음 뚫은 종목이면 True(1순위 후보),
+                # 어제 이미 20일선 위였던 종목(시세가 이미 나온 경우가 많음)은 False(2순위 후보)
+                # 로 분류만 하고, 여전히 후보 목록에는 포함시킨다.
+                ma20_prev = calc_ma(closes[1:], 20)
+                is_new_breakout = (
+                    ma20_prev is not None and len(closes) > 1 and closes[1] <= ma20_prev
+                )
+                daily_cache[code] = {
+                    'ma20': ma20, 'ma200': ma200, 'bb_upper': bb_upper, 'bw': bw,
+                    'in_squeeze': in_squeeze, 'vol_avg20': vol_avg20,
+                    'ma20_prev': ma20_prev, 'is_new_breakout': is_new_breakout,
+                }
             cur = get_current_price(token, code, market)
             price = cur['price']
             if price == 0 or cur['open'] == 0 or cur['prev_close'] == 0:
@@ -514,14 +562,6 @@ def scan_signals(token):
             # ── 필터 ──────────────────────────────────────────
             if price <= ma20:
                 continue
-            # [2026-07-02] 당일 신규 돌파 여부 — 제외하지 않고 "우선순위" 태그로만 사용.
-            # 어제 종가가 20일선 이하였다가 오늘 처음 뚫은 종목이면 True(1순위 후보),
-            # 어제 이미 20일선 위였던 종목(시세가 이미 나온 경우가 많음)은 False(2순위 후보)
-            # 로 분류만 하고, 여전히 후보 목록에는 포함시킨다.
-            ma20_prev = calc_ma(closes[1:], 20)
-            is_new_breakout = (
-                ma20_prev is not None and len(closes) > 1 and closes[1] <= ma20_prev
-            )
             # [2026-07-02 제거] MA200 필터 — 아래 조건 비활성화
             # if ma200 is not None and price <= ma200:
             #     continue
@@ -536,9 +576,10 @@ def scan_signals(token):
             if gap >= gap_threshold:
                 continue
             # 14:00~14:30 구간: 갭 조건 대신 당일 고가 98% 이상 근접 확인
+            # [2026-07-07] highs[0](캐시될 수 있는 일봉 데이터)가 아니라 매번 라이브로
+            # 받아오는 cur['high']를 사용 — 캐싱해도 당일 고가는 항상 최신값으로 확인됨
             if now_hour == 14 and now_minute < 30 and gap_threshold == float('inf'):
-                today_high = highs[0]
-                if today_high < cur['open'] * 0.98:
+                if cur['high'] < cur['open'] * 0.98:
                     continue  # 고가 98% 이상 미달 → 진입 안 함
             vol_ratio = cur['volume'] / vol_avg20 if vol_avg20 else 0
             ma200_str  = f"{ma200:,.0f}" if ma200 else "N/A"
@@ -558,6 +599,8 @@ def scan_signals(token):
         except Exception as e:
             print(f"  오류 {code}: {e}")
             continue
+    save_daily_cache(daily_cache)
+    print(f"[일봉 캐시] {cache_hit}/{len(stocks)}종목 재사용")
     # [2026-07-02] 정렬: 1순위 당일 신규 돌파 > 2순위 스퀴즈 종목 > 3순위 거래량 비율 순
     candidates.sort(key=lambda x: (-int(x['is_new_breakout']), -int(x['in_squeeze']), -x['vol_ratio']))
     return candidates
