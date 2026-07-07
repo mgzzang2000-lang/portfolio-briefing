@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 500000,
+  "current_balance": 200480,
   "trades": [
     {
       "action": "buy",
@@ -21,19 +21,43 @@
       "pnl_pct": -2.79,
       "pnl_amt": -13200,
       "reason": "손절 (-2.79%)"
+    },
+    {
+      "action": "buy",
+      "date": "07/07 14:27",
+      "code": "073240",
+      "stock": "073240",
+      "qty": 48,
+      "price": 6240,
+      "amount": 299520
     }
   ],
-  "position": null,
-  "last_updated": "2026-07-06T10:00:44.108992+09:00",
+  "position": {
+    "code": "073240",
+    "name": "073240",
+    "qty": 48,
+    "market": "J",
+    "avg_price": 6240,
+    "current_price": 6240,
+    "stop_price": 6146,
+    "target_price": 6489,
+    "entry_time": "2026-07-07T14:27:59.312274+09:00",
+    "trailing_activated": false
+  },
+  "last_updated": "2026-07-07T14:27:59.312496+09:00",
   "daily_loss_guard": {
-    "date": "07/06",
-    "consecutive_losses": 1,
+    "date": "07/07",
+    "consecutive_losses": 0,
     "notified": false
   },
   "balance_history": [
     {
       "date": "07/06",
       "balance": 500000
+    },
+    {
+      "date": "07/07",
+      "balance": 200480
     }
   ]
 }
