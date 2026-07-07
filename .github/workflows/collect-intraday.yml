@@ -2,9 +2,13 @@ name: Collect Intraday Minute Data
 
 on:
   schedule:
+    # [2026-07-07] auto-trading.yml과 정각/15분 단위가 겹쳐 스케줄 경합 가능성이 있어 7분 오프셋
     # 00:00~06:59 UTC = 09:00~15:59 KST, 평일(월~금), 15분 간격
-    - cron: '*/15 0-6 * * 1-5'
+    - cron: '7,22,37,52 0-6 * * 1-5'
   workflow_dispatch: {}
+
+permissions:
+  contents: write
 
 jobs:
   collect:
@@ -39,6 +43,13 @@ jobs:
           git add minute_data/ || true
           if ! git diff --cached --quiet; then
             git commit -m "chore: collect intraday minute data [skip ci]"
+            # [2026-07-07] auto-trading.yml과 동시에 push할 수 있어 재시도 로직 추가
+            for i in 1 2 3 4 5; do
+              git push && exit 0
+              git fetch origin main
+              git rebase origin/main
+              sleep 3
+            done
             git push
           else
             echo "변경 없음 - 커밋 스킵"
