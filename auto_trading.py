@@ -268,7 +268,35 @@ def get_current_price(token, code, market="J"):
         'name':        o.get('hts_kor_isnm', code),
         'volume':      int(o.get('acml_vol', 0)),
         'upper_limit': float(o.get('stck_mxpr', 0)),  # 당일 상한가
+        # [2026-07-07] inquire-price는 hts_kor_isnm을 채워주지 않아 'name'이 항상 종목코드로
+        # 대체되고 있었음(=DERIVATIVE_ETF_KEYWORDS 이름 매칭이 사실상 무의미했음).
+        # bstp_kor_isnm/rprs_mrkt_kor_name은 이 API에서 실제로 채워지므로 ETF/ETN 판별용으로 사용.
+        'bstp_name':   o.get('bstp_kor_isnm', ''),
+        'mrkt_name':   o.get('rprs_mrkt_kor_name', ''),
     }
+
+
+def is_derivative_etf(token, code, bstp_name, mrkt_name):
+    """ETF/ETN 계열 상품 중 실제 파생형(레버리지·인버스 등)인지 search-info로 확인.
+    [2026-07-07] 252670(KODEX 200선물인버스2X) 매수 시도가 거래소에서
+    '파생ETF 미신청' 오류로 거부된 것을 계기로 추가 — 기존 이름 키워드 필터는
+    inquire-price가 종목명을 안 줘서 작동하지 않고 있었음."""
+    combined = f"{bstp_name} {mrkt_name}"
+    if 'ETN' in combined:
+        return True
+    if 'ETF' not in combined:
+        return False
+    data = kis_get(token, "/uapi/domestic-stock/v1/quotations/search-info", {
+        "PRDT_TYPE_CD": "300", "PDNO": code
+    }, "CTPF1002R")
+    o = data.get('output', {})
+    ratio = o.get('etf_chas_erng_rt_dbnb', '').strip()
+    if not ratio:
+        return False  # 정보 없으면 일반 ETF로 간주 (과잉 차단 방지)
+    try:
+        return float(ratio) != 1.0
+    except ValueError:
+        return True
 # ── 지표 계산 ─────────────────────────────────────────────────
 def calc_ma(closes, period):
     if len(closes) < period:
@@ -478,6 +506,9 @@ def scan_signals(token):
                 continue
             # [2026-07-06] 파생상품 ETF/ETN(레버리지·인버스·선물 등) 거래 제외
             if any(kw in cur['name'] for kw in DERIVATIVE_ETF_KEYWORDS):
+                continue
+            # [2026-07-07] 실제 판별은 bstp_name/mrkt_name 기반 is_derivative_etf()로 수행
+            if is_derivative_etf(token, code, cur.get('bstp_name', ''), cur.get('mrkt_name', '')):
                 continue
             gap = (cur['open'] - cur['prev_close']) / cur['prev_close'] * 100
             # ── 필터 ──────────────────────────────────────────
