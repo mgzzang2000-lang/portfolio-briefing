@@ -1,0 +1,55 @@
+name: 미국주식 스윙 스캔
+on:
+  # [2026-07-07] 신설. 하루 1회면 충분한 스윙/장기 전략이라 국내봇처럼 5분 간격은
+  # 불필요. 다만 GitHub 자체 schedule 트리거가 하루 종일 안 도는 사고를 이미
+  # 한 번 겪었으므로(collect-intraday.yml 참고), 이 스케줄이 계속 안 도는 것
+  # 같으면 auto-trading.yml처럼 외부 cron-job.org가 workflow_dispatch를
+  # 직접 호출하는 방식으로 바꿀 것.
+  schedule:
+    - cron: '30 21 * * 1-5'  # 21:30 UTC — EDT(하절기) 마감 1.5시간 후, EST(동절기) 마감 30분 후
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: us_swing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: 토큰 캐시 복원
+        uses: actions/cache/restore@v4
+        with:
+          path: us_swing/kis_token.json
+          key: kis-token-${{ github.run_id }}
+          restore-keys: |
+            kis-token-
+      - name: 스윙 신호 스캔 (실주문 없음 — 신호 기록만)
+        env:
+          KIS_APP_KEY:    ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+        run: python scan_signals.py
+      - name: 토큰 캐시 저장
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: us_swing/kis_token.json
+          key: kis-token-${{ github.run_id }}
+      - name: 결과 커밋
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add sp500_universe.json excd_cache.json candidates_*.json
+          git diff --cached --quiet || git commit -m "chore: 미국주식 스윙 스캔 결과 업데이트 [skip ci]"
+          for i in 1 2 3 4 5; do
+            git push && exit 0
+            git fetch origin main
+            git rebase origin/main
+            sleep 3
+          done
+          git push
