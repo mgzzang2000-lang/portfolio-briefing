@@ -1,18 +1,15 @@
-name: 미국주식 스윙 스캔
+name: 미국주식 스윙 매매실행
 on:
-  # [2026-07-07] 신설. 하루 1회면 충분한 스윙/장기 전략이라 국내봇처럼 5분 간격은
-  # 불필요. 다만 GitHub 자체 schedule 트리거가 하루 종일 안 도는 사고를 이미
-  # 한 번 겪었으므로(collect-intraday.yml 참고) — 이후 cron-job.org 외부 호출로
-  # 전환 예정(사용자가 전체 파이프라인 완성 후 등록하기로 함).
-  # 22:00 KST(한국 시간은 서머타임 없음) = 13:00 UTC 고정, 매수 실행(23:30 KST) 전
-  # 최종 확인용으로 밤 10시에 스캔.
+  # [2026-07-07] 신설. 미장 정규개장(서머타임 22:30/동절기 23:30 KST) 이후로
+  # 23:30 KST 고정 — 항상 개장 이후가 되도록 사용자가 직접 선택한 시각.
+  # (스케줄 관련 알려진 이슈는 us-swing-scan.yml 상단 주석 참고)
   schedule:
-    - cron: '0 13 * * 1-5'  # 13:00 UTC = 22:00 KST
+    - cron: '30 14 * * 1-5'  # 14:30 UTC = 23:30 KST
   workflow_dispatch: {}
 permissions:
   contents: write
 jobs:
-  scan:
+  trade:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -30,23 +27,25 @@ jobs:
           key: kis-token-${{ github.run_id }}
           restore-keys: |
             kis-token-
-      - name: 스윙 신호 스캔 (실주문 없음 — 신호 기록만)
+      - name: 매수/매도 실행 (실주문)
         env:
-          KIS_APP_KEY:    ${{ secrets.KIS_APP_KEY }}
-          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
-        run: python scan_signals.py
+          KIS_APP_KEY:     ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET:  ${{ secrets.KIS_APP_SECRET }}
+          KIS_ACCOUNT_NO:  ${{ secrets.KIS_ACCOUNT_NO }}
+        run: python trade_execution.py
       - name: 토큰 캐시 저장
         if: always()
         uses: actions/cache/save@v4
         with:
           path: us_swing/kis_token.json
           key: kis-token-${{ github.run_id }}
-      - name: 결과 커밋
+      - name: 상태 커밋
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add sp500_universe.json excd_cache.json candidates_*.json
-          git diff --cached --quiet || git commit -m "chore: 미국주식 스윙 스캔 결과 업데이트 [skip ci]"
+          git add portfolio_state.json
+          git diff --cached --quiet || git commit -m "chore: 미국주식 스윙 포지션 업데이트 (매매실행) [skip ci]"
           for i in 1 2 3 4 5; do
             git push && exit 0
             git fetch origin main

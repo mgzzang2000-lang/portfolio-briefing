@@ -15,8 +15,10 @@ KIS_APP_KEY = os.environ["KIS_APP_KEY"]
 KIS_APP_SECRET = os.environ["KIS_APP_SECRET"]
 TOKEN_FILE = "kis_token.json"
 
-# 종목별로 어느 거래소에 상장돼있는지 모를 때 순서대로 시도
+# 종목별로 어느 거래소에 상장돼있는지 모를 때 순서대로 시도 (시세 조회용 코드)
 EXCD_CANDIDATES = ["NAS", "NYS", "AMS"]
+# 시세조회(EXCD)와 주문/잔고조회(OVRS_EXCG_CD)는 거래소 코드 표기가 다름
+QUOTE_TO_TRADE_EXCD = {"NAS": "NASD", "NYS": "NYSE", "AMS": "AMEX"}
 
 
 def get_kis_token():
@@ -66,7 +68,7 @@ def kis_get(token, path, params, tr_id, retries=3):
 def get_weekly_ohlcv(token, symbol, excd=None):
     """해외주식 주봉 OHLCV(HHDFS76240000, GUBN=1) — 최신이 index 0, 최대 100주(~2년).
     excd를 모르면 NAS/NYS/AMS 순으로 시도해서 되는 거래소를 함께 반환.
-    반환: (closes, volumes, excd_used) 또는 실패 시 (None, None, None)
+    반환: (dict{closes,highs,lows,volumes}, excd_used) 또는 실패 시 (None, None)
     """
     candidates = [excd] if excd else EXCD_CANDIDATES
     for code in candidates:
@@ -76,15 +78,122 @@ def get_weekly_ohlcv(token, symbol, excd=None):
         }, "HHDFS76240000")
         output = data.get("output2", [])
         if output:
-            closes = [float(x["clos"]) for x in output if x.get("clos")]
-            volumes = [int(float(x["tvol"])) for x in output if x.get("tvol")]
-            if len(closes) >= 30:
-                return closes, volumes, code
+            rows = [x for x in output if x.get("clos")]
+            if len(rows) >= 30:
+                ohlcv = {
+                    "closes":  [float(x["clos"]) for x in rows],
+                    "highs":   [float(x.get("high") or x["clos"]) for x in rows],
+                    "lows":    [float(x.get("low") or x["clos"]) for x in rows],
+                    "volumes": [int(float(x.get("tvol") or 0)) for x in rows],
+                }
+                return ohlcv, code
         time.sleep(0.1)
-    return None, None, None
+    return None, None
+
+
+def get_quote(token, symbol, excd):
+    """실시간에 가까운 현재가(HHDFS00000300) — 주문 직전 최신 가격 확인용."""
+    data = kis_get(token, "/uapi/overseas-price/v1/quotations/price", {
+        "AUTH": "", "EXCD": excd, "SYMB": symbol
+    }, "HHDFS00000300")
+    out = data.get("output", {})
+    last = out.get("last")
+    return float(last) if last else None
 
 
 def calc_ma(values, period):
     if len(values) < period:
         return None
     return sum(values[:period]) / period
+
+
+def calc_atr(highs, lows, closes, period=14):
+    """최신이 index 0인 배열 기준 ATR(단순평균 방식)."""
+    if len(highs) < period + 1:
+        return None
+    trs = []
+    for i in range(period):
+        tr = max(
+            highs[i] - lows[i],
+            abs(highs[i] - closes[i + 1]),
+            abs(lows[i] - closes[i + 1]),
+        )
+        trs.append(tr)
+    return sum(trs) / len(trs)
+
+
+def get_usd_krw_rate():
+    """USD/KRW 환율 — 무료 공개 API(frankfurter.app, ECB 기준). 실패 시 보수적 고정값 폴백."""
+    import requests
+    try:
+        r = requests.get("https://api.frankfurter.app/latest",
+                          params={"from": "USD", "to": "KRW"}, timeout=10)
+        rate = r.json().get("rates", {}).get("KRW")
+        if rate:
+            return float(rate)
+    except Exception:
+        pass
+    return 1450.0  # 폴백(대략치) — 이 경우 로그로 남겨서 실제 환율과 괴리 확인 필요
+
+
+def kis_post(token, path, body, tr_id, retries=3):
+    import requests
+    headers = {
+        "authorization": f"Bearer {token}",
+        "appkey": KIS_APP_KEY, "appsecret": KIS_APP_SECRET,
+        "tr_id": tr_id, "custtype": "P", "content-type": "application/json; charset=utf-8",
+    }
+    for attempt in range(retries):
+        try:
+            r = requests.post(f"{BASE_URL}{path}", headers=headers,
+                               json=body, timeout=10)
+            if not r.text.strip():
+                return {}
+            return r.json()
+        except Exception:
+            if attempt < retries - 1:
+                time.sleep(2)
+    return {}
+
+
+def place_order(token, cano, acnt_prdt_cd, trade_excd, symbol, qty, limit_price, side):
+    """해외주식 주문(TTTT1002U 매수/TTTT1006U 매도) — 지정가만 지원, 시장가는 없음
+    (KIS 공식 문서 기준). trade_excd는 'NASD'/'NYSE'/'AMEX' 등 주문용 거래소코드
+    (시세조회용 EXCD와 다름 — QUOTE_TO_TRADE_EXCD로 변환).
+    반환: (성공여부, 응답 dict)
+    """
+    tr_id = "TTTT1002U" if side == "buy" else "TTTT1006U"
+    body = {
+        "CANO": cano, "ACNT_PRDT_CD": acnt_prdt_cd,
+        "OVRS_EXCG_CD": trade_excd, "PDNO": symbol,
+        "ORD_QTY": str(qty), "OVRS_ORD_UNPR": f"{limit_price:.2f}",
+        "CTAC_TLNO": "", "MGCO_APTM_ODNO": "",
+        "SLL_TYPE": "" if side == "buy" else "00",
+        "ORD_SVR_DVSN_CD": "0", "ORD_DVSN": "00",  # 00: 지정가
+    }
+    data = kis_post(token, "/uapi/overseas-stock/v1/trading/order", body, tr_id)
+    return data.get("rt_cd") == "0", data
+
+
+def get_holdings(token, cano, acnt_prdt_cd):
+    """현재 보유 중인 해외주식 목록(잔고조회, TTTS3012R) — ground truth.
+    반환: [{'symbol','qty','avg_price','current_price','pnl_pct'}, ...]
+    """
+    data = kis_get(token, "/uapi/overseas-stock/v1/trading/inquire-balance", {
+        "CANO": cano, "ACNT_PRDT_CD": acnt_prdt_cd,
+        "OVRS_EXCG_CD": "NASD", "TR_CRCY_CD": "USD",
+        "CTX_AREA_FK200": "", "CTX_AREA_NK200": "",
+    }, "TTTS3012R")
+    holdings = []
+    for row in data.get("output1", []) or []:
+        qty = int(float(row.get("ovrs_cblc_qty", 0) or 0))
+        if qty <= 0:
+            continue
+        holdings.append({
+            "symbol": row.get("ovrs_pdno", ""),
+            "qty": qty,
+            "avg_price": float(row.get("pchs_avg_pric", 0) or 0),
+            "current_price": float(row.get("now_pric2", 0) or 0),
+            "pnl_pct": float(row.get("evlu_pfls_rt", 0) or 0),
+        })
+    return holdings

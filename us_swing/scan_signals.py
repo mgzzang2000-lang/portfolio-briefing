@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-미국주식 스윙/장기 추세추종 — 신호 스캔 (신설, 아직 매수/매도 실행 없음).
+미국주식 스윙/장기 추세추종 — 신호 스캔 (22:00 KST, 매수/매도 실행 전 마지막 스캔).
 
-지금 단계는 "신호만 기록"까지만 함 — 실제 자금 배분(몇 종목 동시보유,
-종목당 비중)을 정한 뒤에 주문 실행 로직을 얹을 예정.
+여기서는 후보 산출 + 보유종목 추세이탈 판정까지만 하고, 실제 주문은
+trade_execution.py(23:30 KST, 정규개장 이후)가 이 결과를 읽어서 실행함.
 
 전략 요약 (하루 1회, 주봉 기준 — 국내주식 봇과 달리 스윙/장기라 초 단위
 타이밍이 필요 없음):
@@ -22,11 +22,20 @@
 
 [2026-07-07] 신설.
 """
-import json, os, time
+import json, os, sys, time
 from datetime import datetime, timezone, timedelta
 
-from kis_common import KST, get_kis_token, get_weekly_ohlcv, calc_ma
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8")  # Windows(cp949) 콘솔 출력 크래시 방지
+
+from kis_common import (
+    KST, get_kis_token, get_weekly_ohlcv, calc_ma, calc_atr,
+    get_holdings,
+)
 from get_universe import get_universe
+
+ACCOUNT_NO = os.environ.get("KIS_ACCOUNT_NO", "")
+ACCOUNT_PROD = "01"
 
 DATA_DIR = os.path.dirname(__file__)
 EXCD_CACHE_FILE = os.path.join(DATA_DIR, "excd_cache.json")
@@ -68,27 +77,32 @@ def main():
     token = get_kis_token()
     excd_cache = load_json(EXCD_CACHE_FILE, {})
 
-    spy_closes, _, spy_excd = get_weekly_ohlcv(token, "SPY", excd_cache.get("SPY"))
-    if not spy_closes:
+    spy_ohlcv, spy_excd = get_weekly_ohlcv(token, "SPY", excd_cache.get("SPY"))
+    if not spy_ohlcv:
         print("[오류] SPY 벤치마크 데이터를 못 가져옴 — 중단")
         return
+    spy_closes = spy_ohlcv["closes"]
     excd_cache["SPY"] = spy_excd
 
     universe = get_universe()
     print(f"S&P500 {len(universe)}종목 스캔 시작")
 
     results = []
+    ohlcv_by_symbol = {}
     for i, stock in enumerate(universe):
         symbol, sector = stock["symbol"], stock["sector"]
-        closes, volumes, excd = get_weekly_ohlcv(token, symbol, excd_cache.get(symbol))
-        if not closes:
+        ohlcv, excd = get_weekly_ohlcv(token, symbol, excd_cache.get(symbol))
+        if not ohlcv:
             continue
         excd_cache[symbol] = excd
+        ohlcv_by_symbol[symbol] = (ohlcv, excd)
+        closes = ohlcv["closes"]
         rs = rel_strength(closes, spy_closes)
         stage2 = is_stage2(closes)
+        atr = calc_atr(ohlcv["highs"], ohlcv["lows"], closes)
         results.append({
             "symbol": symbol, "sector": sector, "price": closes[0],
-            "rel_strength_12w": rs, "stage2": stage2,
+            "rel_strength_12w": rs, "stage2": stage2, "atr": atr,
         })
         if (i + 1) % 50 == 0:
             print(f"  진행: {i+1}/{len(universe)}")
@@ -96,6 +110,30 @@ def main():
         time.sleep(0.1)
 
     save_json(EXCD_CACHE_FILE, excd_cache)
+
+    # ── 보유 중인 포지션의 추세(30주선) 이탈 여부 확인 ──
+    # 진입 조건(가격>30주선 AND 30주선 상승)과 대칭 — 주봉 종가가 30주선
+    # 아래로 내려가면 Stage2가 깨진 것으로 보고 청산 대상으로 표시.
+    # (실제 매도 실행은 trade_execution.py에서, -8% 하드손절은 position_monitor.py에서 별도 처리)
+    trend_exit_symbols = []
+    if ACCOUNT_NO:
+        holdings = get_holdings(token, ACCOUNT_NO, ACCOUNT_PROD)
+        for h in holdings:
+            symbol = h["symbol"]
+            ohlcv = ohlcv_by_symbol.get(symbol)
+            if not ohlcv:
+                # 유니버스에 없는(S&P500 편출됐거나 스캔 실패한) 보유종목은
+                # 별도로 다시 조회해서 확인
+                ohlcv_result, _ = get_weekly_ohlcv(token, symbol, excd_cache.get(symbol))
+                ohlcv = (ohlcv_result, None)
+            data = ohlcv[0]
+            if not data:
+                print(f"  [경고] 보유종목 {symbol} 주봉 데이터 확보 실패 — 추세 확인 불가")
+                continue
+            ma30 = calc_ma(data["closes"], MA_PERIOD)
+            if ma30 is not None and data["closes"][0] < ma30:
+                trend_exit_symbols.append(symbol)
+        print(f"추세 이탈 청산 대상: {trend_exit_symbols}")
 
     # ── 섹터별 상대강도 순위 ──
     sector_rs = {}
@@ -120,6 +158,7 @@ def main():
         "date": today_str,
         "sector_ranking": [{"sector": s, "avg_rel_strength_12w": round(sector_rs[s], 4)} for s in ranked_sectors],
         "candidates": candidates,
+        "trend_exit_symbols": trend_exit_symbols,
     })
     print(f"최종 후보 {len(candidates)}종목: {[c['symbol'] for c in candidates]}")
 

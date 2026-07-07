@@ -1,18 +1,16 @@
-name: 미국주식 스윙 스캔
+name: 미국주식 스윙 포지션 모니터링
 on:
-  # [2026-07-07] 신설. 하루 1회면 충분한 스윙/장기 전략이라 국내봇처럼 5분 간격은
-  # 불필요. 다만 GitHub 자체 schedule 트리거가 하루 종일 안 도는 사고를 이미
-  # 한 번 겪었으므로(collect-intraday.yml 참고) — 이후 cron-job.org 외부 호출로
-  # 전환 예정(사용자가 전체 파이프라인 완성 후 등록하기로 함).
-  # 22:00 KST(한국 시간은 서머타임 없음) = 13:00 UTC 고정, 매수 실행(23:30 KST) 전
-  # 최종 확인용으로 밤 10시에 스캔.
+  # [2026-07-07] 신설. 미장 정규시간대(서머타임 13:30-20:00 UTC / 동절기
+  # 14:30-21:00 UTC)를 여유있게 덮도록 13-21시(UTC) 매시간. 30주선 이탈
+  # 청산은 주봉 데이터라 여기서 안 보고 scan_signals.py가 밤에 확인 —
+  # 여긴 급락 대비 하드손절(-8% 등)만 실시간으로 확인.
   schedule:
-    - cron: '0 13 * * 1-5'  # 13:00 UTC = 22:00 KST
+    - cron: '0 13-21 * * 1-5'
   workflow_dispatch: {}
 permissions:
   contents: write
 jobs:
-  scan:
+  monitor:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -30,23 +28,25 @@ jobs:
           key: kis-token-${{ github.run_id }}
           restore-keys: |
             kis-token-
-      - name: 스윙 신호 스캔 (실주문 없음 — 신호 기록만)
+      - name: 손절 확인 (실주문 가능)
         env:
-          KIS_APP_KEY:    ${{ secrets.KIS_APP_KEY }}
-          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
-        run: python scan_signals.py
+          KIS_APP_KEY:     ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET:  ${{ secrets.KIS_APP_SECRET }}
+          KIS_ACCOUNT_NO:  ${{ secrets.KIS_ACCOUNT_NO }}
+        run: python position_monitor.py
       - name: 토큰 캐시 저장
         if: always()
         uses: actions/cache/save@v4
         with:
           path: us_swing/kis_token.json
           key: kis-token-${{ github.run_id }}
-      - name: 결과 커밋
+      - name: 상태 커밋
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add sp500_universe.json excd_cache.json candidates_*.json
-          git diff --cached --quiet || git commit -m "chore: 미국주식 스윙 스캔 결과 업데이트 [skip ci]"
+          git add portfolio_state.json
+          git diff --cached --quiet || git commit -m "chore: 미국주식 스윙 포지션 업데이트 (손절 모니터링) [skip ci]"
           for i in 1 2 3 4 5; do
             git push && exit 0
             git fetch origin main
