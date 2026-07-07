@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 200480,
+  "current_balance": 500000,
   "trades": [
     {
       "action": "buy",
@@ -30,13 +30,24 @@
       "qty": 48,
       "price": 6240,
       "amount": 299520
+    },
+    {
+      "action": "sell",
+      "date": "07/07 14:30",
+      "stock": "금호타이어",
+      "qty": 48,
+      "price": 6140,
+      "avg_price": 6240,
+      "pnl_pct": -1.6,
+      "pnl_amt": -4800,
+      "reason": "손절 (-1.60%)"
     }
   ],
   "position": null,
   "last_updated": "2026-07-07T14:33:22.052020+09:00",
   "daily_loss_guard": {
     "date": "07/07",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
@@ -46,7 +57,7 @@
     },
     {
       "date": "07/07",
-      "balance": 200480
+      "balance": 500000
     }
   ]
 }
