@@ -175,6 +175,20 @@ def place_order(token, cano, acnt_prdt_cd, trade_excd, symbol, qty, limit_price,
     return data.get("rt_cd") == "0", data
 
 
+def record_balance(state, delta_usd):
+    """매수/매도로 변한 현금을 반영하고, 대시보드용 잔고 추이(일별)에 기록.
+    KR 봇의 save_dashboard() 잔고추이 로직과 동일한 패턴."""
+    state["current_balance"] = round(state.get("current_balance", 0) + delta_usd, 2)
+    history = state.setdefault("balance_history", [])
+    today = datetime.now(KST).strftime("%m/%d")
+    entry = {"date": today, "balance": state["current_balance"]}
+    if history and history[-1]["date"] == today:
+        history[-1] = entry
+    else:
+        history.append(entry)
+    state["balance_history"] = history[-60:]
+
+
 def get_holdings(token, cano, acnt_prdt_cd):
     """현재 보유 중인 해외주식 목록(잔고조회, TTTS3012R) — ground truth.
     반환: [{'symbol','qty','avg_price','current_price','pnl_pct'}, ...]

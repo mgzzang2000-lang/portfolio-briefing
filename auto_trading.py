@@ -434,7 +434,11 @@ def get_balance(token):
     }, "TTTC8434R")
     holdings = data.get('output1', [])
     summary  = data.get('output2', [{}])[0]
-    cash = float(summary.get('dnca_tot_amt', 0))
+    # [2026-07-07] dnca_tot_amt(예수금총금액)는 당일 손익 정산 전 "원금" 그대로라
+    # 매매 손실이 나도 줄지 않는 값이었음(대시보드 잔액이 안 줄어드는 버그의 원인,
+    # 동시에 매수수량 계산도 실제보다 부풀려진 잔액 기준으로 하고 있던 잠재 위험).
+    # nass_amt(순자산금액)는 당일 손익·수수료까지 정산 반영된 실제 순자산.
+    cash = float(summary.get('nass_amt', 0) or summary.get('dnca_tot_amt', 0))
     return holdings, cash
 # ── 주문 ──────────────────────────────────────────────────────
 def place_order(token, code, qty, side="buy"):

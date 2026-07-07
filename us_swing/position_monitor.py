@@ -17,6 +17,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 
 from kis_common import (
     KST, get_kis_token, get_holdings, place_order, QUOTE_TO_TRADE_EXCD,
+    record_balance,
 )
 
 ACCOUNT_NO = os.environ["KIS_ACCOUNT_NO"]
@@ -42,7 +43,10 @@ def save_json(path, data):
 
 def main():
     token = get_kis_token()
-    state = load_json(STATE_FILE, {"positions": {}, "trade_history": []})
+    state = load_json(STATE_FILE, {
+        "initial_balance": 200, "current_balance": 200,
+        "positions": {}, "trade_history": [], "balance_history": [],
+    })
     excd_cache = load_json(EXCD_CACHE_FILE, {})
     holdings = get_holdings(token, ACCOUNT_NO, ACCOUNT_PROD)
 
@@ -73,6 +77,7 @@ def main():
                 "symbol": symbol, "qty": qty, "price": limit_price,
                 "reason": f"하드손절 (기준 {stop_price})",
             })
+            record_balance(state, qty * limit_price)
             state["positions"].pop(symbol, None)
         else:
             print(f"[손절매도 실패] {symbol}: {resp.get('msg1', resp)}")

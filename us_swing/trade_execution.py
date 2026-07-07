@@ -24,7 +24,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 
 from kis_common import (
     KST, get_kis_token, get_holdings, get_quote, place_order,
-    get_usd_krw_rate, QUOTE_TO_TRADE_EXCD,
+    get_usd_krw_rate, QUOTE_TO_TRADE_EXCD, record_balance,
 )
 
 ACCOUNT_NO = os.environ["KIS_ACCOUNT_NO"]
@@ -68,7 +68,10 @@ def main():
         return
 
     token = get_kis_token()
-    state = load_json(STATE_FILE, {"positions": {}, "trade_history": []})
+    state = load_json(STATE_FILE, {
+        "initial_balance": 200, "current_balance": 200,
+        "positions": {}, "trade_history": [], "balance_history": [],
+    })
     holdings = get_holdings(token, ACCOUNT_NO, ACCOUNT_PROD)
     held_symbols = {h["symbol"] for h in holdings}
 
@@ -87,6 +90,7 @@ def main():
         if ok:
             print(f"[매도] {symbol} {h['qty']}주 @ {limit_price} (추세이탈)")
             log_trade(state, "sell", symbol, h["qty"], limit_price, "30주선 하향이탈")
+            record_balance(state, h["qty"] * limit_price)
             state["positions"].pop(symbol, None)
             held_symbols.discard(symbol)
         else:
@@ -141,6 +145,7 @@ def main():
             print(f"[매수] {symbol} {qty}주 @ {limit_price} (손절가 {stop_price:.2f})")
             log_trade(state, "buy", symbol, qty, limit_price,
                        f"RS12w={c.get('rel_strength_12w', 0):.1%}")
+            record_balance(state, -qty * limit_price)
             state["positions"][symbol] = {
                 "stop_price": round(stop_price, 2),
                 "entry_price": limit_price,

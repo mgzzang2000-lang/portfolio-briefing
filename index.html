@@ -3,306 +3,355 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📈 자동매매 대시보드</title>
+<title>포트폴리오</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
+  :root {
+    --bg: #0b0b0d;
+    --surface: #131316;
+    --surface-2: #18181c;
+    --border: rgba(255,255,255,0.07);
+    --text: #e8e8ea;
+    --text-dim: #8a8a92;
+    --text-faint: #55555c;
+    --kr: #5b8def;
+    --kr-dim: rgba(91,141,239,0.10);
+    --us: #e8933a;
+    --us-dim: rgba(232,147,58,0.10);
+    --up: #4ade80;
+    --down: #f87171;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #0f0f13; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Pretendard', sans-serif;
+    min-height: 100vh; -webkit-font-smoothing: antialiased;
+  }
 
-  .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 20px 16px 16px; text-align: center; border-bottom: 1px solid #2d3748; }
-  .header h1 { font-size: 18px; color: #90cdf4; letter-spacing: 1px; margin-bottom: 4px; }
-  .last-updated { font-size: 11px; color: #718096; }
+  .header { padding: 28px 20px 18px; max-width: 480px; margin: 0 auto; }
+  .header .eyebrow { font-size: 11px; color: var(--text-faint); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; }
+  .last-updated { font-size: 11px; color: var(--text-faint); margin-top: 4px; }
 
-  .container { padding: 16px; max-width: 480px; margin: 0 auto; }
+  /* 탭 스위처 */
+  .tabs { display: flex; gap: 4px; max-width: 480px; margin: 0 auto 16px; padding: 0 20px; }
+  .tab { flex: 1; padding: 10px; text-align: center; border-radius: 10px; font-size: 13px; font-weight: 600;
+         color: var(--text-dim); cursor: pointer; border: 1px solid transparent; transition: all 0.15s; }
+  .tab.active.kr { background: var(--kr-dim); color: var(--kr); border-color: rgba(91,141,239,0.25); }
+  .tab.active.us { background: var(--us-dim); color: var(--us); border-color: rgba(232,147,58,0.25); }
+
+  .container { padding: 0 20px 32px; max-width: 480px; margin: 0 auto; }
+  .panel { display: none; }
+  .panel.active { display: block; }
 
   /* 잔고 카드 */
-  .balance-card { background: linear-gradient(135deg, #1e3a5f 0%, #1a2f4a 100%); border-radius: 16px; padding: 24px 20px; margin-bottom: 16px; text-align: center; border: 1px solid #2b4c7e; }
-  .balance-label { font-size: 12px; color: #90cdf4; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
-  .balance-amount { font-size: 36px; font-weight: 700; letter-spacing: -1px; margin-bottom: 12px; }
-  .balance-row { display: flex; justify-content: space-around; }
-  .balance-sub { text-align: center; }
-  .balance-sub .label { font-size: 11px; color: #718096; margin-bottom: 2px; }
-  .balance-sub .value { font-size: 15px; font-weight: 600; }
+  .balance-card { background: var(--surface); border-radius: 14px; padding: 26px 22px; margin-bottom: 14px; border: 1px solid var(--border); }
+  .balance-label { font-size: 11px; color: var(--text-dim); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .balance-amount { font-size: 34px; font-weight: 300; letter-spacing: -0.5px; margin-bottom: 16px; font-variant-numeric: tabular-nums; }
+  .balance-row { display: flex; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--border); }
+  .balance-sub .label { font-size: 10px; color: var(--text-faint); margin-bottom: 3px; }
+  .balance-sub .value { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
 
   /* 차트 */
-  .chart-card { background: #1a1a2e; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #2d3748; }
+  .chart-card { background: var(--surface); border-radius: 14px; padding: 18px 16px 14px; margin-bottom: 14px; border: 1px solid var(--border); }
   .chart-card canvas { display: block; width: 100% !important; }
-  .chart-empty { text-align: center; padding: 32px 0; color: #4a5568; font-size: 13px; }
+  .chart-empty { text-align: center; padding: 36px 0; color: var(--text-faint); font-size: 12px; line-height: 1.6; }
 
   /* 통계 그리드 */
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-  .stat-card { background: #1a1a2e; border-radius: 12px; padding: 16px; border: 1px solid #2d3748; }
-  .stat-card .label { font-size: 11px; color: #718096; margin-bottom: 6px; }
-  .stat-card .value { font-size: 22px; font-weight: 700; }
-  .stat-card .sub { font-size: 11px; color: #718096; margin-top: 2px; }
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .stat-card { background: var(--surface); border-radius: 12px; padding: 15px; border: 1px solid var(--border); }
+  .stat-card .label { font-size: 10px; color: var(--text-faint); margin-bottom: 6px; letter-spacing: 0.3px; }
+  .stat-card .value { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat-card .sub { font-size: 10px; color: var(--text-faint); margin-top: 3px; }
+
+  /* 섹션 */
+  .section-title { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.8px; margin: 20px 0 8px; }
+  .section-title:first-child { margin-top: 0; }
 
   /* 포지션 */
-  .section-title { font-size: 13px; color: #718096; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-  .position-card { background: #1a1a2e; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #2d3748; }
-  .position-empty { text-align: center; padding: 12px; color: #4a5568; font-size: 14px; }
-  .position-name { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-  .position-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
-  .position-row .key { color: #718096; }
+  .position-card { background: var(--surface); border-radius: 12px; padding: 16px; border: 1px solid var(--border); }
+  .position-card + .position-card { margin-top: 8px; }
+  .position-empty { text-align: center; padding: 14px; color: var(--text-faint); font-size: 13px; }
+  .position-name { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+  .position-row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 3px 0; }
+  .position-row .key { color: var(--text-faint); }
+  .position-row .val { font-variant-numeric: tabular-nums; }
 
   /* 거래 내역 */
-  .trades-list { background: #1a1a2e; border-radius: 12px; overflow: hidden; border: 1px solid #2d3748; margin-bottom: 16px; }
-  .trade-item { padding: 14px 16px; border-bottom: 1px solid #2d3748; display: flex; align-items: center; gap: 12px; }
+  .trades-list { background: var(--surface); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+  .trade-item { padding: 13px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
   .trade-item:last-child { border-bottom: none; }
-  .trade-badge { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-  .badge-buy { background: #1a3a5c; }
-  .badge-sell-win { background: #1a3a2a; }
-  .badge-sell-loss { background: #3a1a1a; }
-  .trade-info { flex: 1; }
-  .trade-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-  .trade-detail { font-size: 11px; color: #718096; }
+  .trade-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dot-buy { background: var(--text-dim); }
+  .dot-win { background: var(--up); }
+  .dot-loss { background: var(--down); }
+  .trade-info { flex: 1; min-width: 0; }
+  .trade-name { font-size: 13.5px; font-weight: 500; margin-bottom: 2px; }
+  .trade-detail { font-size: 11px; color: var(--text-faint); }
   .trade-pnl { text-align: right; }
-  .trade-pnl .pnl-pct { font-size: 15px; font-weight: 700; }
-  .trade-pnl .pnl-amt { font-size: 11px; color: #718096; margin-top: 1px; }
-  .no-trades { text-align: center; padding: 24px; color: #4a5568; font-size: 14px; }
+  .trade-pnl .pnl-pct { font-size: 13.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .trade-pnl .pnl-amt { font-size: 10.5px; color: var(--text-faint); margin-top: 1px; font-variant-numeric: tabular-nums; }
+  .no-trades { text-align: center; padding: 28px 20px; color: var(--text-faint); font-size: 13px; line-height: 1.6; }
 
-  /* 색상 */
-  .green { color: #68d391; }
-  .red { color: #fc8181; }
-  .blue { color: #90cdf4; }
-  .gray { color: #a0aec0; }
+  .up { color: var(--up); }
+  .down { color: var(--down); }
+  .dim { color: var(--text-dim); }
+  .faint { color: var(--text-faint); }
 
-  /* 로딩 */
-  .loading { text-align: center; padding: 60px 20px; color: #4a5568; font-size: 14px; }
-  .refresh-btn { display: block; width: 100%; padding: 14px; background: #2d3748; border: none; border-radius: 12px; color: #90cdf4; font-size: 14px; cursor: pointer; margin-bottom: 20px; }
-  .refresh-btn:active { background: #3d4f63; }
+  .loading { text-align: center; padding: 60px 20px; color: var(--text-faint); font-size: 13px; }
+  .refresh-btn { display: block; width: 100%; padding: 13px; background: var(--surface); border: 1px solid var(--border);
+                 border-radius: 12px; color: var(--text-dim); font-size: 13px; cursor: pointer; margin-top: 16px; }
+  .refresh-btn:active { background: var(--surface-2); }
 </style>
 </head>
 <body>
 <div class="header">
-  <h1>📈 자동매매 대시보드</h1>
-  <div class="last-updated" id="lastUpdated">데이터 불러오는 중...</div>
+  <div class="eyebrow">Auto Trading</div>
+  <h1>포트폴리오</h1>
+  <div class="last-updated" id="lastUpdated">불러오는 중...</div>
 </div>
+
+<div class="tabs">
+  <div class="tab kr active" id="tabKr" onclick="switchTab('kr')">국내</div>
+  <div class="tab us" id="tabUs" onclick="switchTab('us')">해외</div>
+</div>
+
 <div class="container">
-  <div id="content" class="loading">⏳ 데이터 불러오는 중...</div>
+  <div id="panelKr" class="panel active"><div class="loading">불러오는 중...</div></div>
+  <div id="panelUs" class="panel"><div class="loading">불러오는 중...</div></div>
 </div>
 
 <script>
-const DATA_URL = 'https://raw.githubusercontent.com/mgzzang2000-lang/portfolio-briefing/main/dashboard_data.json';
-const INITIAL = 500000;
-let chartInstance = null;
+const KR_URL = 'https://raw.githubusercontent.com/mgzzang2000-lang/portfolio-briefing/main/dashboard_data.json';
+const US_URL = 'https://raw.githubusercontent.com/mgzzang2000-lang/portfolio-briefing/main/us_swing/portfolio_state.json';
+let chartKr = null, chartUs = null;
 
-function fmt(n) {
-  return Math.abs(n) >= 10000
-    ? (n/10000).toFixed(1) + '만'
-    : n.toLocaleString();
+function switchTab(which) {
+  document.getElementById('tabKr').classList.toggle('active', which === 'kr');
+  document.getElementById('tabUs').classList.toggle('active', which === 'us');
+  document.getElementById('panelKr').classList.toggle('active', which === 'kr');
+  document.getElementById('panelUs').classList.toggle('active', which === 'us');
 }
-function fmtFull(n) { return n.toLocaleString() + '원'; }
+
 function sign(n) { return n >= 0 ? '+' : ''; }
-function cls(n) { return n >= 0 ? 'green' : 'red'; }
+function cls(n) { return n >= 0 ? 'up' : 'down'; }
 
-function renderChart(history) {
-  const canvas = document.getElementById('balanceChart');
-  if (!canvas) return;
+function fmtKrw(n) {
+  const abs = Math.abs(n);
+  return (abs >= 10000 ? (n/10000).toFixed(1) + '만원' : Math.round(n).toLocaleString() + '원');
+}
+function fmtKrwFull(n) { return Math.round(n).toLocaleString() + '원'; }
+function fmtUsd(n) { return '$' + n.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
 
-  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+function renderChart(canvasId, existing, history, initial, accentColor, fmtFn) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+  if (existing) { existing.destroy(); }
 
   if (!history || history.length < 2) {
-    canvas.parentElement.innerHTML = '<div class="chart-empty">📊 거래 데이터가 쌓이면<br>그래프가 표시됩니다</div>';
-    return;
+    canvas.parentElement.innerHTML = '<div class="chart-empty">거래 데이터가 쌓이면<br>추이 그래프가 표시됩니다</div>';
+    return null;
   }
 
-  // 시작잔고를 항상 첫 점으로 포함
-  const allPoints = [{date: '시작', balance: INITIAL}, ...history];
+  const allPoints = [{date: '시작', balance: initial}, ...history];
   const labels = allPoints.map(h => h.date);
   const values = allPoints.map(h => h.balance);
-  const isProfit = values[values.length - 1] >= INITIAL;
-  const lineColor = isProfit ? '#68d391' : '#fc8181';
-  const fillColor = isProfit ? 'rgba(104,211,145,0.08)' : 'rgba(252,129,129,0.08)';
+  const isProfit = values[values.length - 1] >= initial;
+  const lineColor = isProfit ? '#4ade80' : '#f87171';
 
-  chartInstance = new Chart(canvas, {
+  return new Chart(canvas, {
     type: 'line',
     data: {
       labels,
       datasets: [{
         data: values,
         borderColor: lineColor,
-        backgroundColor: fillColor,
+        backgroundColor: isProfit ? 'rgba(74,222,128,0.06)' : 'rgba(248,113,113,0.06)',
         borderWidth: 2,
-        pointRadius: values.length <= 10 ? 4 : 2,
+        pointRadius: values.length <= 10 ? 3 : 0,
         pointBackgroundColor: lineColor,
         pointBorderColor: 'transparent',
         fill: true,
-        tension: 0.3
+        tension: 0.35
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      aspectRatio: 2.2,
+      responsive: true, maintainAspectRatio: true, aspectRatio: 2.3,
       plugins: {
         legend: { display: false },
         tooltip: {
           callbacks: {
             label: ctx => {
               const v = ctx.raw;
-              const pct = ((v - INITIAL) / INITIAL * 100).toFixed(2);
-              return `${v.toLocaleString()}원 (${pct >= 0 ? '+' : ''}${pct}%)`;
+              const pct = ((v - initial) / initial * 100).toFixed(2);
+              return `${fmtFn(v)} (${pct >= 0 ? '+' : ''}${pct}%)`;
             }
           },
-          backgroundColor: '#1a1a2e',
-          titleColor: '#90cdf4',
-          bodyColor: '#e2e8f0',
-          borderColor: '#2d3748',
-          borderWidth: 1,
-          padding: 10
+          backgroundColor: '#18181c', titleColor: accentColor, bodyColor: '#e8e8ea',
+          borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, padding: 10, displayColors: false
         }
       },
       scales: {
-        x: {
-          ticks: { color: '#718096', font: { size: 10 }, maxRotation: 0, maxTicksLimit: 7 },
-          grid: { color: 'rgba(45,55,72,0.5)' }
-        },
-        y: {
-          ticks: {
-            color: '#718096',
-            font: { size: 10 },
-            callback: v => (v / 10000).toFixed(0) + '만'
-          },
-          grid: { color: 'rgba(45,55,72,0.5)' }
-        }
+        x: { ticks: { color: '#55555c', font: { size: 10 }, maxRotation: 0, maxTicksLimit: 6 }, grid: { display: false } },
+        y: { ticks: { color: '#55555c', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
       }
     }
   });
 }
 
-function render(d) {
+function renderTrades(trades, currencySymbol, fmtFull) {
+  const recent = [...trades].reverse().slice(0, 10);
+  if (!recent.length) return '<div class="no-trades">거래 내역 없음</div>';
+  return `<div class="trades-list">` + recent.map(t => {
+    if (t.action === 'buy') {
+      return `<div class="trade-item">
+        <div class="trade-dot dot-buy"></div>
+        <div class="trade-info">
+          <div class="trade-name">${t.stock || t.symbol}</div>
+          <div class="trade-detail">${t.date} · ${t.qty}주</div>
+        </div>
+        <div class="trade-pnl"><div class="pnl-pct dim">매수</div><div class="pnl-amt">${fmtFull(t.amount != null ? t.amount : t.qty * t.price)}</div></div>
+      </div>`;
+    }
+    const win = (t.pnl_pct != null ? t.pnl_pct : 0) >= 0;
+    const pnlPctStr = t.pnl_pct != null ? `${sign(t.pnl_pct)}${t.pnl_pct.toFixed(2)}%` : '매도';
+    return `<div class="trade-item">
+      <div class="trade-dot ${t.pnl_pct != null ? (win ? 'dot-win' : 'dot-loss') : 'dot-buy'}"></div>
+      <div class="trade-info">
+        <div class="trade-name">${t.stock || t.symbol}</div>
+        <div class="trade-detail">${t.date} · ${t.qty}주${t.reason ? ' · ' + t.reason : ''}</div>
+      </div>
+      <div class="trade-pnl">
+        <div class="pnl-pct ${t.pnl_pct != null ? cls(t.pnl_pct) : 'dim'}">${pnlPctStr}</div>
+        ${t.pnl_amt != null ? `<div class="pnl-amt ${cls(t.pnl_amt)}">${sign(t.pnl_amt)}${fmtFull(Math.abs(t.pnl_amt))}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+function renderKr(d) {
   const trades = d.trades || [];
   const sells = trades.filter(t => t.action === 'sell');
   const wins = sells.filter(t => t.pnl_pct >= 0);
+  const losses = sells.filter(t => t.pnl_pct < 0);
   const winRate = sells.length ? Math.round(wins.length / sells.length * 100) : 0;
   const totalPnl = sells.reduce((s, t) => s + (t.pnl_amt || 0), 0);
-  const currentBalance = d.current_balance || INITIAL;
-  const totalPnlPct = ((currentBalance - INITIAL) / INITIAL * 100).toFixed(2);
-  const avgWin = wins.length ? Math.round(wins.reduce((s,t)=>s+(t.pnl_pct||0),0)/wins.length*100)/100 : 0;
-  const losses = sells.filter(t => t.pnl_pct < 0);
-  const avgLoss = losses.length ? Math.round(losses.reduce((s,t)=>s+(t.pnl_pct||0),0)/losses.length*100)/100 : 0;
+  const initial = d.initial_balance || 500000;
+  const currentBalance = d.current_balance != null ? d.current_balance : initial;
+  const totalPnlPct = ((currentBalance - initial) / initial * 100).toFixed(2);
+  const avgWin = wins.length ? (wins.reduce((s,t)=>s+(t.pnl_pct||0),0)/wins.length).toFixed(2) : '0.00';
+  const avgLoss = losses.length ? (losses.reduce((s,t)=>s+(t.pnl_pct||0),0)/losses.length).toFixed(2) : '0.00';
 
-  // 포지션
   let posHTML = '';
   if (d.position) {
     const p = d.position;
     const pnl = ((p.current_price - p.avg_price) / p.avg_price * 100).toFixed(2);
-    posHTML = `
+    posHTML = `<div class="position-card">
       <div class="position-name">${p.name}</div>
-      <div class="position-row"><span class="key">보유수량</span><span>${p.qty}주</span></div>
-      <div class="position-row"><span class="key">평균단가</span><span>${fmtFull(p.avg_price)}</span></div>
-      <div class="position-row"><span class="key">현재가</span><span>${fmtFull(p.current_price)}</span></div>
-      <div class="position-row"><span class="key">평가손익</span><span class="${cls(pnl)}">${sign(pnl)}${pnl}%</span></div>
-      <div class="position-row"><span class="key">익절가</span><span class="green">${fmtFull(Math.round(p.avg_price * 1.04))}</span></div>
-      <div class="position-row"><span class="key">손절가</span><span class="red">${fmtFull(Math.round(p.avg_price * 0.98))}</span></div>
-    `;
+      <div class="position-row"><span class="key">보유수량</span><span class="val">${p.qty}주</span></div>
+      <div class="position-row"><span class="key">평균단가</span><span class="val">${fmtKrwFull(p.avg_price)}</span></div>
+      <div class="position-row"><span class="key">현재가</span><span class="val">${fmtKrwFull(p.current_price)}</span></div>
+      <div class="position-row"><span class="key">평가손익</span><span class="val ${cls(pnl)}">${sign(pnl)}${pnl}%</span></div>
+      <div class="position-row"><span class="key">익절가</span><span class="val up">${fmtKrwFull(Math.round(p.avg_price * 1.04))}</span></div>
+      <div class="position-row"><span class="key">손절가</span><span class="val down">${fmtKrwFull(Math.round(p.avg_price * 0.98))}</span></div>
+    </div>`;
   } else {
-    posHTML = '<div class="position-empty">현재 보유 포지션 없음</div>';
+    posHTML = '<div class="position-card"><div class="position-empty">보유 포지션 없음</div></div>';
   }
 
-  // 거래 내역 (최신순 10개)
-  const recent = [...trades].reverse().slice(0, 10);
-  let tradesHTML = recent.length ? recent.map(t => {
-    if (t.action === 'buy') {
-      return `<div class="trade-item">
-        <div class="trade-badge badge-buy">📥</div>
-        <div class="trade-info">
-          <div class="trade-name">${t.stock}</div>
-          <div class="trade-detail">${t.date} · ${t.qty}주 · ${fmtFull(t.price)}</div>
-        </div>
-        <div class="trade-pnl"><div class="pnl-pct blue">매수</div><div class="pnl-amt">${fmtFull(t.amount)}</div></div>
-      </div>`;
-    } else {
-      const win = t.pnl_pct >= 0;
-      return `<div class="trade-item">
-        <div class="trade-badge ${win ? 'badge-sell-win' : 'badge-sell-loss'}">${win ? '📤' : '📉'}</div>
-        <div class="trade-info">
-          <div class="trade-name">${t.stock}</div>
-          <div class="trade-detail">${t.date} · ${t.qty}주 · ${t.reason||''}</div>
-        </div>
-        <div class="trade-pnl">
-          <div class="pnl-pct ${cls(t.pnl_pct)}">${sign(t.pnl_pct)}${t.pnl_pct?.toFixed(2)}%</div>
-          <div class="pnl-amt ${cls(t.pnl_amt)}">${sign(t.pnl_amt)}${fmt(t.pnl_amt)}원</div>
-        </div>
-      </div>`;
-    }
-  }).join('') : '<div class="no-trades">거래 내역 없음<br><small>내일 장 시작부터 기록됩니다</small></div>';
-
-  document.getElementById('content').innerHTML = `
+  document.getElementById('panelKr').innerHTML = `
     <div class="balance-card">
       <div class="balance-label">현재 잔고</div>
-      <div class="balance-amount">${fmtFull(currentBalance)}</div>
+      <div class="balance-amount">${fmtKrwFull(currentBalance)}</div>
       <div class="balance-row">
-        <div class="balance-sub">
-          <div class="label">누적 손익</div>
-          <div class="value ${cls(totalPnl)}">${sign(totalPnl)}${fmt(totalPnl)}원</div>
-        </div>
-        <div class="balance-sub">
-          <div class="label">수익률</div>
-          <div class="value ${cls(totalPnlPct)}">${sign(totalPnlPct)}${totalPnlPct}%</div>
-        </div>
-        <div class="balance-sub">
-          <div class="label">시작금액</div>
-          <div class="value gray">${fmt(INITIAL)}원</div>
-        </div>
+        <div class="balance-sub"><div class="label">누적 손익</div><div class="value ${cls(totalPnl)}">${sign(totalPnl)}${fmtKrw(totalPnl)}</div></div>
+        <div class="balance-sub"><div class="label">수익률</div><div class="value ${cls(totalPnlPct)}">${sign(totalPnlPct)}${totalPnlPct}%</div></div>
+        <div class="balance-sub"><div class="label">시작금액</div><div class="value faint">${fmtKrw(initial)}</div></div>
       </div>
     </div>
-
-    <div class="section-title">잔고 추이</div>
-    <div class="chart-card">
-      <canvas id="balanceChart"></canvas>
-    </div>
-
+    <div class="chart-card"><canvas id="chartKr"></canvas></div>
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="label">승률</div>
-        <div class="value ${winRate >= 50 ? 'green' : 'red'}">${winRate}<span style="font-size:14px">%</span></div>
-        <div class="sub">${wins.length}승 ${losses.length}패 (총 ${sells.length}회)</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">총 거래</div>
-        <div class="value blue">${trades.length}<span style="font-size:14px">회</span></div>
-        <div class="sub">매수 ${trades.filter(t=>t.action==='buy').length} · 매도 ${sells.length}</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">평균 수익</div>
-        <div class="value green">+${avgWin}<span style="font-size:14px">%</span></div>
-        <div class="sub">익절 평균</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">평균 손실</div>
-        <div class="value red">${avgLoss}<span style="font-size:14px">%</span></div>
-        <div class="sub">손절 평균</div>
+      <div class="stat-card"><div class="label">승률</div><div class="value ${winRate >= 50 ? 'up' : 'down'}">${winRate}<span style="font-size:13px">%</span></div><div class="sub">${wins.length}승 ${losses.length}패</div></div>
+      <div class="stat-card"><div class="label">총 거래</div><div class="value dim">${trades.length}<span style="font-size:13px">회</span></div><div class="sub">매도 ${sells.length}회</div></div>
+      <div class="stat-card"><div class="label">평균 수익</div><div class="value up">+${avgWin}<span style="font-size:13px">%</span></div><div class="sub">익절 평균</div></div>
+      <div class="stat-card"><div class="label">평균 손실</div><div class="value down">${avgLoss}<span style="font-size:13px">%</span></div><div class="sub">손절 평균</div></div>
+    </div>
+    <div class="section-title">현재 포지션</div>
+    ${posHTML}
+    <div class="section-title">거래 내역</div>
+    ${renderTrades(trades, '원', fmtKrwFull)}
+  `;
+  chartKr = renderChart('chartKr', chartKr, d.balance_history || [], initial, '#5b8def', fmtKrwFull);
+  return d.last_updated;
+}
+
+function renderUs(d) {
+  const trades = d.trade_history || [];
+  const sells = trades.filter(t => t.action === 'sell');
+  const initial = d.initial_balance || 200;
+  const currentBalance = d.current_balance != null ? d.current_balance : initial;
+  const totalPnl = currentBalance - initial;
+  const totalPnlPct = (totalPnl / initial * 100).toFixed(2);
+  const positions = Object.entries(d.positions || {});
+
+  let posHTML = '';
+  if (positions.length) {
+    posHTML = positions.map(([symbol, p]) => `<div class="position-card">
+      <div class="position-name">${symbol}</div>
+      <div class="position-row"><span class="key">보유수량</span><span class="val">${p.qty}주</span></div>
+      <div class="position-row"><span class="key">매입가</span><span class="val">${fmtUsd(p.entry_price)}</span></div>
+      <div class="position-row"><span class="key">손절가</span><span class="val down">${fmtUsd(p.stop_price)}</span></div>
+      <div class="position-row"><span class="key">매수일</span><span class="val faint">${p.entry_date}</span></div>
+    </div>`).join('');
+  } else {
+    posHTML = '<div class="position-card"><div class="position-empty">보유 포지션 없음</div></div>';
+  }
+
+  document.getElementById('panelUs').innerHTML = `
+    <div class="balance-card" style="border-color: rgba(232,147,58,0.18);">
+      <div class="balance-label" style="color:#e8933a;">현재 잔고</div>
+      <div class="balance-amount">${fmtUsd(currentBalance)}</div>
+      <div class="balance-row">
+        <div class="balance-sub"><div class="label">누적 손익</div><div class="value ${cls(totalPnl)}">${sign(totalPnl)}${fmtUsd(Math.abs(totalPnl))}</div></div>
+        <div class="balance-sub"><div class="label">수익률</div><div class="value ${cls(totalPnlPct)}">${sign(totalPnlPct)}${totalPnlPct}%</div></div>
+        <div class="balance-sub"><div class="label">시작금액</div><div class="value faint">${fmtUsd(initial)}</div></div>
       </div>
     </div>
-
+    <div class="chart-card"><canvas id="chartUs"></canvas></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="label">보유종목</div><div class="value" style="color:#e8933a;">${positions.length}<span style="font-size:13px">/3</span></div><div class="sub">동시보유 한도</div></div>
+      <div class="stat-card"><div class="label">총 거래</div><div class="value dim">${trades.length}<span style="font-size:13px">회</span></div><div class="sub">매도 ${sells.length}회</div></div>
+    </div>
     <div class="section-title">현재 포지션</div>
-    <div class="position-card">${posHTML}</div>
-
+    ${posHTML}
     <div class="section-title">거래 내역</div>
-    <div class="trades-list">${tradesHTML}</div>
-
-    <button class="refresh-btn" onclick="loadData()">🔄 새로고침</button>
+    ${renderTrades(trades, '$', fmtUsd)}
   `;
-
-  renderChart(d.balance_history || []);
-
-  const ts = d.last_updated ? new Date(d.last_updated).toLocaleString('ko-KR') : '-';
-  document.getElementById('lastUpdated').textContent = '마지막 업데이트: ' + ts;
+  chartUs = renderChart('chartUs', chartUs, d.balance_history || [], initial, '#e8933a', fmtUsd);
+  return null;
 }
 
 async function loadData() {
+  let krTs = null;
   try {
-    const r = await fetch(DATA_URL + '?t=' + Date.now());
-    const d = await r.json();
-    render(d);
+    const rKr = await fetch(KR_URL + '?t=' + Date.now());
+    const dKr = await rKr.json();
+    krTs = renderKr(dKr);
   } catch(e) {
-    document.getElementById('content').innerHTML = `<div class="loading">⚠️ 데이터 불러오기 실패<br><small>${e.message}</small></div>`;
+    document.getElementById('panelKr').innerHTML = `<div class="loading">불러오기 실패<br><small class="faint">${e.message}</small></div>`;
   }
+  try {
+    const rUs = await fetch(US_URL + '?t=' + Date.now());
+    const dUs = await rUs.json();
+    renderUs(dUs);
+  } catch(e) {
+    document.getElementById('panelUs').innerHTML = `<div class="loading">아직 데이터 없음<br><small class="faint">첫 스캔 후 표시됩니다</small></div>`;
+  }
+  document.getElementById('lastUpdated').textContent = krTs ? new Date(krTs).toLocaleString('ko-KR') : '-';
 }
 
 loadData();
-setInterval(loadData, 5 * 60 * 1000); // 5분마다 자동 갱신
+setInterval(loadData, 5 * 60 * 1000);
 </script>
 </body>
 </html>
