@@ -304,5 +304,28 @@
         "market_cap": 4284.0
       }
     ]
+  },
+  {
+    "time": "13:48:53",
+    "candidates": [
+      {
+        "code": "003280",
+        "name": "003280",
+        "price": 1811.0,
+        "open": 1731.0,
+        "gap_from_open_pct": 4.62,
+        "approx_execution_strength": 54.4,
+        "market_cap": 4354.0
+      },
+      {
+        "code": "079650",
+        "name": "079650",
+        "price": 5680.0,
+        "open": 5160.0,
+        "gap_from_open_pct": 10.08,
+        "approx_execution_strength": 340.5,
+        "market_cap": 1136.0
+      }
+    ]
   }
 ]
