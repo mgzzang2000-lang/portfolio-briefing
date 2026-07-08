@@ -19,5 +19,26 @@
         "market_cap": 1114.0
       }
     ]
+  },
+  {
+    "time": "09:23:45",
+    "candidates": [
+      {
+        "code": "109610",
+        "name": "109610",
+        "price": 2625.0,
+        "in_squeeze": false,
+        "is_new_high": true,
+        "market_cap": 1284.0
+      },
+      {
+        "code": "079650",
+        "name": "079650",
+        "price": 5390.0,
+        "in_squeeze": true,
+        "is_new_high": false,
+        "market_cap": 1078.0
+      }
+    ]
   }
 ]
