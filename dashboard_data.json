@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 490036,
+  "current_balance": 190939,
   "trades": [
     {
       "action": "buy",
@@ -61,10 +61,30 @@
       "pnl_pct": 4.89,
       "pnl_amt": 3780,
       "reason": "익절 (+4.89%)"
+    },
+    {
+      "action": "buy",
+      "date": "07/09 14:19",
+      "code": "001210",
+      "stock": "001210",
+      "qty": 199,
+      "price": 1503,
+      "amount": 299097
     }
   ],
-  "position": null,
-  "last_updated": "2026-07-09T10:58:21.121414+09:00",
+  "position": {
+    "code": "001210",
+    "name": "001210",
+    "qty": 199,
+    "market": "J",
+    "avg_price": 1503,
+    "current_price": 1503,
+    "stop_price": 1487,
+    "target_price": 1579,
+    "entry_time": "2026-07-09T14:19:51.590753+09:00",
+    "trailing_activated": false
+  },
+  "last_updated": "2026-07-09T14:19:51.590977+09:00",
   "daily_loss_guard": {
     "date": "07/09",
     "consecutive_losses": 0,
@@ -81,7 +101,7 @@
     },
     {
       "date": "07/09",
-      "balance": 490036
+      "balance": 190939
     }
   ]
 }
