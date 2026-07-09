@@ -1,6 +1,6 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 691.32,
+  "current_balance": 1974.98,
   "positions": {
     "FTNT": {
       "stop_price": 145.33,
@@ -10,7 +10,10 @@
       "entry_price": 162.29,
       "entry_date": "20260709",
       "qty": 3,
-      "sector": "Information Technology"
+      "sector": "Information Technology",
+      "current_price": 162.175,
+      "pnl_pct": 0.43,
+      "price_updated_at": "23:45"
     },
     "HUM": {
       "stop_price": 362.46,
@@ -20,7 +23,10 @@
       "entry_price": 404.75,
       "entry_date": "20260709",
       "qty": 1,
-      "sector": "Health Care"
+      "sector": "Health Care",
+      "current_price": 401.51,
+      "pnl_pct": -0.31,
+      "price_updated_at": "23:45"
     },
     "UAL": {
       "stop_price": 117.03,
@@ -30,7 +36,10 @@
       "entry_price": 130.68,
       "entry_date": "20260709",
       "qty": 3,
-      "sector": "Industrials"
+      "sector": "Industrials",
+      "current_price": 129.935,
+      "pnl_pct": 0.06,
+      "price_updated_at": "23:45"
     }
   },
   "trade_history": [
@@ -62,7 +71,7 @@
   "balance_history": [
     {
       "date": "07/09",
-      "balance": 691.32
+      "balance": 1974.98
     }
   ]
 }
