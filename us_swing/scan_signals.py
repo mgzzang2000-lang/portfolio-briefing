@@ -42,6 +42,13 @@ EXCD_CACHE_FILE = os.path.join(DATA_DIR, "excd_cache.json")
 LOOKBACK_WEEKS = 12  # 상대강도 계산에 쓸 기간
 MA_PERIOD = 30        # Stage2 판정용 이평선(주)
 
+# [2026-07-09] 신뢰도 강화 4종 세트 — 사용자 확정
+RS_TOP_PERCENTILE = 0.30    # 통과 섹터 내에서도 상대강도 상위 30%만 최종 후보 인정
+ANOMALY_RS_ABS_THRESHOLD = 1.0  # 12주 상대강도가 ±100%p 넘으면 데이터 이상치로 간주해 제외
+                                 # (BNY +1372% 이상치 발견 계기 — 분할 미반영 등 데이터 오류 추정,
+                                 #  이 값을 그대로 두면 섹터 평균까지 왜곡되므로 sector_rs 계산 전에 걸러냄)
+MIN_AVG_WEEKLY_VOLUME = 1_000_000  # 최근 12주 평균 거래량(주) — 일평균 20만주 미만급 저유동성 종목 제외
+
 
 def load_json(path, default):
     try:
@@ -98,11 +105,17 @@ def main():
         ohlcv_by_symbol[symbol] = (ohlcv, excd)
         closes = ohlcv["closes"]
         rs = rel_strength(closes, spy_closes)
+        if rs is not None and abs(rs) > ANOMALY_RS_ABS_THRESHOLD:
+            print(f"  [이상치 제외] {symbol}: 12주 상대강도 {rs:+.1%} — 데이터 오류로 추정, 후보/섹터평균 계산에서 제외")
+            rs = None
         stage2 = is_stage2(closes)
         atr = calc_atr(ohlcv["highs"], ohlcv["lows"], closes)
+        vols = ohlcv["volumes"][:LOOKBACK_WEEKS]
+        avg_volume = sum(vols) / len(vols) if vols else 0
         results.append({
             "symbol": symbol, "sector": sector, "price": closes[0],
             "rel_strength_12w": rs, "stage2": stage2, "atr": atr,
+            "avg_volume": avg_volume,
         })
         if (i + 1) % 50 == 0:
             print(f"  진행: {i+1}/{len(universe)}")
@@ -145,10 +158,29 @@ def main():
     top_sectors = set(ranked_sectors[:max(1, len(ranked_sectors) // 2)])
     print(f"섹터 순위(상위 절반만 후보 인정): {[(s, round(sector_rs[s]*100, 1)) for s in ranked_sectors]}")
 
-    # ── 최종 후보: 상위 섹터 + 상대강도 양수 + Stage2 ──
+    # ── RS 상위 30% 문턱 산출 ──
+    # 통과 섹터 안에서도 "SPY보다 조금이라도 나으면 통과"(rs>0)는 너무 헐거워서
+    # (거의 절반이 통과) 그 안에서도 상대강도 상위 30%만 최종 후보로 인정.
+    sector_pool_rs = sorted(
+        (r["rel_strength_12w"] for r in results
+         if r["sector"] in top_sectors and r["rel_strength_12w"] is not None),
+        reverse=True,
+    )
+    if sector_pool_rs:
+        cutoff_count = max(1, round(len(sector_pool_rs) * RS_TOP_PERCENTILE))
+        rs_threshold = sector_pool_rs[cutoff_count - 1]
+    else:
+        rs_threshold = 0
+    print(f"RS 상위 {RS_TOP_PERCENTILE:.0%} 문턱: {rs_threshold:+.1%} (통과섹터 내 {len(sector_pool_rs)}종목 중)")
+
+    # ── 최종 후보: 상위 섹터 + RS 상위 30% + Stage2 + 최소 유동성 ──
     candidates = [
         r for r in results
-        if r["sector"] in top_sectors and r["rel_strength_12w"] and r["rel_strength_12w"] > 0 and r["stage2"]
+        if r["sector"] in top_sectors
+        and r["rel_strength_12w"] is not None and r["rel_strength_12w"] > 0
+        and r["rel_strength_12w"] >= rs_threshold
+        and r["stage2"]
+        and r["avg_volume"] >= MIN_AVG_WEEKLY_VOLUME
     ]
     candidates.sort(key=lambda r: -r["rel_strength_12w"])
 

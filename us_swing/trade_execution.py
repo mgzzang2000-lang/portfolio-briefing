@@ -5,7 +5,7 @@
 scan_signals.py(22:00 KST)가 저장한 당일 후보/청산대상을 읽어서:
   1. 추세 이탈(30주선 하향 이탈) 표시된 보유종목 매도
   2. 빈 슬롯만큼 상대강도 상위 후보 매수 (최대 MAX_POSITIONS종목,
-     종목당 PER_POSITION_KRW 캡)
+     종목당 min(PER_POSITION_KRW, MAX_POSITION_USD) 캡)
 
 보유 현황은 항상 KIS 잔고조회(get_holdings)로 실시간 확인 — 로컬 파일에
 의존하지 않음(계좌가 진실의 원천). portfolio_state.json은 KIS가 모르는
@@ -26,6 +26,7 @@ from kis_common import (
     KST, get_kis_token, get_holdings, get_quote, place_order,
     get_usd_krw_rate, QUOTE_TO_TRADE_EXCD, record_balance, sync_live_balance,
 )
+from get_universe import get_universe
 
 ACCOUNT_NO = os.environ["KIS_ACCOUNT_NO"]
 ACCOUNT_PROD = "01"
@@ -35,8 +36,17 @@ STATE_FILE = os.path.join(DATA_DIR, "portfolio_state.json")
 
 MAX_POSITIONS = 3
 PER_POSITION_KRW = 1_000_000
-STOP_LOSS_FLOOR_PCT = 0.08  # 최소 -8% 보호(그보다 타이트한 ATR손절은 그대로 둠)
+MAX_POSITION_USD = 500  # [2026-07-09] 사용자 확정 — 종목당 매수금액 상한. 현재 환율 기준
+                         # PER_POSITION_KRW(100만원)보다 낮아서 이 값이 실질적 캡으로 작동.
+STOP_LOSS_FLOOR_PCT = 0.10  # [2026-07-09] 백테스트로 확인한 익절30%/손절10% 조합 채택
 ATR_MULT = 2.0
+TAKE_PROFIT_PCT = 0.30      # 최종 목표가(잔여 물량) — 분할익절 이후에도 적용
+PARTIAL_TP_PCT = 0.15       # 이 수익률 도달 시 보유량의 절반을 먼저 매도
+RATCHET_PCT = 0.0           # 분할익절 후 잔여물량 손절가를 본절(entry_price)로 올림
+# [2026-07-09] 백테스트 비교(익절30%/손절10% 단일 vs +15%분할50%+본절래칫 vs +5%래칫) 결과,
+# 분할익절+본절래칫 쪽이 승률(53.2% vs 41.5%)과 낙폭(22.3% vs 26.4%) 모두 더 나아서
+# "한 방 대박보다 꾸준함" 성향에 맞다고 사용자가 최종 확정. 총수익은 단일 30%/10%보다
+# 낮지만(누적 245% vs 408%, 5.3년 기준) 그 트레이드오프를 감수하기로 함.
 
 
 def load_json(path, default):
@@ -106,8 +116,14 @@ def main():
         return
 
     usd_krw = get_usd_krw_rate()
-    budget_usd = PER_POSITION_KRW / usd_krw
+    budget_usd = min(PER_POSITION_KRW / usd_krw, MAX_POSITION_USD)
     excd_cache = load_json(os.path.join(DATA_DIR, "excd_cache.json"), {})
+
+    # [2026-07-09] 섹터 쏠림 방지 — 최대 3종목만 보유하는데 상위 후보 3개가
+    # 같은 섹터에 몰려도 그대로 다 사던 문제. 섹터당 최대 1종목으로 제한해서
+    # 실제로 분산되게 함. 이미 보유 중인 종목의 섹터도 포함해서 계산.
+    symbol_to_sector = {u["symbol"]: u["sector"] for u in get_universe()}
+    held_sectors = {symbol_to_sector[s] for s in held_symbols if s in symbol_to_sector}
 
     bought = 0
     for c in scan_result.get("candidates", []):
@@ -115,6 +131,10 @@ def main():
             break
         symbol = c["symbol"]
         if symbol in held_symbols:
+            continue
+        sector = c.get("sector")
+        if sector in held_sectors:
+            print(f"  [건너뜀] {symbol}: 섹터 쏠림 방지 ({sector} 이미 보유 중)")
             continue
         quote_excd = excd_cache.get(symbol, "NAS")
         trade_excd = QUOTE_TO_TRADE_EXCD.get(quote_excd, "NASD")
@@ -143,17 +163,24 @@ def main():
         ok, resp = place_order(token, ACCOUNT_NO, ACCOUNT_PROD, trade_excd,
                                 symbol, qty, limit_price, "buy")
         if ok:
-            print(f"[매수] {symbol} {qty}주 @ {limit_price} (손절가 {stop_price:.2f})")
+            tp_price = round(limit_price * (1 + TAKE_PROFIT_PCT), 2)
+            partial_tp_price = round(limit_price * (1 + PARTIAL_TP_PCT), 2)
+            print(f"[매수] {symbol} {qty}주 @ {limit_price} "
+                  f"(손절가 {stop_price:.2f}, 분할익절가 {partial_tp_price}, 최종익절가 {tp_price})")
             log_trade(state, "buy", symbol, qty, limit_price,
                        f"RS12w={c.get('rel_strength_12w', 0):.1%}")
             record_balance(state, -qty * limit_price)
             state["positions"][symbol] = {
                 "stop_price": round(stop_price, 2),
+                "tp_price": tp_price,
+                "partial_tp_price": partial_tp_price,
+                "partial_taken": False,
                 "entry_price": limit_price,
                 "entry_date": today_str,
                 "qty": qty,
             }
             held_symbols.add(symbol)
+            held_sectors.add(sector)
             bought += 1
         else:
             print(f"[매수 실패] {symbol}: {resp.get('msg1', resp)}")
