@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 184920,
+  "current_balance": 489675,
   "trades": [
     {
       "action": "buy",
@@ -58,13 +58,13 @@
     "qty": 27,
     "market": "J",
     "avg_price": 10960,
-    "current_price": 10930,
-    "stop_price": 10854,
+    "current_price": 11310,
+    "stop_price": 11094.2,
     "target_price": 11460,
     "entry_time": "2026-07-09T10:21:56.404756+09:00",
-    "trailing_activated": false
+    "trailing_activated": true
   },
-  "last_updated": "2026-07-09T10:24:00.748720+09:00",
+  "last_updated": "2026-07-09T10:38:39.209497+09:00",
   "daily_loss_guard": {
     "date": "07/09",
     "consecutive_losses": 0,
@@ -81,7 +81,7 @@
     },
     {
       "date": "07/09",
-      "balance": 184920
+      "balance": 489675
     }
   ]
 }
