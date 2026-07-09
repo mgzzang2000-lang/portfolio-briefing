@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 190939,
+  "current_balance": 0,
   "trades": [
     {
       "action": "buy",
@@ -70,21 +70,21 @@
       "qty": 199,
       "price": 1503,
       "amount": 299097
+    },
+    {
+      "action": "sell",
+      "date": "07/09 14:32",
+      "stock": "금호전기",
+      "qty": 100,
+      "price": 1594,
+      "avg_price": 1521,
+      "pnl_pct": 4.8,
+      "pnl_amt": 7300,
+      "reason": "익절 (+4.80%)"
     }
   ],
-  "position": {
-    "code": "001210",
-    "name": "001210",
-    "qty": 199,
-    "market": "J",
-    "avg_price": 1503,
-    "current_price": 1503,
-    "stop_price": 1487,
-    "target_price": 1579,
-    "entry_time": "2026-07-09T14:19:51.590753+09:00",
-    "trailing_activated": false
-  },
-  "last_updated": "2026-07-09T14:19:51.590977+09:00",
+  "position": null,
+  "last_updated": "2026-07-09T14:32:44.035750+09:00",
   "daily_loss_guard": {
     "date": "07/09",
     "consecutive_losses": 0,
@@ -101,7 +101,7 @@
     },
     {
       "date": "07/09",
-      "balance": 190939
+      "balance": 0
     }
   ]
 }
