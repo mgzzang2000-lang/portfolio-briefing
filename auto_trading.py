@@ -853,6 +853,10 @@ def main():
             # 위험이 있어, 이번 사이클은 아무 것도 건드리지 않고 다음 사이클에 재시도한다.
             print("[경고] 잔고 조회 실패 — 이번 사이클 건너뜀")
             return
+        # [2026-07-09] 매매가 없는 사이클에도 매 사이클 실시간 잔고로 갱신 — 종전엔
+        # 매수/매도가 실제로 일어날 때만 대시보드 잔고가 바뀌어서, 사용자가 계좌에서
+        # 직접 입출금해도 다음 매매 전까진 대시보드에 반영이 안 됐음.
+        dash['current_balance'] = int(cash)
         # ① 보유 포지션 관리 ──────────────────────────────────
         # [2026-07-05] 계좌 보유종목 중 "봇이 직접 산 종목(dash['position']['code'])"만
         # 내 포지션으로 취급. 사용자가 계좌에 다른 종목을 들고 있어도 그건 건드리지 않는다.
@@ -874,14 +878,15 @@ def main():
         if guard.get('consecutive_losses', 0) >= DAILY_LOSS_LIMIT:
             if not guard.get('notified'):
                 guard['notified'] = True
-                save_dashboard(dash)
                 send_kakao(kakao_token,
                            f"🛑 오늘 연속 손절 {guard['consecutive_losses']}회 — 신규 진입을 중단합니다 (내일 재개)")
+            save_dashboard(dash)
             print(f"[일일 가드] 연속 손절 {guard['consecutive_losses']}회 — 신규 진입 중단")
             return
         print("포지션 없음 → [1단계] 일봉 신호 스캔")
         candidates = scan_signals(kis_token)
         if not candidates:
+            save_dashboard(dash)
             print("일봉 조건 충족 종목 없음")
             return
         # 상위 3 후보 → 1분봉 타이밍 확인
@@ -898,12 +903,14 @@ def main():
                 break
             print(f"  → 패스: {c['name']}")
         if not chosen:
+            save_dashboard(dash)
             print("1분봉 타이밍 조건 미충족 — 다음 스캔 대기")
             return
         # ③ 매수 ──────────────────────────────────────────────
         price = chosen['price']
         qty   = int(min(cash, MAX_BET) / price)
         if qty < 1:
+            save_dashboard(dash)
             print(f"매수 수량 부족 (가격:{price:,}원)")
             return
         ok, order_result = place_order(kis_token, chosen['code'], qty, "buy")
@@ -911,6 +918,7 @@ def main():
             err_msg = f"⚠️ 매수 주문 실패\n{chosen['name']} {qty}주\n{order_result.get('msg1', '')}"
             print(err_msg)
             send_kakao(kakao_token, err_msg)
+            save_dashboard(dash)
             return
         used = int(price * qty)
         log_buy(dash, chosen['code'], chosen['name'], qty, price,

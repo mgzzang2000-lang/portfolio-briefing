@@ -24,7 +24,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 
 from kis_common import (
     KST, get_kis_token, get_holdings, get_quote, place_order,
-    get_usd_krw_rate, QUOTE_TO_TRADE_EXCD, record_balance,
+    get_usd_krw_rate, QUOTE_TO_TRADE_EXCD, record_balance, sync_live_balance,
 )
 
 ACCOUNT_NO = os.environ["KIS_ACCOUNT_NO"]
@@ -72,6 +72,7 @@ def main():
         "initial_balance": 200, "current_balance": 200,
         "positions": {}, "trade_history": [], "balance_history": [],
     })
+    sync_live_balance(token, ACCOUNT_NO, ACCOUNT_PROD, state)
     holdings = get_holdings(token, ACCOUNT_NO, ACCOUNT_PROD)
     held_symbols = {h["symbol"] for h in holdings}
 

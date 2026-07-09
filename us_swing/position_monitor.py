@@ -17,7 +17,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 
 from kis_common import (
     KST, get_kis_token, get_holdings, place_order, QUOTE_TO_TRADE_EXCD,
-    record_balance,
+    record_balance, sync_live_balance,
 )
 
 ACCOUNT_NO = os.environ["KIS_ACCOUNT_NO"]
@@ -48,9 +48,14 @@ def main():
         "positions": {}, "trade_history": [], "balance_history": [],
     })
     excd_cache = load_json(EXCD_CACHE_FILE, {})
+    sync_live_balance(token, ACCOUNT_NO, ACCOUNT_PROD, state)
     holdings = get_holdings(token, ACCOUNT_NO, ACCOUNT_PROD)
 
     if not holdings:
+        # [2026-07-09] 잔고 갱신은 이미 위에서 끝났으니, 보유 포지션이 없어도
+        # 그 값이 저장되도록 여기서도 save — 종전엔 이 분기에서 그냥 return해서
+        # 매 사이클 잔고 새로고침이 무의미해지고 있었음.
+        save_json(STATE_FILE, state)
         print("보유 포지션 없음 — 확인할 것 없음")
         return
 

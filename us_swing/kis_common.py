@@ -175,10 +175,7 @@ def place_order(token, cano, acnt_prdt_cd, trade_excd, symbol, qty, limit_price,
     return data.get("rt_cd") == "0", data
 
 
-def record_balance(state, delta_usd):
-    """매수/매도로 변한 현금을 반영하고, 대시보드용 잔고 추이(일별)에 기록.
-    KR 봇의 save_dashboard() 잔고추이 로직과 동일한 패턴."""
-    state["current_balance"] = round(state.get("current_balance", 0) + delta_usd, 2)
+def _touch_balance_history(state):
     history = state.setdefault("balance_history", [])
     today = datetime.now(KST).strftime("%m/%d")
     entry = {"date": today, "balance": state["current_balance"]}
@@ -187,6 +184,41 @@ def record_balance(state, delta_usd):
     else:
         history.append(entry)
     state["balance_history"] = history[-60:]
+
+
+def record_balance(state, delta_usd):
+    """매수/매도로 변한 현금을 반영하고, 대시보드용 잔고 추이(일별)에 기록.
+    KR 봇의 save_dashboard() 잔고추이 로직과 동일한 패턴."""
+    state["current_balance"] = round(state.get("current_balance", 0) + delta_usd, 2)
+    _touch_balance_history(state)
+
+
+def sync_live_balance(token, cano, acnt_prdt_cd, state):
+    """[2026-07-09] 매매 여부와 상관없이 매 사이클 실제 계좌 총자산으로 잔고를
+    갱신. 종전엔 초기값(또는 직전 값)에 거래 손익만 누적하는 장부 계산이라,
+    사용자가 계좌에서 직접 입출금해도 대시보드엔 절대 반영되지 않았음
+    (KR 봇은 매매 시점에 실제 잔고를 다시 조회해 최소한 그때는 보정됐지만,
+    이쪽은 그마저도 없었음). 체결기준현재잔고(CTRP6504R) output3.tot_asst_amt
+    (총자산, 원화환산)를 그날 환율로 나눠 USD로 반영한다.
+    조회 실패(또는 0원 응답 — API 오류로 보고 신뢰하지 않음) 시 기존 값을
+    그대로 두고 아무 것도 하지 않는다."""
+    data = kis_get(token, "/uapi/overseas-stock/v1/trading/inquire-present-balance", {
+        "CANO": cano, "ACNT_PRDT_CD": acnt_prdt_cd,
+        "WCRC_FRCR_DVSN_CD": "02", "NATN_CD": "840",
+        "TR_MKET_CD": "00", "INQR_DVSN_CD": "00",
+    }, "CTRP6504R")
+    output3 = data.get("output3") or {}
+    try:
+        total_krw = float(output3.get("tot_asst_amt", 0) or 0)
+    except (TypeError, ValueError):
+        return
+    if total_krw <= 0:
+        return
+    usd_krw = get_usd_krw_rate()
+    if not usd_krw:
+        return
+    state["current_balance"] = round(total_krw / usd_krw, 2)
+    _touch_balance_history(state)
 
 
 def get_holdings(token, cano, acnt_prdt_cd):
