@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 489675,
+  "current_balance": 490036,
   "trades": [
     {
       "action": "buy",
@@ -50,21 +50,21 @@
       "qty": 27,
       "price": 10960,
       "amount": 295920
+    },
+    {
+      "action": "sell",
+      "date": "07/09 10:58",
+      "stock": "흥구석유",
+      "qty": 7,
+      "price": 11590,
+      "avg_price": 11050,
+      "pnl_pct": 4.89,
+      "pnl_amt": 3780,
+      "reason": "익절 (+4.89%)"
     }
   ],
-  "position": {
-    "code": "024060",
-    "name": "024060",
-    "qty": 27,
-    "market": "J",
-    "avg_price": 10960,
-    "current_price": 11310,
-    "stop_price": 11094.2,
-    "target_price": 11460,
-    "entry_time": "2026-07-09T10:21:56.404756+09:00",
-    "trailing_activated": true
-  },
-  "last_updated": "2026-07-09T10:38:39.209497+09:00",
+  "position": null,
+  "last_updated": "2026-07-09T10:58:21.121414+09:00",
   "daily_loss_guard": {
     "date": "07/09",
     "consecutive_losses": 0,
@@ -81,7 +81,7 @@
     },
     {
       "date": "07/09",
-      "balance": 489675
+      "balance": 490036
     }
   ]
 }
