@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 480840,
+  "current_balance": 184920,
   "trades": [
     {
       "action": "buy",
@@ -41,13 +41,33 @@
       "pnl_pct": -1.6,
       "pnl_amt": -4800,
       "reason": "손절 (-1.60%)"
+    },
+    {
+      "action": "buy",
+      "date": "07/09 10:21",
+      "code": "024060",
+      "stock": "024060",
+      "qty": 27,
+      "price": 10960,
+      "amount": 295920
     }
   ],
-  "position": null,
-  "last_updated": "2026-07-07T14:33:22.052020+09:00",
+  "position": {
+    "code": "024060",
+    "name": "024060",
+    "qty": 27,
+    "market": "J",
+    "avg_price": 10960,
+    "current_price": 10930,
+    "stop_price": 10854,
+    "target_price": 11460,
+    "entry_time": "2026-07-09T10:21:56.404756+09:00",
+    "trailing_activated": false
+  },
+  "last_updated": "2026-07-09T10:24:00.748720+09:00",
   "daily_loss_guard": {
-    "date": "07/07",
-    "consecutive_losses": 1,
+    "date": "07/09",
+    "consecutive_losses": 0,
     "notified": false
   },
   "balance_history": [
@@ -58,6 +78,10 @@
     {
       "date": "07/07",
       "balance": 480840
+    },
+    {
+      "date": "07/09",
+      "balance": 184920
     }
   ]
 }
