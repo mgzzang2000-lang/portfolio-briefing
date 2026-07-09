@@ -77,6 +77,13 @@ def main():
             label += f" / 분할익절가 {partial_tp_price}"
         print(f"  {symbol}: 현재 {current_price} vs 손절가 {stop_price}{label} ({h['pnl_pct']:+.2f}%)")
 
+        # [2026-07-09] 대시보드에 현재 수익률 표시용 — 매도 여부와 상관없이 매시간
+        # 사이클마다 갱신. 실시간 연동은 아니고 이 스크립트가 도는 시각(미장중 매시간)
+        # 기준 스냅샷임을 대시보드에서 구분할 수 있도록 갱신 시각도 같이 기록.
+        pos["current_price"] = current_price
+        pos["pnl_pct"] = round(h["pnl_pct"], 2)
+        pos["price_updated_at"] = datetime.now(KST).strftime("%H:%M")
+
         quote_excd = excd_cache.get(symbol, "NAS")
         trade_excd = QUOTE_TO_TRADE_EXCD.get(quote_excd, "NASD")
         limit_price = round(current_price * 0.995, 2)
