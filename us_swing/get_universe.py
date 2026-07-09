@@ -26,7 +26,10 @@ def _fetch_from_source():
     for row in reader:
         symbol = row.get("Symbol", "").strip()
         sector = row.get("GICS Sector", "").strip()
-        if symbol:
+        # [2026-07-09] sector가 빈 문자열인 행을 그대로 두면, 서로 무관한 두 종목이
+        # 둘 다 sector=""로 묶여 섹터당-1종목 캡(trade_execution.py)에서 서로를
+        # 같은 섹터로 오인해 부당하게 매수 차단당하는 문제가 생김 — 원천 제외.
+        if symbol and sector:
             universe.append({"symbol": symbol, "sector": sector})
     return universe
 

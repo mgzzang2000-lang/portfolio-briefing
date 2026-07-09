@@ -43,7 +43,10 @@ from get_universe import get_universe
 # 강화 4종(RS상위30%/이상치제외/거래량필터/섹터당1종목)을 백테스트도 그대로
 # 반영 — 그래야 여기서 나온 승률/손익 숫자가 실제 돌아가는 로직과 일치함.
 MAX_POSITIONS = 3
-STOP_LOSS_FLOOR_PCT = 0.08  # 그리드 서치 시 run_backtest(stop_loss_floor_pct=...)로 덮어씀
+STOP_LOSS_FLOOR_PCT = 0.10  # [코드리뷰 수정] trade_execution.py의 현재 값(0.10)과 동기화.
+                             # main()의 그리드서치는 항상 run_backtest(stop_loss_floor_pct=...)로
+                             # 명시 override하므로 그리드 결과엔 영향 없었지만, run_backtest()를
+                             # 파라미터 없이 직접 호출하면(REPL 등) 이 기본값이 조용히 쓰이므로 동기화.
 ATR_MULT = 2.0
 WARMUP_WEEKS = 40  # MA_PERIOD(30)+여유 — 신호 계산에 필요한 최소 과거 주수
 YEARS = "6y"
@@ -134,22 +137,26 @@ def run_backtest(universe, series_by_symbol, spy_series, take_profit_pct=None,
                 continue
             pos = positions[symbol]
 
-            # 분할 익절 트리거 — 이번 주에 처음 도달했으면 부분청산만 기록하고
-            # 나머지 청산조건(손절/익절/추세이탈) 판정은 다음 주부터 (같은 주 이중처리 방지)
-            if (partial_tp_pct and not pos.get("partial_taken")
+            # [코드리뷰 수정] 우선순위를 손절 > 최종익절 > 분할익절 > 추세이탈 순으로
+            # 정렬 — 원래는 분할익절 체크가 손절 체크보다 먼저 실행돼서, 같은 주에
+            # 저가가 손절가를 뚫고 고가가 분할익절가도 뚫은(변동성 큰) 주를 "손절"이
+            # 아니라 "부분익절 성공"으로 잘못 집계하고 있었음. position_monitor.py의
+            # 실거래 우선순위(손절 > 최종익절 > 분할익절)와 반드시 일치시켜야 함.
+            exit_price, reason = None, None
+            if low_t <= pos["stop_price"]:
+                exit_price, reason = pos["stop_price"], "hard_stop"
+            elif take_profit_pct and high_t >= pos["tp_price"]:
+                exit_price, reason = pos["tp_price"], "take_profit"
+            elif (partial_tp_pct and not pos.get("partial_taken")
                     and high_t >= pos["entry_price"] * (1 + partial_tp_pct)):
+                # 분할 익절 트리거 — 이번 주에 처음 도달했으면 부분청산만 기록하고
+                # 나머지 청산조건(손절/익절/추세이탈) 판정은 다음 주부터 (같은 주 이중처리 방지)
                 pos["partial_taken"] = True
                 pos["partial_fraction"] = partial_fraction
                 pos["partial_return"] = partial_tp_pct
                 if ratchet_pct is not None:
                     pos["stop_price"] = max(pos["stop_price"], pos["entry_price"] * (1 + ratchet_pct))
                 continue
-
-            exit_price, reason = None, None
-            if low_t <= pos["stop_price"]:
-                exit_price, reason = pos["stop_price"], "hard_stop"
-            elif take_profit_pct and high_t >= pos["tp_price"]:
-                exit_price, reason = pos["tp_price"], "take_profit"
             else:
                 closes_desc = window_desc(s, "close", t, need)
                 if closes_desc is not None:

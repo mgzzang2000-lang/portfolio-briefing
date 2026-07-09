@@ -19,6 +19,9 @@ from kis_common import (
     KST, get_kis_token, get_holdings, place_order, QUOTE_TO_TRADE_EXCD,
     record_balance, sync_live_balance,
 )
+# [코드리뷰 수정] RATCHET_PCT/PARTIAL_FRACTION을 이 파일에 따로 선언해두면 한쪽만
+# 바꾸고 잊어버릴 위험이 있다는 지적을 받아, trade_execution.py를 단일 소스로 삼아 import.
+from trade_execution import RATCHET_PCT, PARTIAL_FRACTION
 
 ACCOUNT_NO = os.environ["KIS_ACCOUNT_NO"]
 ACCOUNT_PROD = "01"
@@ -26,9 +29,6 @@ ACCOUNT_PROD = "01"
 DATA_DIR = os.path.dirname(__file__)
 STATE_FILE = os.path.join(DATA_DIR, "portfolio_state.json")
 EXCD_CACHE_FILE = os.path.join(DATA_DIR, "excd_cache.json")
-
-RATCHET_PCT = 0.0  # [2026-07-09] 분할익절 체결 후 잔여물량 손절가를 본절로 올림
-                    # (trade_execution.py의 같은 값과 반드시 일치시킬 것)
 
 
 def load_json(path, default):
@@ -85,13 +85,15 @@ def main():
         # 가격이 한 번에 최종익절가까지 뛰어넘은 경우엔 굳이 분할을 거칠 필요 없이
         # 바로 전량 최종익절로 처리 — 시간 단위 폴링이라 그 사이 갭업 가능.
         if current_price <= stop_price:
-            reason = f"손절 (기준 {stop_price})" + (" — 본절래칫 이후" if partial_taken else "")
+            # [코드리뷰 수정] "하드손절" 리터럴을 유지 — trade_history를 이 문자열로
+            # 필터링하는 향후 도구(대시보드 등)가 있을 수 있어 접두사를 안 바꿈
+            reason = f"하드손절 (기준 {stop_price})" + ("(래칫 이후)" if partial_taken else "")
             sell_qty = qty
         elif tp_price and current_price >= tp_price:
             reason = f"최종익절 (기준 {tp_price})"
             sell_qty = qty
         elif partial_tp_price and not partial_taken and current_price >= partial_tp_price:
-            sell_qty = qty // 2
+            sell_qty = int(qty * PARTIAL_FRACTION)
             if sell_qty < 1:
                 print(f"    분할익절가 도달했지만 보유수량({qty}주)이 적어 분할 불가 — 최종익절/손절까지 홀드")
                 continue
@@ -112,9 +114,17 @@ def main():
             if sell_qty == qty:
                 state["positions"].pop(symbol, None)
             else:
-                # 분할익절 — 포지션은 유지, 잔여물량 손절가를 본절로 래칫업
+                # 분할익절 — 포지션은 유지, 잔여물량 손절가를 본절로 래칫업.
+                # qty도 갱신(대시보드가 이 값을 그대로 표시하므로 안 하면 매도 후에도
+                # 예전 수량이 남아있는 것처럼 보임 — 실제 매매 판단은 여전히
+                # get_holdings()의 실시간 잔고를 기준으로 함, 이건 표시용 보정).
                 pos["partial_taken"] = True
                 pos["stop_price"] = round(max(stop_price, pos["entry_price"] * (1 + RATCHET_PCT)), 2)
+                pos["qty"] = qty - sell_qty
+            # [코드리뷰 수정] 분할매도는 (하드손절/최종익절과 달리) 브로커 잔고 재조회로
+            # 자연 복구되지 않는 로컬 상태(partial_taken, 래칫된 stop_price)를 남기므로,
+            # 사이클 도중 죽어도 유실 구간을 최소화하기 위해 매 건 처리 직후 바로 저장.
+            save_json(STATE_FILE, state)
         else:
             print(f"[매도 실패] {symbol}: {resp.get('msg1', resp)}")
         time.sleep(0.3)
