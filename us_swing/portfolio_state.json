@@ -1,12 +1,68 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 1974.98,
-  "positions": {},
-  "trade_history": [],
+  "current_balance": 691.32,
+  "positions": {
+    "FTNT": {
+      "stop_price": 145.33,
+      "tp_price": 210.98,
+      "partial_tp_price": 186.63,
+      "partial_taken": false,
+      "entry_price": 162.29,
+      "entry_date": "20260709",
+      "qty": 3,
+      "sector": "Information Technology"
+    },
+    "HUM": {
+      "stop_price": 362.46,
+      "tp_price": 526.18,
+      "partial_tp_price": 465.46,
+      "partial_taken": false,
+      "entry_price": 404.75,
+      "entry_date": "20260709",
+      "qty": 1,
+      "sector": "Health Care"
+    },
+    "UAL": {
+      "stop_price": 117.03,
+      "tp_price": 169.88,
+      "partial_tp_price": 150.28,
+      "partial_taken": false,
+      "entry_price": 130.68,
+      "entry_date": "20260709",
+      "qty": 3,
+      "sector": "Industrials"
+    }
+  },
+  "trade_history": [
+    {
+      "action": "buy",
+      "date": "2026-07-09 23:31",
+      "symbol": "FTNT",
+      "qty": 3,
+      "price": 162.29,
+      "reason": "RS12w=89.7%"
+    },
+    {
+      "action": "buy",
+      "date": "2026-07-09 23:31",
+      "symbol": "HUM",
+      "qty": 1,
+      "price": 404.75,
+      "reason": "RS12w=89.4%"
+    },
+    {
+      "action": "buy",
+      "date": "2026-07-09 23:31",
+      "symbol": "UAL",
+      "qty": 3,
+      "price": 130.68,
+      "reason": "RS12w=21.9%"
+    }
+  ],
   "balance_history": [
     {
       "date": "07/09",
-      "balance": 1974.98
+      "balance": 691.32
     }
   ]
 }
