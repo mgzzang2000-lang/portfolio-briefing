@@ -506,5 +506,34 @@
         "market_cap": 5578.0
       }
     ]
+  },
+  {
+    "time": "12:15:17",
+    "candidates": [
+      {
+        "code": "003280",
+        "name": "003280",
+        "price": 1777.0,
+        "in_squeeze": true,
+        "is_new_high": false,
+        "market_cap": 4272.0
+      },
+      {
+        "code": "024060",
+        "name": "024060",
+        "price": 12650.0,
+        "in_squeeze": false,
+        "is_new_high": true,
+        "market_cap": 1898.0
+      },
+      {
+        "code": "002990",
+        "name": "002990",
+        "price": 14840.0,
+        "in_squeeze": false,
+        "is_new_high": true,
+        "market_cap": 5529.0
+      }
+    ]
   }
 ]
