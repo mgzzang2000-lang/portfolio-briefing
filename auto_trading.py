@@ -95,6 +95,14 @@ def kis_get(token, path, params, tr_id, retries=3):
         try:
             r = requests.get(f"{BASE_URL}{path}", headers=headers, params=params, timeout=10)
             print(f"[API] {tr_id} status={r.status_code} len={len(r.text)}")
+            # [2026-07-09] 매도 직후 재조회에서 HTTP 500이 온 적이 있었는데, 종전엔
+            # status를 안 보고 그냥 파싱 시도해서 에러 바디를 "성공"으로 취급했음(잔고 0원 오발송의 원인).
+            if r.status_code != 200:
+                print(f"[경고] status={r.status_code} 응답: {tr_id} | body={r.text[:200]}")
+                if attempt < retries - 1:
+                    time.sleep(2)
+                    continue
+                return {}
             if not r.text.strip():
                 print(f"[경고] 빈 응답: {tr_id}")
                 return {}
@@ -432,8 +440,15 @@ def get_balance(token):
         "FNCG_AMT_AUTO_RDPT_YN": "N", "PRCS_DVSN": "00",
         "CTX_AREA_FK100": "", "CTX_AREA_NK100": ""
     }, "TTTC8434R")
+    # [2026-07-09] API 실패(빈 응답/에러 바디)로 output2가 아예 없는 경우, 종전엔
+    # summary={}로 폴백해서 cash=0.0을 "정상 잔고"처럼 반환했음 — 매도 직후 재조회가
+    # 실패했을 뿐인데 "잔고 0원"으로 대시보드/카톡에 그대로 찍히는 사고로 이어짐.
+    # output2 자체가 없으면 잔고를 신뢰할 수 없다는 뜻이므로 None을 반환해 호출부가
+    # "값을 모른다"와 "실제로 0원이다"를 구분하게 함.
+    if not data.get('output2'):
+        return data.get('output1', []), None
     holdings = data.get('output1', [])
-    summary  = data.get('output2', [{}])[0]
+    summary  = data['output2'][0]
     # [2026-07-07] dnca_tot_amt(예수금총금액)는 당일 손익 정산 전 "원금" 그대로라
     # 매매 손실이 나도 줄지 않는 값이었음(대시보드 잔액이 안 줄어드는 버그의 원인,
     # 동시에 매수수량 계산도 실제보다 부풀려진 잔액 기준으로 하고 있던 잠재 위험).
@@ -740,7 +755,12 @@ def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
                 return
             time.sleep(1)
             _, new_cash = get_balance(kis_token)
-            dash['current_balance'] = int(new_cash)
+            # [2026-07-09] 매도 자체는 이미 성공했으니 잔고 재조회 실패해도 되돌리지 않음.
+            # 다만 실패 시(None) 0원으로 덮어쓰지 말고 이전 값을 그대로 유지.
+            if new_cash is not None:
+                dash['current_balance'] = int(new_cash)
+            else:
+                print("  [경고] 부분익절 후 잔고 재조회 실패 — 이전 잔고 유지")
             print(f"  [+2%] 50% 부분익절 ({half_qty}주) → 나머지 손절선: {stop_price:,.0f}")
             save_dashboard(dash)
             return
@@ -766,7 +786,10 @@ def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
                     time.sleep(1)
                     _, new_cash = get_balance(kis_token)
                     pos['stop_price'] = avg_price * 1.004
-                    dash['current_balance'] = int(new_cash)
+                    if new_cash is not None:
+                        dash['current_balance'] = int(new_cash)
+                    else:
+                        print("  [경고] 2시간 부분청산 후 잔고 재조회 실패 — 이전 잔고 유지")
                     print(f"  [2시간] 50% 부분청산 ({sell_qty}주) → 나머지 손절: {pos['stop_price']:,.0f}")
                     save_dashboard(dash)
                     return
@@ -790,14 +813,21 @@ def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
         time.sleep(1)
         _, new_cash = get_balance(kis_token)
         pnl_amt = int((cur_price - avg_price) * qty)
+        # [2026-07-09] 매도 직후 잔고 재조회가 실패(None)하면 0원으로 기록/발송하지 않고
+        # 직전까지 알던 잔고를 그대로 유지 — 매도 자체(place_order)는 이미 성공했으므로
+        # 여기서 실패해도 매도를 되돌리거나 재시도하지 않는다.
+        balance_known = new_cash is not None
+        balance_for_dash = new_cash if balance_known else dash.get('current_balance', 0)
         log_sell(dash, name, qty, avg_price, cur_price,
-                 pnl, pnl_amt, reason, new_cash)
+                 pnl, pnl_amt, reason, balance_for_dash)
         guard['consecutive_losses'] = guard.get('consecutive_losses', 0) + 1 if pnl < 0 else 0
         save_dashboard(dash)
+        balance_line = (f"💰 잔고: {balance_for_dash:,.0f}원" if balance_known
+                         else "💰 잔고: 확인 실패 (이전 값 유지, 다음 사이클에 갱신)")
         msg = (f"📤 매도\n{name} {qty}주\n"
                f"사유: {reason}\n"
                f"손익: {pnl:+.2f}% ({pnl_amt:+,}원)\n"
-               f"💰 잔고: {new_cash:,.0f}원")
+               f"{balance_line}")
         send_kakao(kakao_token, msg)
     else:
         save_dashboard(dash)
@@ -817,6 +847,12 @@ def main():
     guard = check_daily_guard(dash, now)
     try:
         holdings, cash = get_balance(kis_token)
+        if cash is None:
+            # [2026-07-09] 잔고 조회 실패 시 holdings도 신뢰 불가([]로 비어있을 수 있음).
+            # 그대로 진행하면 실제 보유 포지션을 "계좌에 없음"으로 오판해 상태를 지워버릴
+            # 위험이 있어, 이번 사이클은 아무 것도 건드리지 않고 다음 사이클에 재시도한다.
+            print("[경고] 잔고 조회 실패 — 이번 사이클 건너뜀")
+            return
         # ① 보유 포지션 관리 ──────────────────────────────────
         # [2026-07-05] 계좌 보유종목 중 "봇이 직접 산 종목(dash['position']['code'])"만
         # 내 포지션으로 취급. 사용자가 계좌에 다른 종목을 들고 있어도 그건 건드리지 않는다.
