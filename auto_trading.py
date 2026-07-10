@@ -203,6 +203,48 @@ def log_buy(dash, code, name, qty, price, cash_after, stop_price, target_price, 
         'trailing_activated': False,  # 트레일링 스탑 활성화 여부
     }
     dash['current_balance'] = int(cash_after)
+def recover_missing_sells(token, dash, dash_position):
+    """대시보드엔 포지션이 남아있는데 실계좌엔 없을 때, 조용히 지우기 전에
+    오늘 체결내역(TTTC8001R)에서 이 종목의 매도 기록을 찾아 log_sell()로 남긴다.
+    [2026-07-10] 로컬 watcher가 실제로 판 뒤 git 동기화 실패로 매도 로그가
+    원격에 못 올라가고, 뒤이어 GitHub Actions가 포지션 불일치를 감지해 기록 없이
+    상태만 초기화해버리는 사고(흥아해운 건)가 발생해 추가."""
+    code = dash_position['code']
+    avg_price = dash_position['avg_price']
+    today = datetime.now(KST).strftime('%Y%m%d')
+    data = kis_get(token, "/uapi/domestic-stock/v1/trading/inquire-daily-ccld", {
+        "CANO": ACCOUNT_NO, "ACNT_PRDT_CD": ACCOUNT_PROD,
+        "INQR_STRT_DT": today, "INQR_END_DT": today,
+        "SLL_BUY_DVSN_CD": "01", "PDNO": code, "CCLD_DVSN": "01",
+        "ORD_GNO_BRNO": "", "ODNO": "", "INQR_DVSN": "00",
+        "INQR_DVSN_1": "", "INQR_DVSN_3": "00", "EXCG_ID_DVSN_CD": "KRX",
+        "CTX_AREA_FK100": "", "CTX_AREA_NK100": ""
+    }, "TTTC8001R")
+    sells = data.get('output1', [])
+    if not sells:
+        return False
+    logged_times = {t['date'] for t in dash['trades'] if t.get('action') == 'sell'}
+    recovered = False
+    for s in sorted(sells, key=lambda x: x['ord_tmd']):
+        qty = int(s.get('tot_ccld_qty', 0))
+        if qty <= 0:
+            continue
+        price = float(s['avg_prvs'])
+        t = datetime.strptime(s['ord_tmd'], '%H%M%S')
+        date_str = datetime.now(KST).strftime('%m/%d ') + t.strftime('%H:%M')
+        if date_str in logged_times:
+            continue
+        pnl_pct = (price - avg_price) / avg_price * 100
+        pnl_amt = int((price - avg_price) * qty)
+        dash['trades'].append({
+            'action': 'sell', 'date': date_str,
+            'stock': dash_position.get('name', code),
+            'qty': qty, 'price': int(price), 'avg_price': int(avg_price),
+            'pnl_pct': round(pnl_pct, 2), 'pnl_amt': pnl_amt,
+            'reason': f"{'익절' if pnl_pct >= 0 else '손절'} (복구, {pnl_pct:+.2f}%)"
+        })
+        recovered = True
+    return recovered
 def log_sell(dash, name, qty, avg_price, sell_price, pnl_pct, pnl_amt, reason, new_cash):
     dash['trades'].append({
         'action': 'sell',
@@ -865,8 +907,17 @@ def main():
         matched = [h for h in holdings
                    if bot_code and h.get('pdno') == bot_code and int(h.get('hldg_qty', 0)) > 0]
         if not matched and dash_position:
-            # 대시보드엔 포지션이 남아있는데 실제 계좌엔 없음(수동 매도 등) — 상태만 정리
-            print(f"[경고] 대시보드 포지션({bot_code})이 실제 계좌에 없음 — 상태 초기화")
+            # 대시보드엔 포지션이 남아있는데 실제 계좌엔 없음(수동 매도, 또는 다른
+            # 프로세스가 이미 팔았는데 git 동기화만 실패한 경우) — 지우기 전에
+            # 오늘 체결내역에서 매도 기록을 복구 시도
+            print(f"[경고] 대시보드 포지션({bot_code})이 실제 계좌에 없음 — 매도 체결내역 복구 시도")
+            recovered = recover_missing_sells(kis_token, dash, dash_position)
+            if recovered:
+                print("  → 체결내역에서 매도 기록 복구 완료")
+            else:
+                print("  → 체결내역 복구 실패, 기록 없이 상태만 초기화")
+                send_kakao(kakao_token,
+                            f"⚠️ {dash_position.get('name', bot_code)} 매도 기록 유실 — 체결내역 직접 확인 필요")
             dash['position'] = None
             save_dashboard(dash)
             return
