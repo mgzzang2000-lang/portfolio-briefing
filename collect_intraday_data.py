@@ -14,7 +14,7 @@
 2. [2026-07-10 추가] 매 사이클마다 아래 두 그룹도 워치리스트에 합침(중복 제거,
    한 번 들어오면 그날 계속 수집 — 나중에 여러 조건식을 실제 시세로 재생/비교
    하려면 "그 종목의 그 순간 진짜 가격"이 반드시 있어야 하기 때문):
-   ① 섀도우A/B(대안 조건식) 스캔이 그 사이클에 포착한 후보 — shadow_scan.py가
+   ① 섀도우A/B/C(대안 조건식) 스캔이 그 사이클에 포착한 후보 — shadow_scan.py가
       따로 돌 때는 후보 "기록"만 하고 1분봉은 안 쌓아서, 나중에 그 종목의 실제
       가격 흐름을 재생할 수 없는 공백이 있었음(2026-07-10 사용자가 백테스트
       돌려보다가 발견). 이제 이 스크립트 안에서 섀도우 스캔까지 실행해서 공백 해소.
@@ -297,7 +297,7 @@ def main():
         watchlist = build_watchlist(token)
         print(f"[라이브 필터] {len(watchlist)}종목: {[w['name'] for w in watchlist]}")
 
-    # ── [2026-07-10] 섀도우A/B 스캔을 여기서 함께 실행 — 후보 종목을
+    # ── [2026-07-10] 섀도우A/B/C 스캔을 여기서 함께 실행 — 후보 종목을
     # 워치리스트에 합쳐서 1분봉을 같이 쌓고, 기존과 동일하게 shadow_data/에도 기록 ──
     stocks, kospi_set = shadow_scan.get_universe(token)
     a_candidates = shadow_scan.scan_shadow_a(token, stocks, kospi_set)
@@ -306,8 +306,12 @@ def main():
     b_candidates = shadow_scan.scan_shadow_b(token, stocks, kospi_set)
     shadow_scan.append_snapshot(f"shadow_data/B_{today_str}.json", b_candidates)
     print(f"[섀도우B] 후보 {len(b_candidates)}종목: {[c['name'] for c in b_candidates]}")
+    c_candidates = shadow_scan.scan_shadow_c(token, stocks, kospi_set)
+    shadow_scan.append_snapshot(f"shadow_data/C_{today_str}.json", c_candidates)
+    print(f"[섀도우C] 후보 {len(c_candidates)}종목: {[c['name'] for c in c_candidates]}")
 
-    shadow_codes = {c['code'] for c in a_candidates} | {c['code'] for c in b_candidates}
+    shadow_codes = ({c['code'] for c in a_candidates} | {c['code'] for c in b_candidates}
+                     | {c['code'] for c in c_candidates})
     live_trade_codes = get_live_trade_codes_today(today_str)
     watchlist = merge_into_watchlist(watchlist, shadow_codes | live_trade_codes, token)
     save_json(watchlist_path, watchlist)

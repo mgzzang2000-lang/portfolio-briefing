@@ -20,15 +20,23 @@
    대신 inquire-ccnl 틱을 상승틱/하락틱으로 분류해 근사치를 계산해 참고용으로만
    기록하고, 필터링 기준으로는 쓰지 않음(근사치라 오탐 위험이 있어서).
 
-두 섀도우 모두 시가총액 700억원 이상 필터를 공통 적용(기존 실거래 봇엔 없던
-조건 — 소형주 슬리피지 문제 방지 목적으로 두 검색식에 공통으로 있던 조건).
+[섀도우 C] FVG(Fair Value Gap) + 유동성 스윕 결합 — "쉽알남" 스마트머니 트레이딩
+   노트 참고(2026-07-10). 오더블럭/추세선/채널은 노트 스스로도 "경험적/주관적
+   판단이 필요하다"고 인정하는 기준이라 자동화 코드로 명확히 정의하기 어려워
+   보류하고, 3개 캔들 구조로 숫자 기준이 딱 떨어지는 FVG만 우선 구현. 눌림목
+   (A/B)과 달리 일봉이 아니라 1분봉을 직접 조회해서 판정(`find_fvg_with_sweep`).
+
+셋 다 시가총액 700억원 이상 필터를 공통 적용(기존 실거래 봇엔 없던
+조건 — 소형주 슬리피지 문제 방지 목적으로 검색식들에 공통으로 있던 조건).
 
 실행: auto-trading.yml의 5분 사이클에 얹혀서 돈다(GH 자체 schedule 트리거가
 그날 아예 발화 안 하는 사고를 이미 한 번 겪었기 때문 — collect_intraday_data.py와
-동일한 이유). shadow_data/A_YYYYMMDD.json, shadow_data/B_YYYYMMDD.json 에
-사이클별 스냅샷을 누적 저장.
+동일한 이유). shadow_data/A_YYYYMMDD.json, B_YYYYMMDD.json, C_YYYYMMDD.json에
+사이클별 스냅샷을 누적 저장. [2026-07-10] collect_intraday_data.py가 이 스캔들을
+직접 호출하도록 통합되면서, 후보로 잡힌 종목의 1분봉도 같이 수집되기 시작함
+(이전엔 후보만 기록되고 그 종목의 실제 가격 흐름은 안 쌓이는 공백이 있었음).
 
-[2026-07-07] 신설.
+[2026-07-07] 신설(섀도우A/B). [2026-07-10] 섀도우C(FVG) 추가.
 """
 import os, json, time
 from datetime import datetime, timezone, timedelta
@@ -343,6 +351,105 @@ def scan_shadow_b(token, stocks, kospi_set):
     return candidates
 
 
+# ── 섀도우 C: FVG(Fair Value Gap) + 유동성 스윕 결합 ──────────────────────
+# [2026-07-10 신설] 쉽알남(스마트머니 트레이딩 노트) 참고. 오더블럭/추세선/채널은
+# "캔들 몸통이 적당히 커야 한다"/"스윙포인트를 어디로 잡을지" 등 노트 스스로도
+# 인정하는 주관적 판단이 많이 필요해서 자동화 코드로 명확히 정의하기 어려움.
+# FVG는 3개 캔들 구조로 숫자 기준이 딱 떨어져서 셋 중 가장 코드화하기 좋음.
+# 여기에 노트에서 공통으로 "신뢰도 상승 조건"으로 언급된 유동성 스윕(직전 저점을
+# 살짝 하회했다가 회복)을 결합 — 눌림목(A/B)과 달리 1분봉 패턴이라 일봉이 아닌
+# 실시간 1분봉을 직접 조회해서 판정.
+def get_minute_bars_raw(token, code, market="J"):
+    """현재 시각 기준 최근 1분봉(최대 30개, 최신이 index 0) 원본 반환."""
+    data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice", {
+        "FID_ETC_CLS_CODE": "",
+        "FID_COND_MRKT_DIV_CODE": market,
+        "FID_INPUT_ISCD": code,
+        "FID_INPUT_HOUR_1": datetime.now(KST).strftime('%H%M%S'),
+        "FID_PW_DATA_INCU_YN": "Y",
+    }, "FHKST03010200")
+    return data.get('output2', [])
+
+
+def find_fvg_with_sweep(bars_asc, lookback=20):
+    """bars_asc: 오래된→최신 순 1분봉. 상승형 FVG(2번 캔들이 몸통 큰 양봉, 1번
+    고가<3번 저가 갭)이면서, 그 직전에 유동성 스윕(직전 저점을 살짝 하회 후 회복)이
+    있었던 경우만 후보로 인정. 조건 충족 시 dict, 아니면 None."""
+    if len(bars_asc) < lookback:
+        return None
+    recent = bars_asc[-lookback:]
+
+    def v(b, k):
+        return float(b[k])
+
+    # 최근 몇 개 캔들 구간에서 3봉 조합(c1,c2,c3)을 뒤에서부터 탐색
+    for i in range(len(recent) - 3, max(0, len(recent) - 8), -1):
+        c1, c2, c3 = recent[i], recent[i + 1], recent[i + 2]
+        c1_high, c3_low = v(c1, 'stck_hgpr'), v(c3, 'stck_lwpr')
+        if c1_high >= c3_low:
+            continue  # 갭 없음
+        body1 = abs(v(c1, 'stck_prpr') - v(c1, 'stck_oprc'))
+        body2 = abs(v(c2, 'stck_prpr') - v(c2, 'stck_oprc'))
+        body3 = abs(v(c3, 'stck_prpr') - v(c3, 'stck_oprc'))
+        avg_side_body = (body1 + body3) / 2
+        if avg_side_body <= 0 or body2 < avg_side_body * 2.0:
+            continue  # 2번 캔들이 앞뒤 대비 충분히 크지 않음
+        if not (v(c2, 'stck_prpr') > v(c2, 'stck_oprc')):
+            continue  # 2번 캔들이 양봉이어야 상승형 FVG
+
+        pre = recent[:i]
+        if len(pre) < 5:
+            continue
+        local_low = min(v(b, 'stck_lwpr') for b in pre[:-2])
+        last_two_low = min(v(b, 'stck_lwpr') for b in pre[-2:])
+        if not (last_two_low < local_low * 0.999):
+            continue  # 직전 저점을 살짝이라도 하회(스윕)한 적이 없으면 제외
+
+        cur_price = v(recent[-1], 'stck_prpr')
+        if not (c1_high <= cur_price <= c3_low):
+            continue  # 갭 구간으로 되돌아온 시점이 아니면 아직 진입 타이밍 아님
+
+        return {
+            'gap_low': c1_high, 'gap_high': c3_low, 'price': cur_price,
+            'stop_price': min(v(c1, 'stck_lwpr'), v(c2, 'stck_lwpr'), v(c3, 'stck_lwpr')),
+            # 익절 목표 = FVG를 만든 파동(c1~c3) 자체의 고점 돌파 — 스윕 전 구간(pre)의
+            # 고점은 이 파동이 이미 훨씬 위로 뚫고 올라온 낮은 값이라 목표가로 부적절함.
+            'target_price': max(v(c1, 'stck_hgpr'), v(c2, 'stck_hgpr'), v(c3, 'stck_hgpr')),
+        }
+    return None
+
+
+def scan_shadow_c(token, stocks, kospi_set):
+    candidates = []
+    for code in stocks:
+        try:
+            market = "J" if code in kospi_set else "Q"
+            cur = get_current_price(token, code, market)
+            if cur['price'] == 0 or cur['market_cap'] < MARKET_CAP_MIN:
+                continue
+            if any(kw in cur['name'] for kw in DERIVATIVE_ETF_KEYWORDS):
+                continue
+            if is_derivative_etf(token, code, cur['bstp_name'], cur['mrkt_name']):
+                continue
+            raw = get_minute_bars_raw(token, code, market)
+            if len(raw) < 20:
+                continue
+            bars_asc = list(reversed(raw))
+            found = find_fvg_with_sweep(bars_asc)
+            if found is None:
+                continue
+            candidates.append({
+                'code': code, 'name': cur['name'], 'price': found['price'],
+                'gap_low': found['gap_low'], 'gap_high': found['gap_high'],
+                'stop_price': found['stop_price'], 'target_price': found['target_price'],
+                'market_cap': cur['market_cap'],
+            })
+            time.sleep(0.06)
+        except Exception as e:
+            print(f"  [섀도우C 오류] {code}: {e}")
+    return candidates
+
+
 def append_snapshot(path, candidates):
     if not candidates:
         return
@@ -370,6 +477,10 @@ def main():
     b_candidates = scan_shadow_b(token, stocks, kospi_set)
     append_snapshot(f"{DATA_DIR}/B_{today_str}.json", b_candidates)
     print(f"[섀도우B] 후보 {len(b_candidates)}종목: {[c['name'] for c in b_candidates]}")
+
+    c_candidates = scan_shadow_c(token, stocks, kospi_set)
+    append_snapshot(f"{DATA_DIR}/C_{today_str}.json", c_candidates)
+    print(f"[섀도우C] 후보 {len(c_candidates)}종목: {[c['name'] for c in c_candidates]}")
 
 
 if __name__ == '__main__':
