@@ -1,7 +1,7 @@
 # 로컬 실시간 포지션 감시 — GitHub Actions(5분 간격)의 반응 지연을 보완
 # 포지션 보유 중엔 5초 간격으로 가격을 확인해 손절/익절/상한가를 즉시 처리한다.
 # 종목 스캔·매수는 계속 GitHub Actions가 담당하고, 이 스크립트는 "판다" 역할만 한다.
-import os, sys, time, subprocess
+import os, sys, time, json, subprocess
 from datetime import datetime
 
 # Windows 콘솔(cp949)에서 이모지 등 유니코드 출력 시 크래시 방지
@@ -33,6 +33,9 @@ KST = bot.KST
 NO_POSITION_INTERVAL = 20   # 포지션 없을 때 대기(초)
 POSITION_CHECK_INTERVAL = 5  # 포지션 보유 중 가격 확인 간격(초)
 GIT_PULL_EVERY = 12         # 포지션 보유 중 git pull 주기 (POSITION_CHECK_INTERVAL 배수)
+HEARTBEAT_EVERY = 6         # 포지션 보유 중 하트비트 푸시 주기 (30초) — GitHub Actions가
+                            # 이걸 보고 "로컬 watcher가 살아있으니 포지션 관리를 양보"할지 판단
+HEARTBEAT_FILE = os.path.join(REPO_DIR, 'watcher_heartbeat.json')
 KAKAO_TOKEN_REFRESH_SEC = 1800
 
 
@@ -63,6 +66,32 @@ def git_push_dashboard():
         run_git('rebase', 'origin/main')
         time.sleep(2)
     print("[git push] 재시도 끝까지 실패 — 다음 GitHub Actions 실행이 대신 반영할 것")
+
+
+def push_heartbeat():
+    """[2026-07-10 추가] 로컬 watcher가 살아있다는 신호를 가볍게 남긴다.
+    GitHub Actions가 이 신호(90초 이내)를 보면 같은 포지션을 동시에 건드리지 않고
+    양보한다 — 흥구석유·금호전기·흥아해운에서 두 감시자가 거의 동시에 +2% 부분익절
+    조건을 각자 판단해 중복 매도했던 레이스 컨디션 방지용. 실패해도 다음 주기에
+    다시 시도하면 되므로 조용히 넘어간다."""
+    try:
+        with open(HEARTBEAT_FILE, 'w', encoding='utf-8') as f:
+            json.dump({'alive_at': datetime.now(KST).isoformat()}, f)
+    except Exception as e:
+        print(f"[하트비트 기록 실패] {e}")
+        return
+    run_git('add', 'watcher_heartbeat.json')
+    commit = run_git('commit', '-m', '[로컬감시] heartbeat [skip ci]')
+    if commit and 'nothing to commit' in (commit.stdout + commit.stderr):
+        return
+    for _ in range(3):
+        push = run_git('push')
+        if push and push.returncode == 0:
+            return
+        run_git('fetch', 'origin', 'main')
+        run_git('rebase', 'origin/main')
+        time.sleep(1)
+    print("[하트비트 푸시] 재시도 끝까지 실패 — 다음 주기에 재시도")
 
 
 def wait_seconds(sec):
@@ -167,6 +196,9 @@ def main():
             # 전량/부분 청산으로 실제 보유수량이 바뀐 경우에만 push
             # (매 5초 체크마다 push하면 GitHub 쪽과 과도하게 충돌하므로 의미있는 변화만 반영)
             git_push_dashboard()
+
+        if loop_count % HEARTBEAT_EVERY == 0:
+            push_heartbeat()
 
         wait_seconds(POSITION_CHECK_INTERVAL)
 

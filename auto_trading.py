@@ -36,6 +36,20 @@ KAKAO_REFRESH_TOKEN = os.environ['KAKAO_REFRESH_TOKEN']
 DASHBOARD_FILE = "dashboard_data.json"
 TOKEN_FILE     = "kis_token.json"
 DAILY_CACHE_FILE = "daily_filter_cache.json"
+HEARTBEAT_FILE = "watcher_heartbeat.json"
+WATCHER_ALIVE_THRESHOLD_SEC = 90  # [2026-07-10] 로컬 watcher.py 하트비트가 이 시간 이내면
+# "살아서 포지션을 직접 관리 중"으로 간주하고 GitHub Actions는 양보(중복매도 방지).
+# 흥구석유·금호전기·흥아해운에서 두 감시자가 동시에 +2% 부분익절을 각자 실행해
+# 매도가 중복 발생했던 레이스 컨디션 때문에 추가.
+def watcher_is_alive():
+    try:
+        with open(HEARTBEAT_FILE, 'r', encoding='utf-8') as f:
+            hb = json.load(f)
+        alive_at = datetime.fromisoformat(hb['alive_at'])
+        age = (datetime.now(KST) - alive_at).total_seconds()
+        return age < WATCHER_ALIVE_THRESHOLD_SEC
+    except Exception:
+        return False
 # [2026-07-07] MA20/BB스퀴즈/20일평균거래량은 어제 종가 기준이라 하루 안에서는
 # 사실상 안 바뀌는 값인데, 매 5분 사이클마다 상위 ~200종목 전부 다시 계산하느라
 # 스캔이 오래 걸렸음(사이클당 35~40초). 이 값들만 종목당 하루 1회 계산해 캐싱하고
@@ -923,6 +937,11 @@ def main():
             return
         active = matched
         if active:
+            if watcher_is_alive():
+                print("[백업 대기] 로컬 실시간감시(watcher.py)가 살아있음 — "
+                      "이 사이클은 포지션 관리를 건너뜀 (중복매도 방지, 잔고만 갱신)")
+                save_dashboard(dash)
+                return
             manage_position(kis_token, kakao_token, dash, guard, now, active[0], force_sell_at)
             return
         # ② 신규 진입 스캔 (시간대별 진입 가능 여부는 scan_signals 내부에서 판정)
