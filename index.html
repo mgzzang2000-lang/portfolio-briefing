@@ -235,9 +235,9 @@ function renderKr(d) {
   const wins = sells.filter(t => t.pnl_pct >= 0);
   const losses = sells.filter(t => t.pnl_pct < 0);
   const winRate = sells.length ? Math.round(wins.length / sells.length * 100) : 0;
-  const totalPnl = sells.reduce((s, t) => s + (t.pnl_amt || 0), 0);
   const initial = d.initial_balance || 500000;
   const currentBalance = d.current_balance != null ? d.current_balance : initial;
+  const totalPnl = currentBalance - initial;
   const totalPnlPct = ((currentBalance - initial) / initial * 100).toFixed(2);
   const avgWin = wins.length ? (wins.reduce((s,t)=>s+(t.pnl_pct||0),0)/wins.length).toFixed(2) : '0.00';
   const avgLoss = losses.length ? (losses.reduce((s,t)=>s+(t.pnl_pct||0),0)/losses.length).toFixed(2) : '0.00';
