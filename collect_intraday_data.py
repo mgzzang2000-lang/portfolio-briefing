@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-1분봉 실시간 수집기 (미래 intraday_backtest.py용 히스토리컬 데이터 축적)
+1분봉 실시간 수집기 (미래 intraday_backtest.py / shadow_backtest.py용
+히스토리컬 데이터 축적) — [2026-07-10] 섀도우 스캔(shadow_scan.py)과 통합.
 =====================================================
 [배경] KIS API는 "과거 날짜"의 1분봉을 안정적으로 지원하지 않는 것으로
 확인됨(intraday_backtest.py 실행 시 실패). pykrx 등 외부 소스도 국내
@@ -8,27 +9,41 @@
 직접 수집해서 쌓아두는 것.
 
 [동작 방식]
-1. 하루 중 최초 실행 시, 일봉 공통 필터(MA20/MA200/MACD/BB/거래량)를
+1. 하루 중 최초 실행 시, 일봉 공통 필터(MA20/BB/거래량, 라이브 전략과 동일)를
    통과하는 종목 리스트를 산출해 data/watchlist_YYYYMMDD.json 에 저장.
-   (시간대/갭 필터는 적용하지 않음 - 연구용으로 폭넓게 수집)
-2. 이후 각 실행마다 워치리스트 종목의 최근 1분봉(최대 30개)을 조회해서
-   아직 저장 안 된 새 봉만 data/minute/{code}_{YYYYMMDD}.json 에 append.
-3. GitHub Actions에서 09:00~15:30(KST) 사이 약 10~15분 간격으로 반복
-   실행하면, 며칠 지나면 intraday_backtest.py가 쓸 수 있는 진짜
-   히스토리컬 1분봉이 쌓임.
+2. [2026-07-10 추가] 매 사이클마다 아래 두 그룹도 워치리스트에 합침(중복 제거,
+   한 번 들어오면 그날 계속 수집 — 나중에 여러 조건식을 실제 시세로 재생/비교
+   하려면 "그 종목의 그 순간 진짜 가격"이 반드시 있어야 하기 때문):
+   ① 섀도우A/B(대안 조건식) 스캔이 그 사이클에 포착한 후보 — shadow_scan.py가
+      따로 돌 때는 후보 "기록"만 하고 1분봉은 안 쌓아서, 나중에 그 종목의 실제
+      가격 흐름을 재생할 수 없는 공백이 있었음(2026-07-10 사용자가 백테스트
+      돌려보다가 발견). 이제 이 스크립트 안에서 섀도우 스캔까지 실행해서 공백 해소.
+   ② 실거래 봇이 오늘 실제로 산/보유 중인 종목(dashboard_data.json) — 라이브
+      필터와 섀도우 스캔이 각자 다른 순간에 API를 조회하다 보니(가격>볼린저밴드98%
+      같은 경계선 조건이 몇 초 차이로 뒤집힐 수 있음), 실제 라이브가 산 종목인데도
+      이 스크립트의 필터 스냅샷에서는 근소하게 탈락해 1분봉이 안 쌓이는 사례가
+      실제로 있었음(2026-07-09~10 5건의 실거래 중 3건). 대시보드에서 직접 읽어와
+      "실제 산 종목"은 필터 통과 여부와 무관하게 항상 수집 대상에 넣어 이 공백을
+      원천 차단.
+3. 이후 각 실행마다 워치리스트 종목의 최근 1분봉(최대 30개)을 조회해서
+   아직 저장 안 된 새 봉만 minute_data/{code}_{YYYYMMDD}.json 에 append.
+   섀도우A/B가 그 사이클에 포착한 후보 스냅샷은 기존과 동일하게
+   shadow_data/A_YYYYMMDD.json / B_YYYYMMDD.json 에도 그대로 남김(백테스트가
+   "그 모델이 그 순간 무엇을 포착했는지" + "그 이후 실제 가격이 어떻게 움직였는지"
+   둘 다 필요하기 때문).
+4. GitHub Actions에서 09:00~15:30(KST) 사이 5분 간격으로 반복 실행.
 
 [주의] GitHub Actions 스케줄은 1분 단위 보장이 안 되고 부하 시 지연될
-수 있음 - 그래도 한 번 호출에 최근 30개 봉이 오므로 15분 간격이면
+수 있음 - 그래도 한 번 호출에 최근 30개 봉이 오므로 5분 간격이면
 빠지는 구간 없이 커버됨.
 
-[2026-07-06] 워치리스트 필터를 라이브(auto_trading.py)와 동기화.
-MA200/MACD 조건 제거, 거래량 필터를 경과시간 비례로 수정 — 이전엔
-라이브에서 이미 뺀 조건들이 남아있어서 여기서 쌓는 데이터가 실제
-라이브 전략의 후보군과 어긋나 있었음.
+[한계] 이렇게 해도 "과거"로 소급 적용은 안 됨 — 새로 등록한 조건식(모델)은
+등록한 날부터 후보가 잡히고 그 후보 종목의 1분봉이 그날부터 쌓이기 시작함.
 =====================================================
 """
 import os, json, time
 from datetime import datetime, timezone, timedelta
+import shadow_scan
 
 KST = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
@@ -227,6 +242,44 @@ def save_json(path, data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+def resolve_market(token, code):
+    """코스피(J)/코스닥(Q) 미상인 코드의 시장 구분을 현재가 조회로 판별."""
+    data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-price", {
+        "FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code
+    }, "FHKST01010100")
+    if data.get('output', {}).get('stck_prpr'):
+        return "J"
+    return "Q"
+
+
+def get_live_trade_codes_today(today_str):
+    """실거래 봇이 오늘 실제로 산/보유중인 종목 코드 — 라이브 필터 통과 여부와
+    무관하게 항상 1분봉 수집 대상에 넣기 위한 '있는 그대로의 진실' 소스."""
+    dash = load_json("dashboard_data.json", {})
+    codes = set()
+    today_disp = datetime.strptime(today_str, '%Y%m%d').strftime('%m/%d')
+    for t in dash.get('trades', []):
+        if t.get('action') == 'buy' and str(t.get('date', '')).startswith(today_disp) and t.get('code'):
+            codes.add(t['code'])
+    pos = dash.get('position')
+    if pos and pos.get('pdno'):
+        codes.add(pos['pdno'])
+    return codes
+
+
+def merge_into_watchlist(watchlist, new_codes, token):
+    """new_codes(시장 미상)를 기존 워치리스트에 중복없이 합침."""
+    existing = {w['code'] for w in watchlist}
+    for code in new_codes:
+        if code in existing:
+            continue
+        market = resolve_market(token, code)
+        watchlist.append({'code': code, 'name': code, 'market': market, 'squeeze': False})
+        existing.add(code)
+        time.sleep(0.06)
+    return watchlist
+
+
 def main():
     now = datetime.now(KST)
     if (now.hour, now.minute) < MARKET_OPEN or (now.hour, now.minute) > MARKET_CLOSE:
@@ -242,8 +295,22 @@ def main():
     if watchlist is None:
         print("오늘 첫 실행 - 워치리스트 산출 중...")
         watchlist = build_watchlist(token)
-        save_json(watchlist_path, watchlist)
-        print(f"워치리스트 {len(watchlist)}종목 저장: {[w['name'] for w in watchlist]}")
+        print(f"[라이브 필터] {len(watchlist)}종목: {[w['name'] for w in watchlist]}")
+
+    # ── [2026-07-10] 섀도우A/B 스캔을 여기서 함께 실행 — 후보 종목을
+    # 워치리스트에 합쳐서 1분봉을 같이 쌓고, 기존과 동일하게 shadow_data/에도 기록 ──
+    stocks, kospi_set = shadow_scan.get_universe(token)
+    a_candidates = shadow_scan.scan_shadow_a(token, stocks, kospi_set)
+    shadow_scan.append_snapshot(f"shadow_data/A_{today_str}.json", a_candidates)
+    print(f"[섀도우A] 후보 {len(a_candidates)}종목: {[c['name'] for c in a_candidates]}")
+    b_candidates = shadow_scan.scan_shadow_b(token, stocks, kospi_set)
+    shadow_scan.append_snapshot(f"shadow_data/B_{today_str}.json", b_candidates)
+    print(f"[섀도우B] 후보 {len(b_candidates)}종목: {[c['name'] for c in b_candidates]}")
+
+    shadow_codes = {c['code'] for c in a_candidates} | {c['code'] for c in b_candidates}
+    live_trade_codes = get_live_trade_codes_today(today_str)
+    watchlist = merge_into_watchlist(watchlist, shadow_codes | live_trade_codes, token)
+    save_json(watchlist_path, watchlist)
 
     if not watchlist:
         print("워치리스트 없음 - 종료")
@@ -266,7 +333,7 @@ def main():
             print(f" {w['name']}({code}): +{len(new_bars)}봉 (누적 {len(stored)})")
         time.sleep(0.1)
 
-    print(f"완료 - 신규 {total_new}봉 저장")
+    print(f"완료 - 신규 {total_new}봉 저장 (워치리스트 {len(watchlist)}종목)")
 
 
 if __name__ == '__main__':

@@ -47,25 +47,20 @@ jobs:
             python auto_trading.py
             if [ $i -lt 5 ]; then sleep 60; fi
           done
-      - name: 인트라데이 1분봉 수집
+      - name: 인트라데이 1분봉 수집 + 섀도우 전략 비교 스캔 (실주문 없음)
         # [2026-07-07] collect-intraday.yml은 GitHub 자체 schedule 트리거에만 의존했는데,
         # 이 트리거가 그날 한 번도 발화하지 않는 사고가 발생(외부 cron-job.org가 호출하는
         # 이 워크플로우와 달리 별도 외부 호출자가 없었음). 이미 5분마다 안정적으로 도는
         # 이 잡에 얹어서 매 사이클 수집하도록 변경 — 오히려 15분→5분으로 촘촘해짐.
+        # [2026-07-10] 섀도우 스캔(shadow_scan.py)을 별도 스텝으로 분리 실행하면 섀도우가
+        # 포착한 종목의 1분봉이 안 쌓이는 공백이 생겨서(백테스트 시도 중 발견), 이제
+        # collect_intraday_data.py 안에서 섀도우 스캔까지 실행하고 그 후보 종목들도
+        # 워치리스트에 합쳐 1분봉을 함께 수집하도록 통합.
         if: always()
         env:
           KIS_APP_KEY:    ${{ secrets.KIS_APP_KEY }}
           KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
         run: python collect_intraday_data.py
-      - name: 섀도우 전략 비교 스캔 (실주문 없음)
-        # [2026-07-07 신설] 실거래 전략을 직접 바꾸지 않고, 대안 조건식(섀도우A: BB98%
-        # 대신 신고가 기준 / 섀도우B: 시가돌파형 초기모멘텀)으로 포착됐을 후보만 기록.
-        # 자금 투입 없이 minute_data와 대조해 나중에 성과를 비교하기 위함.
-        if: always()
-        env:
-          KIS_APP_KEY:    ${{ secrets.KIS_APP_KEY }}
-          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
-        run: python shadow_scan.py
       - name: 토큰 캐시 저장
         if: always()
         uses: actions/cache/save@v4

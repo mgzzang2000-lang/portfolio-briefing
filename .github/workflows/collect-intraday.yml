@@ -41,7 +41,7 @@ jobs:
         run: |
           git config user.name "Auto Update"
           git config user.email "actions@github.com"
-          git add minute_data/ || true
+          git add minute_data/ shadow_data/ || true
           if ! git diff --cached --quiet; then
             git commit -m "chore: collect intraday minute data [skip ci]"
             # [2026-07-07] auto-trading.yml과 동시에 push할 수 있어 재시도 로직 추가
