@@ -110,6 +110,28 @@
       "qty": 176,
       "price": 1703,
       "amount": 299728
+    },
+    {
+      "action": "sell",
+      "date": "07/10 11:57",
+      "stock": "흥아해운",
+      "qty": 88,
+      "price": 1737,
+      "avg_price": 1703,
+      "pnl_pct": 2.0,
+      "pnl_amt": 2992,
+      "reason": "익절 (+2.00%, 부분익절 50%)"
+    },
+    {
+      "action": "sell",
+      "date": "07/10 12:30",
+      "stock": "흥아해운",
+      "qty": 88,
+      "price": 1775,
+      "avg_price": 1703,
+      "pnl_pct": 4.23,
+      "pnl_amt": 6336,
+      "reason": "익절 (+4.23%)"
     }
   ],
   "position": null,
