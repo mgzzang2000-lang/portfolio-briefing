@@ -53,6 +53,28 @@
     },
     {
       "action": "sell",
+      "date": "07/09 10:37",
+      "stock": "흥구석유",
+      "qty": 13,
+      "price": 11380,
+      "avg_price": 11050,
+      "pnl_pct": 2.99,
+      "pnl_amt": 4290,
+      "reason": "익절 (복구, +2.99%)"
+    },
+    {
+      "action": "sell",
+      "date": "07/09 10:38",
+      "stock": "흥구석유",
+      "qty": 7,
+      "price": 11330,
+      "avg_price": 11050,
+      "pnl_pct": 2.53,
+      "pnl_amt": 1960,
+      "reason": "익절 (복구, +2.53%)"
+    },
+    {
+      "action": "sell",
       "date": "07/09 10:58",
       "stock": "흥구석유",
       "qty": 7,
@@ -70,6 +92,17 @@
       "qty": 199,
       "price": 1503,
       "amount": 299097
+    },
+    {
+      "action": "sell",
+      "date": "07/09 14:31",
+      "stock": "금호전기",
+      "qty": 99,
+      "price": 1573,
+      "avg_price": 1521,
+      "pnl_pct": 3.42,
+      "pnl_amt": 5148,
+      "reason": "익절 (복구, +3.42%)"
     },
     {
       "action": "sell",
