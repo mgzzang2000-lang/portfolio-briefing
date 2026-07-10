@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 501734,
+  "current_balance": 499586,
   "trades": [
     {
       "action": "buy",
@@ -81,13 +81,33 @@
       "pnl_pct": 4.8,
       "pnl_amt": 7300,
       "reason": "익절 (+4.80%)"
+    },
+    {
+      "action": "buy",
+      "date": "07/10 09:01",
+      "code": "002990",
+      "stock": "002990",
+      "qty": 15,
+      "price": 18790,
+      "amount": 281850
+    },
+    {
+      "action": "sell",
+      "date": "07/10 09:05",
+      "stock": "금호건설",
+      "qty": 8,
+      "price": 17780,
+      "avg_price": 18310,
+      "pnl_pct": -2.89,
+      "pnl_amt": -4240,
+      "reason": "손절 (-2.89%)"
     }
   ],
   "position": null,
-  "last_updated": "2026-07-09T14:32:44.035750+09:00",
+  "last_updated": "2026-07-10T09:05:52.895912+09:00",
   "daily_loss_guard": {
-    "date": "07/09",
-    "consecutive_losses": 0,
+    "date": "07/10",
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
@@ -102,6 +122,10 @@
     {
       "date": "07/09",
       "balance": 501734
+    },
+    {
+      "date": "07/10",
+      "balance": 499586
     }
   ]
 }
