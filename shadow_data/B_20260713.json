@@ -135,5 +135,28 @@
         "market_cap": 925.0
       }
     ]
+  },
+  {
+    "time": "10:20:51",
+    "candidates": [
+      {
+        "code": "069540",
+        "name": "069540",
+        "price": 2525.0,
+        "open": 2370.0,
+        "gap_from_open_pct": 6.54,
+        "approx_execution_strength": 24.1,
+        "market_cap": 2845.0
+      },
+      {
+        "code": "002700",
+        "name": "002700",
+        "price": 1313.0,
+        "open": 1136.0,
+        "gap_from_open_pct": 15.58,
+        "approx_execution_strength": 111481.8,
+        "market_cap": 920.0
+      }
+    ]
   }
 ]
