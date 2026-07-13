@@ -534,37 +534,24 @@ def scan_signals(token):
       ② [2026-07-02 제거] MA200 필터 — 장기추세 조건 없음
       ③ [2026-07-02 제거] MACD 관련 조건 전체 삭제
       ④ 볼린저밴드 스퀴즈 OR BB 상단 근접(98%)
-      ⑤ 거래량 20일 평균 2배 이상 (시간 경과 비례 보정)
-      ⑥ 시간대별 갭 필터: 09:00~09:10(5%), 09:10~11:00(5%), 14:00~14:30(고가98%)
+      ⑤ 거래량 20일 평균 1.5배 이상 (시간 경과 비례 보정) [2026-07-13: 2배→1.5배 완화]
+      ⑥ 갭 필터 5% (전 구간 단일 기준) [2026-07-13: 09:00~14:50 단일 구간으로 통합,
+         14:00~14:30 고가근접 특례 제거 — 거래 빈도를 늘리기 위한 필터 단순화]
     정렬: 1순위 당일 신규 돌파 > 2순위 스퀴즈 종목 > 3순위 거래량 비율 순
     """
-    # [2026-07-02 추가] 시간대별 진입 가능 여부 판정
+    # [2026-07-13] 진입 가능 시간대 — 기존 09:00~11:00/14:00~14:30 이원화 게이트가
+    # 하루 6.5시간 중 2.5시간만 쓰던 것을 09:00~14:50 단일 구간으로 통합(15:20 강제청산
+    # 전 최소 30분 여유는 유지). "더 자주 거래"를 위한 필터 완화.
     now = datetime.now(KST)
     now_hour = now.hour
     now_minute = now.minute
 
-    # 진입 시간대 판정
-    if 9 <= now_hour < 11:  # 09:00~11:00 (두 단계)
-        can_entry = True
-    elif 14 <= now_hour < 15 and now_minute < 30:  # 14:00~14:30
-        can_entry = True
-    else:  # 11:00~14:00, 14:30~15:30, 기타 (신규 진입 없음)
-        can_entry = False
-
+    can_entry = now_hour == 9 or (10 <= now_hour < 14) or (now_hour == 14 and now_minute < 50)
     if not can_entry:
         print(f"[{now.strftime('%H:%M')}] 신규 진입 시간 아님 — 스캔 스킵")
         return []
 
-    # 갭 필터 임계값 설정
-    # [2026-07-02] 09:00~09:10 구간도 3% -> 5%로 완화 (09:10~11:00과 동일)
-    if now_hour == 9 and now_minute < 10:
-        gap_threshold = 5.0  # 09:00~09:10
-    elif 9 <= now_hour < 11:
-        gap_threshold = 5.0  # 09:10~11:00
-    elif 14 <= now_hour < 15 and now_minute < 30:
-        gap_threshold = float('inf')  # 14:00~14:30: 갭 조건 제거 (대신 고가근접 사용)
-    else:
-        gap_threshold = 5.0  # 기본값 (도달 불가)
+    gap_threshold = 5.0  # 전 구간 단일 갭 기준 (14:00~14:30 고가근접 특례 제거)
 
     # [2026-07-02] 시간 경과 비례 거래량 기대치
     # 오늘 누적거래량(장중 계속 증가)을 과거 20일 '하루 종일' 평균과 시간 보정 없이
@@ -647,17 +634,11 @@ def scan_signals(token):
             bb_near_upper = (price >= bb_upper * 0.98)
             if not (in_squeeze or bb_near_upper):
                 continue
-            if vol_avg20 and cur['volume'] < vol_avg20 * (elapsed_minutes / 390) * 2:
+            if vol_avg20 and cur['volume'] < vol_avg20 * (elapsed_minutes / 390) * 1.5:
                 continue
-            # [2026-07-02] 시간대별 갭 필터 적용
+            # [2026-07-02] 갭 필터 적용
             if gap >= gap_threshold:
                 continue
-            # 14:00~14:30 구간: 갭 조건 대신 당일 고가 98% 이상 근접 확인
-            # [2026-07-07] highs[0](캐시될 수 있는 일봉 데이터)가 아니라 매번 라이브로
-            # 받아오는 cur['high']를 사용 — 캐싱해도 당일 고가는 항상 최신값으로 확인됨
-            if now_hour == 14 and now_minute < 30 and gap_threshold == float('inf'):
-                if cur['high'] < cur['open'] * 0.98:
-                    continue  # 고가 98% 이상 미달 → 진입 안 함
             vol_ratio = cur['volume'] / vol_avg20 if vol_avg20 else 0
             ma200_str  = f"{ma200:,.0f}" if ma200 else "N/A"
             bb_tag     = "스퀴즈" if in_squeeze else "BB상단근접"
@@ -705,8 +686,6 @@ def check_pullback_reclaim(closes, highs, lows, volumes, lookback=15):
         return False, "탐색 구간 부족"
     peak_idx = max(range(search_end), key=lambda i: asc_h[i])
     peak_price = asc_h[peak_idx]
-    flag_start = max(0, peak_idx - 3)
-    flagpole_vol = sum(asc_v[flag_start:peak_idx + 1]) / max(1, peak_idx + 1 - flag_start)
 
     # 고점 이후 ~ 직전 봉까지가 눌림(횡보/조정) 구간
     pullback_range = range(peak_idx + 1, lookback - 1)
@@ -719,14 +698,14 @@ def check_pullback_reclaim(closes, highs, lows, volumes, lookback=15):
     cur_close = asc_c[-1]
     cur_vol   = asc_v[-1]
 
+    # [2026-07-13] volume_dried_up(눌림구간 거래량<깃대의 80%) 조건 제거 — 나머지
+    # 3개 조건과 상관성이 높아 사실상 중복 필터였음. 필터 단순화 차원에서 제외.
     healthy_pullback = 0.2 <= pullback_pct <= 4.0        # 너무 얕지도(노이즈) 깊지도(추세훼손) 않은 눌림
-    volume_dried_up  = pullback_vol < flagpole_vol * 0.8  # 눌림 구간엔 거래량이 줄어야 건강한 조정
     reclaim          = cur_close >= peak_price * 0.997    # 직전 고점 근처까지 재돌파
     volume_surge     = cur_vol >= pullback_vol * 1.5      # 재돌파 시 거래량 급증
 
-    ok = healthy_pullback and volume_dried_up and reclaim and volume_surge
+    ok = healthy_pullback and reclaim and volume_surge
     info = (f"눌림{pullback_pct:.1f}%({'✓' if healthy_pullback else '✗'}) "
-            f"거래량감소{'✓' if volume_dried_up else '✗'} "
             f"재돌파{'✓' if reclaim else '✗'} "
             f"거래량급증{'✓' if volume_surge else '✗'}")
     return ok, info
@@ -767,6 +746,9 @@ def check_1min_entry(token, code, name, market="J"):
     if atr_1m:
         stop_price = price - atr_1m * 1.5
         stop_price = min(stop_price, price * 0.985)  # 최소 -1.5% 보호
+        # [2026-07-13] 실거래 로그 확인 결과 ATR 손절에 상한이 없어 -2.79%,
+        # -2.89%, -3.71% 손실이 실제로 발생함 — 최대 -2.5%로 손실 상한 추가
+        stop_price = max(stop_price, price * 0.975)
     else:
         stop_price = price * 0.98  # ATR 계산 불가 시 폴백
     target_price = price * 1.04
