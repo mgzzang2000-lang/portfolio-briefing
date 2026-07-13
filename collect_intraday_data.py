@@ -310,8 +310,12 @@ def main():
     shadow_scan.append_snapshot(f"shadow_data/C_{today_str}.json", c_candidates)
     print(f"[섀도우C] 후보 {len(c_candidates)}종목: {[c['name'] for c in c_candidates]}")
 
+    d_candidates = shadow_scan.scan_shadow_d(token, stocks, kospi_set)
+    shadow_scan.append_snapshot(f"shadow_data/D_{today_str}.json", d_candidates)
+    print(f"[섀도우D] 후보 {len(d_candidates)}종목: {[c['name'] for c in d_candidates]}")
+
     shadow_codes = ({c['code'] for c in a_candidates} | {c['code'] for c in b_candidates}
-                     | {c['code'] for c in c_candidates})
+                     | {c['code'] for c in c_candidates} | {c['code'] for c in d_candidates})
     live_trade_codes = get_live_trade_codes_today(today_str)
     watchlist = merge_into_watchlist(watchlist, shadow_codes | live_trade_codes, token)
     save_json(watchlist_path, watchlist)
