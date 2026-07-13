@@ -50,6 +50,11 @@ TOKEN_FILE = "kis_token.json"
 DATA_DIR = "shadow_data"
 MARKET_CAP_MIN = 700  # 억원
 DERIVATIVE_ETF_KEYWORDS = ["레버리지", "인버스", "ETN", "선물"]
+MAX_EXTENSION_FROM_OPEN_PCT = 5.0  # [2026-07-13] 섀도우A: 오늘 시가 대비 이미 이만큼
+# 오른 종목은 "지금 막 오르는 중"이 아니라 "이미 다 오른 뒤"로 보고 제외.
+# check_1min_timing의 눌림목 확인은 최근 15봉짜리 좁은 창만 보기 때문에, 003280
+# 사례(09:00~09:09 9분간 +9.6% 급등)처럼 국소적으로는 건강한 눌림/재돌파로 보여도
+# 하루 전체로는 이미 크게 오른 경우를 놓칠 수 있어 별도로 추가.
 
 MARKET_OPEN = (9, 0)
 MARKET_CLOSE = (15, 30)  # [2026-07-07] collect_intraday_data.py와 동일하게 맞춤 —
@@ -146,6 +151,8 @@ def get_current_price(token, code, market="J"):
         'bstp_name':   o.get('bstp_kor_isnm', ''),
         'mrkt_name':   o.get('rprs_mrkt_kor_name', ''),
         'market_cap':  float(o.get('hts_avls', 0) or 0),  # 억원 단위
+        'vi_cls_code':      o.get('vi_cls_code', 'N'),       # VI적용구분코드(N=미발동)
+        'ovtm_vi_cls_code': o.get('ovtm_vi_cls_code', 'N'),  # 시간외 VI적용구분코드
     }
 
 
@@ -228,6 +235,114 @@ def is_bb_squeeze(closes, period=20, lookback=20):
     return bw_now <= sorted(hist)[int(len(hist) * 0.3)]
 
 
+def calc_rsi(closes, period=14):
+    """closes: 최신이 index 0. auto_trading.py와 동일 로직(섀도우 모듈 독립 유지 위해 복제)."""
+    if len(closes) < period + 1:
+        return None
+    diffs  = [closes[i] - closes[i + 1] for i in range(period)]
+    gains  = sum(d for d in diffs if d > 0) / period
+    losses = sum(abs(d) for d in diffs if d < 0) / period
+    if losses == 0:
+        return 100.0
+    return 100 - (100 / (1 + gains / losses))
+
+
+def calc_stoch_rsi(closes, rsi_period=14, stoch_period=5, smooth_k=3, smooth_d=3):
+    """스토캐스틱 RSI. closes: 최신이 index 0. returns: (K, D) — 매수 신호: K > D AND K > 20.
+    auto_trading.py와 동일 로직(섀도우 모듈 독립 유지 위해 복제)."""
+    needed = rsi_period + stoch_period + smooth_k + smooth_d + 2
+    if len(closes) < needed:
+        return None, None
+    asc = list(reversed(closes))
+    rsi_vals = []
+    for i in range(rsi_period, len(asc)):
+        window = list(reversed(asc[i - rsi_period: i + 1]))
+        r = calc_rsi(window, rsi_period)
+        if r is not None:
+            rsi_vals.append(r)
+    if len(rsi_vals) < stoch_period:
+        return None, None
+    raw_k = []
+    for i in range(stoch_period - 1, len(rsi_vals)):
+        win = rsi_vals[i - stoch_period + 1: i + 1]
+        hi, lo = max(win), min(win)
+        raw_k.append(50.0 if hi == lo else (rsi_vals[i] - lo) / (hi - lo) * 100)
+    if len(raw_k) < smooth_k:
+        return None, None
+    k_vals = [sum(raw_k[i - smooth_k + 1: i + 1]) / smooth_k
+              for i in range(smooth_k - 1, len(raw_k))]
+    if len(k_vals) < smooth_d:
+        return None, None
+    d_vals = [sum(k_vals[i - smooth_d + 1: i + 1]) / smooth_d
+              for i in range(smooth_d - 1, len(k_vals))]
+    return k_vals[-1], d_vals[-1]
+
+
+def check_pullback_reclaim(closes, highs, lows, volumes, lookback=15):
+    """눌림목+불플래그 재돌파 확인. auto_trading.py와 동일 로직(섀도우 모듈 독립 유지 위해 복제).
+    반환: (ok, info_str)"""
+    if len(closes) < lookback + 3 or len(volumes) < lookback + 3:
+        return False, "데이터 부족(눌림목 확인 불가)"
+    asc_c = list(reversed(closes[:lookback]))
+    asc_h = list(reversed(highs[:lookback]))
+    asc_l = list(reversed(lows[:lookback]))
+    asc_v = list(reversed(volumes[:lookback]))
+    search_end = lookback - 3
+    if search_end < 3:
+        return False, "탐색 구간 부족"
+    peak_idx = max(range(search_end), key=lambda i: asc_h[i])
+    peak_price = asc_h[peak_idx]
+    flag_start = max(0, peak_idx - 3)
+    flagpole_vol = sum(asc_v[flag_start:peak_idx + 1]) / max(1, peak_idx + 1 - flag_start)
+    pullback_range = range(peak_idx + 1, lookback - 1)
+    if len(list(pullback_range)) < 2:
+        return False, "눌림 구간 부족"
+    trough_price = min(asc_l[i] for i in pullback_range)
+    pullback_vol = sum(asc_v[i] for i in pullback_range) / len(list(pullback_range))
+    pullback_pct = (peak_price - trough_price) / peak_price * 100 if peak_price else 0
+    cur_close = asc_c[-1]
+    cur_vol   = asc_v[-1]
+    healthy_pullback = 0.2 <= pullback_pct <= 4.0
+    volume_dried_up  = pullback_vol < flagpole_vol * 0.8
+    reclaim          = cur_close >= peak_price * 0.997
+    volume_surge     = cur_vol >= pullback_vol * 1.5
+    ok = healthy_pullback and volume_dried_up and reclaim and volume_surge
+    info = (f"눌림{pullback_pct:.1f}%({'✓' if healthy_pullback else '✗'}) "
+            f"거래량감소{'✓' if volume_dried_up else '✗'} "
+            f"재돌파{'✓' if reclaim else '✗'} "
+            f"거래량급증{'✓' if volume_surge else '✗'}")
+    return ok, info
+
+
+def check_1min_timing(token, code, market, cur):
+    """[2026-07-13] 실거래 봇(auto_trading.check_1min_entry)과 동일한 진입 타이밍
+    확인을 섀도우A에도 적용 — 스토캐스틱RSI + 눌림목/불플래그 재돌파 + VI필터.
+    섀도우A가 일봉 조건만 통과하면 그 순간 가격을 바로 "매수"로 기록하던 문제
+    (003280 사례: 09:00~09:09 9분간 +9.6% 급등한 상태에서 그대로 진입 후 손절)를
+    막기 위해 추가. auto_trading.py와 의도적으로 독립된 모듈이라 로직만 복제.
+    cur: 호출부에서 이미 조회한 get_current_price() 결과(VI상태 확인용, 중복 API호출 방지)."""
+    raw = get_minute_bars_raw(token, code, market)
+    if len(raw) < 10:
+        return False, "1분봉 데이터 부족"
+    closes  = [float(x.get('stck_prpr', 0)) for x in raw]
+    highs   = [float(x.get('stck_hgpr', 0)) for x in raw]
+    lows    = [float(x.get('stck_lwpr', 0)) for x in raw]
+    volumes = [int(x.get('cntg_vol', 0)) for x in raw]
+    if any(c == 0 for c in closes[:3]):
+        return False, "1분봉 가격 이상"
+    if cur['vi_cls_code'] != 'N' or cur['ovtm_vi_cls_code'] != 'N':
+        return False, "VI 발동 중"
+    if any(v == 0 for v in volumes[:5]):
+        return False, "최근 거래정지(VI 추정) 캔들 포함"
+    stoch_k, stoch_d = calc_stoch_rsi(closes)
+    if stoch_k is None or not (stoch_k > stoch_d and stoch_k > 20):
+        return False, "스토캐스틱RSI 미충족"
+    pullback_ok, pullback_info = check_pullback_reclaim(closes, highs, lows, volumes)
+    if not pullback_ok:
+        return False, f"눌림목 미충족({pullback_info})"
+    return True, "OK"
+
+
 def load_json(path, default):
     try:
         with open(path, 'r', encoding='utf-8') as f:
@@ -290,10 +405,22 @@ def scan_shadow_a(token, stocks, kospi_set):
             vol_avg20 = sum(volumes[1:21]) / 20 if len(volumes) >= 21 else None
             if vol_avg20 and cur['volume'] < vol_avg20 * (elapsed_minutes / 390) * 2:
                 continue
+            # [2026-07-13] ① 오늘 시가 대비 이미 많이 오른 종목은 "이미 다 오른 뒤"
+            # 진입이라 제외 (003280 사례: 9분만에 +9.6% 급등한 상태에서 진입 후 손절)
+            pct_from_open = ((price - cur['open']) / cur['open'] * 100) if cur['open'] else 0
+            if pct_from_open > MAX_EXTENSION_FROM_OPEN_PCT:
+                continue
+            # [2026-07-13] ② 실거래 봇과 동일한 1분봉 진입 타이밍 확인(스토캐스틱RSI +
+            # 눌림목/불플래그 재돌파 + VI필터) — 이걸 통과한 시점에만 "매수"로 기록
+            timing_ok, timing_info = check_1min_timing(token, code, market, cur)
+            if not timing_ok:
+                continue
             candidates.append({
                 'code': code, 'name': cur['name'], 'price': price,
                 'in_squeeze': in_squeeze, 'is_new_high': is_new_high,
                 'market_cap': cur['market_cap'],
+                'pct_from_open': round(pct_from_open, 2),
+                'timing_info': timing_info,
             })
             time.sleep(0.06)
         except Exception as e:
