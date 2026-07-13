@@ -588,6 +588,11 @@ def scan_shadow_c(token, stocks, kospi_set):
 # 사실상 건너뜀. 틱(체결) 단위로 보면 이 시점에도 데이터가 이미 쌓여있는 경우가
 # 많아, 분봉이 아닌 틱으로 "오프닝 레인지(09:00~09:05 고가) 돌파 + 거래량 확인"을
 # 판단해보는 실험. 09:27 이후엔 기존 방식이 이어받으므로 이 시간대에만 동작.
+# [2026-07-13 추가] VWAP(거래량가중평균가) 확인 조건 결합 — 리테일 ORB 전략에서
+# 흔히 쓰이는 방식으로, "레인지 돌파 + 거래량 위" 조합만으로는 저거래량 구간에서
+# 잠깐 튀었다가 되돌리는 가짜 돌파를 못 거른다는 문제가 있음. 돌파 시점에 현재가가
+# 당일 VWAP 위에 있는지까지 확인하면, 그 상승이 소수 체결의 노이즈가 아니라
+# 실제 매수 참여가 뒷받침된 움직임인지 추가로 검증할 수 있음.
 def load_ticks(code, ymd):
     return load_json(f"{TICK_DATA_DIR}/{code}_{ymd}.json", [])
 
@@ -653,11 +658,18 @@ def scan_shadow_d(token, stocks, kospi_set):
             after_minutes = max(1, (now.hour * 60 + now.minute) - (9 * 60 + OPENING_RANGE_MINUTES))
             vol_surge = (after_vol / after_minutes) >= (range_vol / OPENING_RANGE_MINUTES) * 1.5
             breakout = cur['price'] >= range_high * 1.003
-            if not (breakout and vol_surge):
+            # [2026-07-13] VWAP 확인 — 당일 09:00부터 지금까지 쌓인 틱 전체(오프닝+이후)로
+            # 거래량가중평균가를 계산해, 돌파가 VWAP 위에서 일어났는지 확인
+            total_vol = sum(t['vol'] for t in ticks)
+            if total_vol == 0:
+                continue
+            vwap = sum(t['price'] * t['vol'] for t in ticks) / total_vol
+            above_vwap = cur['price'] >= vwap
+            if not (breakout and vol_surge and above_vwap):
                 continue
             candidates.append({
                 'code': code, 'name': cur['name'], 'price': cur['price'],
-                'range_high': range_high, 'market_cap': cur['market_cap'],
+                'range_high': range_high, 'vwap': round(vwap, 1), 'market_cap': cur['market_cap'],
             })
             time.sleep(0.06)
         except Exception as e:
