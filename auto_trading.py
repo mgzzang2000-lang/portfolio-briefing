@@ -360,6 +360,8 @@ def get_current_price(token, code, market="J"):
         # bstp_kor_isnm/rprs_mrkt_kor_name은 이 API에서 실제로 채워지므로 ETF/ETN 판별용으로 사용.
         'bstp_name':   o.get('bstp_kor_isnm', ''),
         'mrkt_name':   o.get('rprs_mrkt_kor_name', ''),
+        'vi_cls_code':      o.get('vi_cls_code', 'N'),       # VI적용구분코드(N=미발동)
+        'ovtm_vi_cls_code': o.get('ovtm_vi_cls_code', 'N'),  # 시간외 VI적용구분코드
     }
 
 
@@ -744,6 +746,15 @@ def check_1min_entry(token, code, name, market="J"):
     lows    = minute['lows']
     volumes = minute['volumes']
     price   = closes[0]
+    # [2026-07-13] VI(변동성완화장치) 필터 — 002880(07/13) 사례: 급등 캔들 직후
+    # 2분간 거래정지(거래량0)된 구간을 "거래량 줄어든 눌림목"으로 오인해 진입,
+    # VI 해제 직후 급락으로 이어짐(-3.71%, 1분만에 손절). 실시간 VI상태 + 최근
+    # 거래량0 캔들(VI로 얼어붙었던 흔적) 둘 다 확인해 그런 종목은 진입 제외.
+    quote = get_current_price(token, code, market)
+    if quote['vi_cls_code'] != 'N' or quote['ovtm_vi_cls_code'] != 'N':
+        return False, 0, 0, "VI 발동 중 — 진입 제외"
+    if any(v == 0 for v in volumes[:5]):
+        return False, 0, 0, "최근 거래정지(VI 추정) 캔들 포함 — 진입 제외"
     # ① 스토캐스틱 RSI
     stoch_k, stoch_d = calc_stoch_rsi(closes)
     if stoch_k is None:
