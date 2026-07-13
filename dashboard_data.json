@@ -198,20 +198,20 @@
     {
       "action": "sell",
       "date": "07/13 11:09",
-      "stock": "002700",
+      "stock": "신일전자",
       "qty": 232,
       "price": 1262,
       "avg_price": 1289,
       "pnl_pct": -2.09,
       "pnl_amt": -6264,
-      "reason": "손절 (복구, -2.09%)"
+      "reason": "손절 (-2.09%)"
     }
   ],
   "position": null,
   "last_updated": "2026-07-13T15:27:20.974164+09:00",
   "daily_loss_guard": {
     "date": "07/13",
-    "consecutive_losses": 1,
+    "consecutive_losses": 2,
     "notified": false
   },
   "balance_history": [
