@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 497581,
+  "current_balance": 499165,
   "trades": [
     {
       "action": "buy",
@@ -185,10 +185,30 @@
       "pnl_pct": -3.71,
       "pnl_amt": -11008,
       "reason": "손절 (-3.71%)"
+    },
+    {
+      "action": "buy",
+      "date": "07/13 10:52",
+      "code": "002700",
+      "stock": "002700",
+      "qty": 232,
+      "price": 1289,
+      "amount": 299048
     }
   ],
-  "position": null,
-  "last_updated": "2026-07-13T10:36:19.589585+09:00",
+  "position": {
+    "code": "002700",
+    "name": "002700",
+    "qty": 232,
+    "market": "J",
+    "avg_price": 1289,
+    "current_price": 1293,
+    "stop_price": 1265,
+    "target_price": 1336,
+    "entry_time": "2026-07-13T10:52:53.673328+09:00",
+    "trailing_activated": false
+  },
+  "last_updated": "2026-07-13T10:53:57.302142+09:00",
   "daily_loss_guard": {
     "date": "07/13",
     "consecutive_losses": 1,
@@ -213,7 +233,7 @@
     },
     {
       "date": "07/13",
-      "balance": 497581
+      "balance": 499165
     }
   ]
 }
