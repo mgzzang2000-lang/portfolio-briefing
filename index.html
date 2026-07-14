@@ -289,7 +289,11 @@ function renderUs(d) {
   const trades = d.trade_history || [];
   const sells = trades.filter(t => t.action === 'sell');
   const initial = d.initial_balance || 200;
-  const currentBalance = d.current_balance != null ? d.current_balance : initial;
+  // [2026-07-14] current_balance는 순수 현금이라 종목 보유 중엔 가격이 움직여도
+  // 화면이 안 바뀌던 문제(평가손익 미반영) — total_assets(현금+평가금액)를 우선 사용.
+  // 옛 데이터(스크립트 갱신 전)에는 이 필드가 없을 수 있어 current_balance로 대체.
+  const currentBalance = d.total_assets != null ? d.total_assets
+                        : (d.current_balance != null ? d.current_balance : initial);
   const totalPnl = currentBalance - initial;
   const totalPnlPct = (totalPnl / initial * 100).toFixed(2);
   const positions = Object.entries(d.positions || {});
@@ -320,7 +324,7 @@ function renderUs(d) {
 
   document.getElementById('panelUs').innerHTML = `
     <div class="balance-card" style="border-color: rgba(232,147,58,0.18);">
-      <div class="balance-label" style="color:#e8933a;">현재 잔고</div>
+      <div class="balance-label" style="color:#e8933a;">현재 자산</div>
       <div class="balance-amount">${fmtUsd(currentBalance)}</div>
       <div class="balance-row">
         <div class="balance-sub"><div class="label">누적 손익</div><div class="value ${cls(totalPnl)}">${sign(totalPnl)}${fmtUsd(Math.abs(totalPnl))}</div></div>
@@ -338,7 +342,7 @@ function renderUs(d) {
     <div class="section-title">거래 내역</div>
     ${renderTrades(trades, '$', fmtUsd)}
   `;
-  chartUs = renderChart('chartUs', chartUs, d.balance_history || [], initial, '#e8933a', fmtUsd);
+  chartUs = renderChart('chartUs', chartUs, d.total_assets_history || d.balance_history || [], initial, '#e8933a', fmtUsd);
   return null;
 }
 

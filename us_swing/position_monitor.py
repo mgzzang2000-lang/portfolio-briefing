@@ -17,7 +17,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 
 from kis_common import (
     KST, get_kis_token, get_holdings, place_order, QUOTE_TO_TRADE_EXCD,
-    record_balance, sync_live_balance,
+    record_balance, sync_live_balance, sync_total_assets,
 )
 # [코드리뷰 수정] RATCHET_PCT/PARTIAL_FRACTION을 이 파일에 따로 선언해두면 한쪽만
 # 바꾸고 잊어버릴 위험이 있다는 지적을 받아, trade_execution.py를 단일 소스로 삼아 import.
@@ -58,6 +58,7 @@ def main():
         # [2026-07-09] 잔고 갱신은 이미 위에서 끝났으니, 보유 포지션이 없어도
         # 그 값이 저장되도록 여기서도 save — 종전엔 이 분기에서 그냥 return해서
         # 매 사이클 잔고 새로고침이 무의미해지고 있었음.
+        sync_total_assets(state, [])
         save_json(STATE_FILE, state)
         print("보유 포지션 없음 — 확인할 것 없음")
         return
@@ -136,6 +137,11 @@ def main():
             print(f"[매도 실패] {symbol}: {resp.get('msg1', resp)}")
         time.sleep(0.3)
 
+    # 이번 사이클에 전량 매도된 종목은 그 대금이 이미 current_balance(현금)에
+    # 반영됐으니 position_value에서 제외 — 안 그러면 매도대금+매도 전 평가금액이
+    # 이중으로 잡혀 total_assets가 순간적으로 부풀어 보임.
+    final_holdings = [h for h in holdings if h["symbol"] in state.get("positions", {})]
+    sync_total_assets(state, final_holdings)
     save_json(STATE_FILE, state)
 
 

@@ -25,6 +25,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 from kis_common import (
     KST, get_kis_token, get_holdings, get_quote, place_order,
     get_usd_krw_rate, QUOTE_TO_TRADE_EXCD, record_balance, sync_live_balance,
+    sync_total_assets,
 )
 from get_universe import get_universe
 
@@ -115,6 +116,7 @@ def main():
     free_slots = MAX_POSITIONS - len(held_symbols)
     if free_slots <= 0:
         print(f"빈 슬롯 없음 (보유 {len(held_symbols)}/{MAX_POSITIONS})")
+        sync_total_assets(state, [h for h in holdings if h["symbol"] in held_symbols])
         save_json(STATE_FILE, state)
         return
 
@@ -203,6 +205,16 @@ def main():
             print(f"[매수 실패] {symbol}: {resp.get('msg1', resp)}")
         time.sleep(0.3)
 
+    # 이번 실행에서 새로 산 종목은 holdings(실행 시작 시점 조회)에 없으므로
+    # 방금 체결된 entry_price를 현재가 대용으로 사용(매수 직후라 오차 미미) —
+    # 다음 position_monitor.py(매시간) 사이클에서 실제 현재가로 갱신됨.
+    total_holdings = [h for h in holdings if h["symbol"] in held_symbols]
+    priced_symbols = {h["symbol"] for h in total_holdings}
+    for symbol in held_symbols - priced_symbols:
+        pos = state["positions"].get(symbol)
+        if pos:
+            total_holdings.append({"symbol": symbol, "qty": pos["qty"], "current_price": pos["entry_price"]})
+    sync_total_assets(state, total_holdings)
     save_json(STATE_FILE, state)
     print(f"완료 — 신규매수 {bought}건, 현재 보유 {len(held_symbols)}/{MAX_POSITIONS}")
 

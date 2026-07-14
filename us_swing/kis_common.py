@@ -226,6 +226,25 @@ def sync_live_balance(token, cano, acnt_prdt_cd, state):
     _touch_balance_history(state)
 
 
+def sync_total_assets(state, holdings):
+    """[2026-07-14] current_balance는 순수 현금(frcr_dncl_amt_2)이라, 종목을 매수해
+    보유하고 있는 동안엔 그 종목 가격이 오르내려도 화면에 전혀 반영이 안 됐음
+    (사용자 피드백: "현재 자산이 매수하고 남은 잔고만 보여준다", "계속 일정 금액에
+    멈춰있어 재미없다"). 대시보드 표시(총자산/차트)는 현금 + 보유종목 평가금액
+    합계를 따로 저장한 total_assets를 쓰고, current_balance는 실제 매매 시
+    현금흐름을 정확히 추적해야 하는 내부 장부 값이라 건드리지 않는다."""
+    position_value = sum(h["qty"] * h["current_price"] for h in holdings)
+    state["total_assets"] = round(state.get("current_balance", 0) + position_value, 2)
+    history = state.setdefault("total_assets_history", [])
+    today = datetime.now(KST).strftime("%m/%d")
+    entry = {"date": today, "balance": state["total_assets"]}
+    if history and history[-1]["date"] == today:
+        history[-1] = entry
+    else:
+        history.append(entry)
+    state["total_assets_history"] = history[-60:]
+
+
 def get_holdings(token, cano, acnt_prdt_cd):
     """현재 보유 중인 해외주식 목록(잔고조회, TTTS3012R) — ground truth.
     반환: [{'symbol','qty','avg_price','current_price','pnl_pct'}, ...]
