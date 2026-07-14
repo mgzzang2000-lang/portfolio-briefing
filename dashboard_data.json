@@ -210,32 +210,52 @@
       "action": "buy",
       "date": "07/14 10:35",
       "code": "069540",
-      "stock": "069540",
+      "stock": "빛과전자",
       "qty": 120,
-      "price": 2485,
-      "amount": 298200
+      "price": 2505,
+      "amount": 300600
     },
     {
       "action": "sell",
       "date": "07/14 10:38",
-      "stock": "069540",
+      "stock": "빛과전자",
       "qty": 60,
       "price": 2625,
-      "avg_price": 2485,
-      "pnl_pct": 5.63,
-      "pnl_amt": 8400,
-      "reason": "익절 (복구, +5.63%)"
+      "avg_price": 2505,
+      "pnl_pct": 4.79,
+      "pnl_amt": 7200,
+      "reason": "익절 (체결내역 기준 정정, +4.79%)"
     },
     {
       "action": "sell",
       "date": "07/14 10:38",
-      "stock": "069540",
+      "stock": "빛과전자",
       "qty": 60,
       "price": 2605,
-      "avg_price": 2485,
-      "pnl_pct": 4.83,
-      "pnl_amt": 7200,
-      "reason": "익절 (복구, +4.83%)"
+      "avg_price": 2505,
+      "pnl_pct": 3.99,
+      "pnl_amt": 6000,
+      "reason": "익절 (체결내역 기준 정정, +3.99%)"
+    },
+    {
+      "action": "buy",
+      "date": "07/14 10:39",
+      "code": "005860",
+      "stock": "한일사료",
+      "qty": 110,
+      "price": 2715,
+      "amount": 298650
+    },
+    {
+      "action": "sell",
+      "date": "07/14 13:49",
+      "stock": "한일사료",
+      "qty": 110,
+      "price": 2585,
+      "avg_price": 2715,
+      "pnl_pct": -4.79,
+      "pnl_amt": -14300,
+      "reason": "손절 (복구, -4.79%)"
     },
     {
       "action": "buy",
@@ -262,7 +282,7 @@
   "last_updated": "2026-07-14T15:21:39.532386+09:00",
   "daily_loss_guard": {
     "date": "07/14",
-    "consecutive_losses": 1,
+    "consecutive_losses": 2,
     "notified": false
   },
   "balance_history": [
