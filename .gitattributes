@@ -1,0 +1,13 @@
+# [2026-07-14] watcher.py(내 PC)와 GitHub Actions가 같은 파일에 동시에 커밋해서
+# 생기던 git 충돌을 없애기 위한 설정. 실제 동작은 dashboard_merge.py +
+# .github/workflows/auto-trading.yml, watcher.py의 git config 설정과 함께 동작함.
+
+# 매매기록/포지션 — 내용을 이해해서 항상 자동으로 합침 (거래내역 유실 방지)
+dashboard_data.json merge=dashboard-merge
+
+# 매 사이클 통째로 다시 만들어지는 시세/캐시성 데이터 — 충돌나면 그냥 우리 쪽(최신 실행) 유지
+minute_data/*.json merge=ours
+shadow_data/*.json merge=ours
+watcher_heartbeat.json merge=ours
+daily_filter_cache.json merge=ours
+kis_token.json merge=ours

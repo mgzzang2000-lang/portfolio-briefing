@@ -49,7 +49,10 @@ def run_git(*args, timeout=15):
 
 
 def git_pull():
-    run_git('pull', '--rebase')
+    # [2026-07-14] rebase는 충돌 시 ours/theirs 방향이 뒤집혀 dashboard_merge.py
+    # 병합 규칙과 안 맞을 수 있어 merge로 통일 (충돌나도 dashboard_merge.py가
+    # 항상 자동으로 풀어주므로 사람 개입 없이 진행됨).
+    run_git('pull', '--no-rebase')
 
 
 def git_push_dashboard():
@@ -57,15 +60,21 @@ def git_push_dashboard():
     commit = run_git('commit', '-m', '[로컬감시] 대시보드 업데이트 [skip ci]')
     if commit and 'nothing to commit' in (commit.stdout + commit.stderr):
         return
-    for _ in range(5):
+    for _ in range(10):
         push = run_git('push')
         if push and push.returncode == 0:
             print("[git push] 완료")
             return
         run_git('fetch', 'origin', 'main')
-        run_git('rebase', 'origin/main')
+        merge = run_git('merge', 'origin/main', '-m', 'merge: 대시보드 동기화 [skip ci]')
+        if merge and merge.returncode != 0:
+            # dashboard_merge.py가 항상 성공 처리하므로 이 분기는 거의 발생 안 하지만,
+            # 혹시 대비해 add까지는 해둔다 (merge driver가 conflict 마커 없이 파일을
+            # 이미 덮어썼을 것이므로 add만 하면 커밋 가능한 상태가 됨).
+            run_git('add', 'dashboard_data.json')
+            run_git('commit', '--no-edit')
         time.sleep(2)
-    print("[git push] 재시도 끝까지 실패 — 다음 GitHub Actions 실행이 대신 반영할 것")
+    print("[git push] 10회 재시도 끝까지 실패 — 다음 GitHub Actions 실행이 대신 반영할 것")
 
 
 def push_heartbeat():
@@ -89,7 +98,7 @@ def push_heartbeat():
         if push and push.returncode == 0:
             return
         run_git('fetch', 'origin', 'main')
-        run_git('rebase', 'origin/main')
+        run_git('merge', 'origin/main', '-m', 'merge: heartbeat 동기화 [skip ci]')
         time.sleep(1)
     print("[하트비트 푸시] 재시도 끝까지 실패 — 다음 주기에 재시도")
 

@@ -77,14 +77,27 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # [2026-07-14] watcher.py(사용자 PC)와 이 워크플로우가 거의 동시에 같은
+          # 파일을 커밋하면서 텍스트 기반 rebase가 충돌해 매매기록이 통째로 유실되는
+          # 사고(005860 매수 기록 소실 → 손절 로직이 포지션 존재 자체를 몰라 손절 안 나감)가
+          # 발생. dashboard_merge.py가 내용을 이해해서 항상 자동으로 병합하도록 설정 —
+          # 이 설정은 매 실행마다 새로 체크아웃되므로 매번 등록해야 함(커밋으로 저장 불가).
+          git config merge.dashboard-merge.name "Dashboard semantic JSON merge"
+          git config merge.dashboard-merge.driver "python dashboard_merge.py %O %A %B"
+          git config merge.ours.driver true
           git add dashboard_data.json minute_data/ shadow_data/
           git diff --cached --quiet || git commit -m "chore: update dashboard data [skip ci]"
-          # [2026-07-06] 실행 도중(최대 7분) 다른 커밋이 먼저 push되면 non-fast-forward로
-          # 거절될 수 있어, 최신 main을 rebase로 받아서 재시도
+          # rebase는 충돌 시 ours/theirs 방향이 뒤집혀 merge driver 규칙과 안 맞을 수
+          # 있어 merge로 통일 (dashboard_merge.py가 항상 자동으로 합쳐주므로 사람이
+          # 볼 충돌 마커 자체가 안 생김 — minute_data/shadow_data는 merge=ours라 그냥
+          # 이번 실행 결과를 유지).
           for i in 1 2 3 4 5; do
             git push && exit 0
             git fetch origin main
-            git rebase origin/main
+            git merge origin/main -m "merge: 대시보드 동기화 [skip ci]" || {
+              git add dashboard_data.json minute_data/ shadow_data/
+              git commit --no-edit
+            }
             sleep 3
           done
           git push
