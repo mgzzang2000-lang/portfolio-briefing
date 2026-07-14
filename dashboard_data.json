@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 488904,
+  "current_balance": 482931,
   "trades": [
     {
       "action": "buy",
@@ -236,13 +236,33 @@
       "pnl_pct": 4.83,
       "pnl_amt": 7200,
       "reason": "익절 (복구, +4.83%)"
+    },
+    {
+      "action": "buy",
+      "date": "07/14 14:33",
+      "code": "069540",
+      "stock": "069540",
+      "qty": 120,
+      "price": 2500,
+      "amount": 300000
+    },
+    {
+      "action": "sell",
+      "date": "07/14 14:36",
+      "stock": "빛과전자",
+      "qty": 120,
+      "price": 2450,
+      "avg_price": 2494,
+      "pnl_pct": -1.77,
+      "pnl_amt": -5304,
+      "reason": "손절 (-1.77%)"
     }
   ],
   "position": null,
-  "last_updated": "2026-07-14T14:19:33.449934+09:00",
+  "last_updated": "2026-07-14T14:38:25.054395+09:00",
   "daily_loss_guard": {
     "date": "07/14",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
@@ -268,7 +288,7 @@
     },
     {
       "date": "07/14",
-      "balance": 488904
+      "balance": 482931
     }
   ]
 }
