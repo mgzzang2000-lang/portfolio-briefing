@@ -36,7 +36,18 @@
 직접 호출하도록 통합되면서, 후보로 잡힌 종목의 1분봉도 같이 수집되기 시작함
 (이전엔 후보만 기록되고 그 종목의 실제 가격 흐름은 안 쌓이는 공백이 있었음).
 
-[2026-07-07] 신설(섀도우A/B). [2026-07-10] 섀도우C(FVG) 추가.
+[섀도우 E] 아직 조건식이 아니라 순수 데이터 수집 단계. 사용자가 "프로그램매수
+   급증을 급등 초입 신호로 못 쓸까"를 제안했고, 실시간 스냅샷 1회 확인 결과
+   대형주(삼성전자)는 프로그램순매수가 크고 방향성이 뚜렷한 반면, 이 봇이 실제
+   매매한 중소형주 2종목(069540/005860)은 값이 작고 부호가 계속 뒤집히는 노이즈
+   수준이었음 — 다만 표본 1스냅샷이라 결론 내리긴 이름. 임계값을 지금 추측해서
+   후보조건으로 만들면 과최적화 위험이 크므로, A~D와 달리 조건 없이 종목별
+   프로그램매매 시계열 원본만 minute_data와 같은 구조로 shadow_data/E_{code}_
+   {date}.json에 쌓는다(collect_intraday_data.py 참고). 나중에 표본이 쌓이면
+   그때 실제 급등 발생 시각과 대조해서 유의미한 임계값이 있는지 분석 예정.
+
+[2026-07-07] 신설(섀도우A/B). [2026-07-10] 섀도우C(FVG) 추가. [2026-07-15] 섀도우E
+(프로그램매매 데이터 수집) 추가.
 """
 import os, json, time
 from datetime import datetime, timezone, timedelta
@@ -172,6 +183,18 @@ def get_recent_ticks(token, code, market="J"):
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-ccnl", {
         "FID_COND_MRKT_DIV_CODE": market, "FID_INPUT_ISCD": code
     }, "FHKST01010300")
+    return data.get('output', [])
+
+
+def get_program_trade_raw(token, code):
+    """종목별 프로그램매매추이(체결) 원본 반환(최신이 index 0).
+    [2026-07-15 신설, 섀도우E 데이터수집용] FID_COND_MRKT_DIV_CODE는 코스피/코스닥
+    구분이 아니라 거래소 구분(J=KRX,NX=NXT,UN=통합)이라 다른 함수와 달리 market
+    파라미터 없이 항상 "J" 고정 — 실측으로 코스닥 종목(069540 등)도 이 값으로
+    정상 조회됨을 확인함."""
+    data = kis_get(token, "/uapi/domestic-stock/v1/quotations/program-trade-by-stock", {
+        "FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code
+    }, "FHPPG04650101")
     return data.get('output', [])
 
 

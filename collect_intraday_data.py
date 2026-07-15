@@ -32,6 +32,9 @@
    "그 모델이 그 순간 무엇을 포착했는지" + "그 이후 실제 가격이 어떻게 움직였는지"
    둘 다 필요하기 때문).
 4. GitHub Actions에서 09:00~15:30(KST) 사이 5분 간격으로 반복 실행.
+5. [2026-07-15 추가] 위 워치리스트 종목에 한해 프로그램매매추이(체결)도 같이
+   수집해 shadow_data/E_{code}_{date}.json에 쌓음(섀도우E, 아직 조건식 아니고
+   순수 데이터 수집 — 자세한 배경은 shadow_scan.py 상단 섀도우E 설명 참고).
 
 [주의] GitHub Actions 스케줄은 1분 단위 보장이 안 되고 부하 시 지연될
 수 있음 - 그래도 한 번 호출에 최근 30개 봉이 오므로 5분 간격이면
@@ -325,6 +328,7 @@ def main():
         return
 
     total_new = 0
+    total_new_e = 0
     for w in watchlist:
         code, market = w['code'], w['market']
         bars_path = f"{DATA_DIR}/{code}_{today_str}.json"
@@ -341,7 +345,24 @@ def main():
             print(f" {w['name']}({code}): +{len(new_bars)}봉 (누적 {len(stored)})")
         time.sleep(0.1)
 
+        # [2026-07-15 섀도우E] 워치리스트(=오늘 실제 급등 후보로 걸린 종목들)에
+        # 한해 프로그램매매 시계열도 같이 쌓음 — 나중에 minute_data의 급등 시각과
+        # 대조해 프로그램순매수가 선행지표로 쓸만한지 분석하기 위함. 아직 조건식
+        # 아님(shadow_scan.py 섀도우E 설명 참고).
+        e_path = f"shadow_data/E_{code}_{today_str}.json"
+        e_stored = load_json(e_path, [])
+        e_seen = {r['bsop_hour'] for r in e_stored if r.get('bsop_hour')}
+        e_raw = shadow_scan.get_program_trade_raw(token, code)
+        e_new = [r for r in e_raw if r.get('bsop_hour') and r['bsop_hour'] not in e_seen]
+        if e_new:
+            e_stored.extend(e_new)
+            e_stored.sort(key=lambda r: r['bsop_hour'])
+            save_json(e_path, e_stored)
+            total_new_e += len(e_new)
+        time.sleep(0.1)
+
     print(f"완료 - 신규 {total_new}봉 저장 (워치리스트 {len(watchlist)}종목)")
+    print(f"[섀도우E] 프로그램매매 신규 {total_new_e}건 저장")
 
 
 if __name__ == '__main__':
