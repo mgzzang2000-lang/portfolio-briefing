@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 482891,
+  "current_balance": 482090,
   "trades": [
     {
       "action": "buy",
@@ -285,21 +285,32 @@
       "qty": 166,
       "price": 1799,
       "amount": 298634
+    },
+    {
+      "action": "sell",
+      "date": "07/15 13:50",
+      "stock": "003280",
+      "qty": 83,
+      "price": 1801,
+      "avg_price": 1799,
+      "pnl_pct": 0.11,
+      "pnl_amt": 166,
+      "reason": "익절 (복구, +0.11%)"
+    },
+    {
+      "action": "sell",
+      "date": "07/15 13:51",
+      "stock": "003280",
+      "qty": 83,
+      "price": 1799,
+      "avg_price": 1799,
+      "pnl_pct": 0.0,
+      "pnl_amt": 0,
+      "reason": "익절 (복구, +0.00%)"
     }
   ],
-  "position": {
-    "code": "003280",
-    "name": "003280",
-    "qty": 166,
-    "market": "J",
-    "avg_price": 1799,
-    "current_price": 1801,
-    "stop_price": 1773,
-    "target_price": 1872,
-    "entry_time": "2026-07-15T11:50:36.500515+09:00",
-    "trailing_activated": false
-  },
-  "last_updated": "2026-07-15T13:44:43.560179+09:00",
+  "position": null,
+  "last_updated": "2026-07-15T14:01:22.474108+09:00",
   "daily_loss_guard": {
     "date": "07/15",
     "consecutive_losses": 0,
@@ -332,7 +343,7 @@
     },
     {
       "date": "07/15",
-      "balance": 482891
+      "balance": 482090
     }
   ]
 }
