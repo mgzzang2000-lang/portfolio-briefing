@@ -307,13 +307,24 @@
       "pnl_pct": 0.0,
       "pnl_amt": 0,
       "reason": "익절 (복구, +0.00%)"
+    },
+    {
+      "action": "sell",
+      "date": "07/15 13:51",
+      "stock": "흥아해운",
+      "qty": 83,
+      "price": 1800,
+      "avg_price": 1801,
+      "pnl_pct": -0.06,
+      "pnl_amt": -83,
+      "reason": "손절 (-0.06%)"
     }
   ],
   "position": null,
   "last_updated": "2026-07-15T14:01:22.474108+09:00",
   "daily_loss_guard": {
     "date": "07/15",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
