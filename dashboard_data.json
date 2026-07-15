@@ -288,6 +288,17 @@
     },
     {
       "action": "sell",
+      "date": "07/15 13:50",
+      "stock": "003280",
+      "qty": 83,
+      "price": 1801,
+      "avg_price": 1799,
+      "pnl_pct": 0.11,
+      "pnl_amt": 166,
+      "reason": "익절 (복구, +0.11%)"
+    },
+    {
+      "action": "sell",
       "date": "07/15 13:51",
       "stock": "흥아해운",
       "qty": 83,
@@ -296,6 +307,17 @@
       "pnl_pct": -0.06,
       "pnl_amt": -83,
       "reason": "손절 (-0.06%)"
+    },
+    {
+      "action": "sell",
+      "date": "07/15 13:51",
+      "stock": "003280",
+      "qty": 83,
+      "price": 1799,
+      "avg_price": 1799,
+      "pnl_pct": 0.0,
+      "pnl_amt": 0,
+      "reason": "익절 (복구, +0.00%)"
     }
   ],
   "position": null,
