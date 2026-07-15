@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 482931,
+  "current_balance": 482559,
   "trades": [
     {
       "action": "buy",
@@ -276,10 +276,30 @@
       "pnl_pct": -1.77,
       "pnl_amt": -5304,
       "reason": "손절 (-1.77%)"
+    },
+    {
+      "action": "buy",
+      "date": "07/15 11:50",
+      "code": "003280",
+      "stock": "003280",
+      "qty": 166,
+      "price": 1799,
+      "amount": 298634
     }
   ],
-  "position": null,
-  "last_updated": "2026-07-15T11:35:25.548006+09:00",
+  "position": {
+    "code": "003280",
+    "name": "003280",
+    "qty": 166,
+    "market": "J",
+    "avg_price": 1799,
+    "current_price": 1799,
+    "stop_price": 1773,
+    "target_price": 1872,
+    "entry_time": "2026-07-15T11:50:36.500515+09:00",
+    "trailing_activated": false
+  },
+  "last_updated": "2026-07-15T11:52:41.106627+09:00",
   "daily_loss_guard": {
     "date": "07/15",
     "consecutive_losses": 0,
@@ -312,7 +332,7 @@
     },
     {
       "date": "07/15",
-      "balance": 482931
+      "balance": 482559
     }
   ]
 }
