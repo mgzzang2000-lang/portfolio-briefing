@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 178327,
+  "current_balance": 469080,
   "trades": [
     {
       "action": "buy",
@@ -356,24 +356,44 @@
       "qty": 104,
       "price": 2860,
       "amount": 297440
+    },
+    {
+      "action": "sell",
+      "date": "07/16 11:42",
+      "stock": "빛과전자",
+      "qty": 104,
+      "price": 2830,
+      "avg_price": 2875,
+      "pnl_pct": -1.57,
+      "pnl_amt": -4680,
+      "reason": "손절 (-1.57%)"
+    },
+    {
+      "action": "buy",
+      "date": "07/16 11:43",
+      "code": "003280",
+      "stock": "003280",
+      "qty": 156,
+      "price": 1912,
+      "amount": 298272
     }
   ],
   "position": {
-    "code": "069540",
-    "name": "069540",
-    "qty": 104,
+    "code": "003280",
+    "name": "003280",
+    "qty": 156,
     "market": "J",
-    "avg_price": 2860,
-    "current_price": 2860,
-    "stop_price": 2831,
-    "target_price": 2990,
-    "entry_time": "2026-07-16T11:29:47.495473+09:00",
+    "avg_price": 1912,
+    "current_price": 1911,
+    "stop_price": 1885,
+    "target_price": 1990,
+    "entry_time": "2026-07-16T11:43:50.598241+09:00",
     "trailing_activated": false
   },
-  "last_updated": "2026-07-16T11:29:47.495672+09:00",
+  "last_updated": "2026-07-16T11:47:00.076520+09:00",
   "daily_loss_guard": {
     "date": "07/16",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
@@ -407,7 +427,7 @@
     },
     {
       "date": "07/16",
-      "balance": 178327
+      "balance": 469080
     }
   ]
 }
