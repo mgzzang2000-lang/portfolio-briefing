@@ -14,6 +14,13 @@ permissions:
 jobs:
   trade:
     runs-on: ubuntu-latest
+    # [2026-07-16] 기본값(6시간)이면 한국투자증권 서버 접속장애처럼 API가 통째로
+    # 응답 없을 때 한 실행이 비정상적으로 오래(오늘 28분) 걸려 concurrency의 단일
+    # 실행 슬롯을 계속 잡아먹고, 그동안 뒤이어 트리거된 실행들이 전부 취소되며
+    # 보유 포지션의 손절 체크 자체가 24분간 안 되는 사고로 이어짐. 정상 실행은
+    # ~5~6분이면 끝나므로 넉넉히 잡아도 문제없음 — 이 시간을 넘기면 강제 종료해
+    # 다음 트리거가 곧바로 이어받아 손절 체크를 재개할 수 있게 한다.
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
