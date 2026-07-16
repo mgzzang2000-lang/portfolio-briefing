@@ -26,6 +26,12 @@ KST = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
 MAX_BET = 300_000  # [2026-07-06] 눌림목+불플래그 진입 로직 검증 전까지 축소 운용 (20만→30만 조정)
 DERIVATIVE_ETF_KEYWORDS = ["레버리지", "인버스", "ETN", "선물"]  # [2026-07-06] 파생상품 ETF/ETN 매수 제외
+# [2026-07-16] 실거래 로그 16건을 1분봉과 대조 분석한 결과, 손실거래는 평균
+# 시가대비 +9.4% 지점에서 진입(승리거래는 +5.8%)한 것으로 나타남 — 눌림목·재돌파
+# 조건을 통과해도 "그날 하루로 보면 이미 많이 오른 상태"인지는 걸러내지 못하고
+# 있었음. 섀도우A(2026-07-13, shadow_scan.py)에 이미 같은 취지로 검증해둔 상한을
+# 실거래에도 동일하게 적용.
+MAX_EXTENSION_FROM_OPEN_PCT = 5.0
 ACCOUNT_NO   = os.environ['KIS_ACCOUNT_NO']
 ACCOUNT_PROD = "01"
 KIS_APP_KEY    = os.environ['KIS_APP_KEY']
@@ -646,6 +652,11 @@ def scan_signals(token):
                 continue
             # [2026-07-02] 갭 필터 적용
             if gap >= gap_threshold:
+                continue
+            # [2026-07-16] 시가대비 등락률 상한 — 손실거래 평균(+9.4%)이 승리거래
+            # 평균(+5.8%)보다 뚜렷이 높게 나온 실거래 분석 결과 반영(섀도우A와 동일 기준)
+            pct_from_open = (price - cur['open']) / cur['open'] * 100
+            if pct_from_open > MAX_EXTENSION_FROM_OPEN_PCT:
                 continue
             vol_ratio = cur['volume'] / vol_avg20 if vol_avg20 else 0
             ma200_str  = f"{ma200:,.0f}" if ma200 else "N/A"
