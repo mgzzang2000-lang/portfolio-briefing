@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 482090,
+  "current_balance": 196781,
   "trades": [
     {
       "action": "buy",
@@ -318,10 +318,30 @@
       "pnl_pct": 0.0,
       "pnl_amt": 0,
       "reason": "익절 (복구, +0.00%)"
+    },
+    {
+      "action": "buy",
+      "date": "07/16 09:30",
+      "code": "279570",
+      "stock": "279570",
+      "qty": 43,
+      "price": 6840,
+      "amount": 294120
     }
   ],
-  "position": null,
-  "last_updated": "2026-07-16T09:12:32.867828+09:00",
+  "position": {
+    "code": "279570",
+    "name": "279570",
+    "qty": 43,
+    "market": "J",
+    "avg_price": 6840,
+    "current_price": 6840,
+    "stop_price": 6649,
+    "target_price": 7092,
+    "entry_time": "2026-07-16T09:30:50.818629+09:00",
+    "trailing_activated": false
+  },
+  "last_updated": "2026-07-16T09:30:50.818827+09:00",
   "daily_loss_guard": {
     "date": "07/16",
     "consecutive_losses": 0,
@@ -358,7 +378,7 @@
     },
     {
       "date": "07/16",
-      "balance": 482090
+      "balance": 196781
     }
   ]
 }
