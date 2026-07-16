@@ -32,6 +32,12 @@ DERIVATIVE_ETF_KEYWORDS = ["레버리지", "인버스", "ETN", "선물"]  # [202
 # 있었음. 섀도우A(2026-07-13, shadow_scan.py)에 이미 같은 취지로 검증해둔 상한을
 # 실거래에도 동일하게 적용.
 MAX_EXTENSION_FROM_OPEN_PCT = 5.0
+# [2026-07-16] 실거래 24건 분석 결과: 이긴 거래는 +2% 부분익절로 절반만 실현되는 반면
+# 진 거래는 손절 시 전량이 한 번에 나가, 이긴 거래의 평균 투입금(14만원)이 진 거래
+# (26.8만원)의 절반 수준밖에 안 됐음 — 승률/평균%는 우호적인데도 금액가중 평균수익률은
+# 마이너스(-0.56%)였던 근본 원인. 부분익절 비율을 낮춰 이긴 거래에 더 많은 물량을
+# 남겨(계속 추세를 태워) 이 비대칭을 줄임(50%→30%).
+PARTIAL_TP_FRACTION = 0.3
 ACCOUNT_NO   = os.environ['KIS_ACCOUNT_NO']
 ACCOUNT_PROD = "01"
 KIS_APP_KEY    = os.environ['KIS_APP_KEY']
@@ -805,18 +811,20 @@ def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
     if quote['upper_limit'] > 0 and cur_price >= quote['upper_limit'] * 0.995:
         sell, reason = True, f"상한가 익절 ({pnl:+.2f}%)"
 
-    # [2026-07-06 변경] +2% 도달 시 50% 부분익절 + 나머지 손절선을 본전+0.4%로 상향
-    # (기존엔 손절선만 올리고 팔지는 않았음 — 사용자 요청으로 절반은 여기서 확정 실현)
+    # [2026-07-06 도입, 2026-07-16 비율 조정] +2% 도달 시 부분익절 + 나머지 손절선을 본전+0.4%로 상향
+    # (기존엔 손절선만 올리고 팔지는 않았음 — 사용자 요청으로 일부는 여기서 확정 실현)
+    # [2026-07-16] 비율을 50%→PARTIAL_TP_FRACTION(30%)로 축소 — 이긴 거래에 더 많은 물량을
+    # 남겨 손절(전량 청산)과의 투입금 비대칭을 줄이기 위함(위 상수 정의부 주석 참고).
     # 상한가로 이미 전량 익절이 확정된 경우엔 건너뜀(중복 매도 방지)
     if not sell and not pos.get('trailing_activated') and pnl >= 2.0:
         pos['trailing_activated'] = True
         pos['stop_price'] = max(stop_price, avg_price * 1.004)  # 본전+0.4%
         stop_price = pos['stop_price']
-        half_qty = qty // 2
-        if half_qty >= 1:
-            ok, order_result = place_order(kis_token, code, half_qty, "sell")
+        partial_qty = max(1, round(qty * PARTIAL_TP_FRACTION)) if qty > 1 else 0
+        if partial_qty >= 1:
+            ok, order_result = place_order(kis_token, code, partial_qty, "sell")
             if not ok:
-                err_msg = f"⚠️ +2% 부분익절 주문 실패\n{name} {half_qty}주\n{order_result.get('msg1', '')}"
+                err_msg = f"⚠️ +2% 부분익절 주문 실패\n{name} {partial_qty}주\n{order_result.get('msg1', '')}"
                 print(err_msg)
                 send_kakao(kakao_token, err_msg)
                 save_dashboard(dash)
@@ -829,7 +837,7 @@ def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
                 dash['current_balance'] = int(new_cash)
             else:
                 print("  [경고] 부분익절 후 잔고 재조회 실패 — 이전 잔고 유지")
-            print(f"  [+2%] 50% 부분익절 ({half_qty}주) → 나머지 손절선: {stop_price:,.0f}")
+            print(f"  [+2%] {PARTIAL_TP_FRACTION*100:.0f}% 부분익절 ({partial_qty}주) → 나머지 손절선: {stop_price:,.0f}")
             save_dashboard(dash)
             return
         else:

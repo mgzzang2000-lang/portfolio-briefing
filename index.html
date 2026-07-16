@@ -60,9 +60,10 @@
   /* 통계 그리드 */
   .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
   .stat-card { background: var(--surface); border-radius: 12px; padding: 15px; border: 1px solid var(--border); }
+  .stat-card.wide { grid-column: 1 / -1; }
   .stat-card .label { font-size: 10px; color: var(--text-faint); margin-bottom: 6px; letter-spacing: 0.3px; }
   .stat-card .value { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .stat-card .sub { font-size: 10px; color: var(--text-faint); margin-top: 3px; }
+  .stat-card .sub { font-size: 10px; color: var(--text-faint); margin-top: 3px; line-height: 1.4; }
 
   /* 섹션 */
   .section-title { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.8px; margin: 20px 0 8px; }
@@ -241,6 +242,14 @@ function renderKr(d) {
   const totalPnlPct = ((currentBalance - initial) / initial * 100).toFixed(2);
   const avgWin = wins.length ? (wins.reduce((s,t)=>s+(t.pnl_pct||0),0)/wins.length).toFixed(2) : '0.00';
   const avgLoss = losses.length ? (losses.reduce((s,t)=>s+(t.pnl_pct||0),0)/losses.length).toFixed(2) : '0.00';
+  // [2026-07-16] 승률·평균%(건당 단순평균)는 거래마다 투입금액이 다른 걸 반영하지 못해
+  // "승률/평균%은 좋은데 잔고는 준다" 착시를 일으킬 수 있음(부분익절은 소액, 손절은 전량이라
+  // 특히 그랬음) — 실제 잔고 증감과 같은 방향으로 움직이는 금액가중 평균수익률을 따로 표시.
+  const notionalOf = t => (t.qty || 0) * (t.price || 0);
+  const weightedNotional = sells.reduce((s,t) => s + notionalOf(t), 0);
+  const weightedReturnPct = weightedNotional
+    ? (sells.reduce((s,t) => s + (t.pnl_pct || 0) * notionalOf(t), 0) / weightedNotional).toFixed(2)
+    : '0.00';
 
   let posHTML = '';
   if (d.position) {
@@ -271,10 +280,11 @@ function renderKr(d) {
     </div>
     <div class="chart-card"><canvas id="chartKr"></canvas></div>
     <div class="stats-grid">
-      <div class="stat-card"><div class="label">승률</div><div class="value ${winRate >= 50 ? 'up' : 'down'}">${winRate}<span style="font-size:13px">%</span></div><div class="sub">${wins.length}승 ${losses.length}패</div></div>
+      <div class="stat-card"><div class="label">승률</div><div class="value ${winRate >= 50 ? 'up' : 'down'}">${winRate}<span style="font-size:13px">%</span></div><div class="sub">${wins.length}승 ${losses.length}패 (건수 기준)</div></div>
       <div class="stat-card"><div class="label">총 거래</div><div class="value dim">${trades.length}<span style="font-size:13px">회</span></div><div class="sub">매도 ${sells.length}회</div></div>
-      <div class="stat-card"><div class="label">평균 수익</div><div class="value up">+${avgWin}<span style="font-size:13px">%</span></div><div class="sub">익절 평균</div></div>
-      <div class="stat-card"><div class="label">평균 손실</div><div class="value down">${avgLoss}<span style="font-size:13px">%</span></div><div class="sub">손절 평균</div></div>
+      <div class="stat-card"><div class="label">평균 수익</div><div class="value up">+${avgWin}<span style="font-size:13px">%</span></div><div class="sub">익절 건당 단순평균</div></div>
+      <div class="stat-card"><div class="label">평균 손실</div><div class="value down">${avgLoss}<span style="font-size:13px">%</span></div><div class="sub">손절 건당 단순평균</div></div>
+      <div class="stat-card wide"><div class="label">금액가중 평균수익률</div><div class="value ${cls(weightedReturnPct)}">${sign(weightedReturnPct)}${weightedReturnPct}<span style="font-size:13px">%</span></div><div class="sub">거래별 투입금액을 반영한 실제 수익률 — 잔고 증감과 같은 방향으로 움직임. 위 승률·평균%은 건당 단순평균이라 이 값과 다를 수 있음(예: 부분익절로 소액만 익절되고 손절은 전량 나가면, 승률·평균%은 좋아 보여도 이 값은 마이너스일 수 있음)</div></div>
     </div>
     <div class="section-title">현재 포지션</div>
     ${posHTML}
