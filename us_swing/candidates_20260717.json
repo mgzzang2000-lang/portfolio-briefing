@@ -1,0 +1,646 @@
+{
+  "date": "20260717",
+  "sector_ranking": [
+    {
+      "sector": "Health Care",
+      "avg_rel_strength_12w": 0.0605
+    },
+    {
+      "sector": "Financials",
+      "avg_rel_strength_12w": 0.0416
+    },
+    {
+      "sector": "Information Technology",
+      "avg_rel_strength_12w": 0.0209
+    },
+    {
+      "sector": "Real Estate",
+      "avg_rel_strength_12w": -0.0004
+    },
+    {
+      "sector": "Consumer Staples",
+      "avg_rel_strength_12w": -0.0028
+    },
+    {
+      "sector": "Industrials",
+      "avg_rel_strength_12w": -0.0156
+    },
+    {
+      "sector": "Energy",
+      "avg_rel_strength_12w": -0.0532
+    },
+    {
+      "sector": "Utilities",
+      "avg_rel_strength_12w": -0.0598
+    },
+    {
+      "sector": "Materials",
+      "avg_rel_strength_12w": -0.0704
+    },
+    {
+      "sector": "Consumer Discretionary",
+      "avg_rel_strength_12w": -0.0719
+    },
+    {
+      "sector": "Communication Services",
+      "avg_rel_strength_12w": -0.0832
+    }
+  ],
+  "candidates": [
+    {
+      "symbol": "DDOG",
+      "sector": "Information Technology",
+      "price": 261.32,
+      "rel_strength_12w": 0.9636983614249093,
+      "stage2": true,
+      "atr": 27.805792857142855,
+      "avg_volume": 27234565.666666668
+    },
+    {
+      "symbol": "PANW",
+      "sector": "Information Technology",
+      "price": 349.14,
+      "rel_strength_12w": 0.9009997812168378,
+      "stage2": true,
+      "atr": 31.249278571428572,
+      "avg_volume": 38087158.583333336
+    },
+    {
+      "symbol": "FTNT",
+      "sector": "Information Technology",
+      "price": 159.72,
+      "rel_strength_12w": 0.8392349471248899,
+      "stage2": true,
+      "atr": 11.823942857142857,
+      "avg_volume": 29093800.583333332
+    },
+    {
+      "symbol": "DELL",
+      "sector": "Information Technology",
+      "price": 401.6799,
+      "rel_strength_12w": 0.8043262521567727,
+      "stage2": true,
+      "atr": 56.69997142857142,
+      "avg_volume": 41781896.083333336
+    },
+    {
+      "symbol": "HUM",
+      "sector": "Health Care",
+      "price": 392.61,
+      "rel_strength_12w": 0.7696132242041298,
+      "stage2": true,
+      "atr": 29.598971428571424,
+      "avg_volume": 7402096.166666667
+    },
+    {
+      "symbol": "MU",
+      "sector": "Information Technology",
+      "price": 849.24,
+      "rel_strength_12w": 0.655167211415105,
+      "stage2": true,
+      "atr": 156.63061428571427,
+      "avg_volume": 245076478.08333334
+    },
+    {
+      "symbol": "HPE",
+      "sector": "Information Technology",
+      "price": 45.345,
+      "rel_strength_12w": 0.5557343923493061,
+      "stage2": true,
+      "atr": 6.220428571428571,
+      "avg_volume": 125167310.33333333
+    },
+    {
+      "symbol": "CNC",
+      "sector": "Health Care",
+      "price": 65.505,
+      "rel_strength_12w": 0.5118274188753267,
+      "stage2": true,
+      "atr": 5.0369642857142845,
+      "avg_volume": 27059327.083333332
+    },
+    {
+      "symbol": "DVA",
+      "sector": "Health Care",
+      "price": 236.365,
+      "rel_strength_12w": 0.502040590806965,
+      "stage2": true,
+      "atr": 14.529642857142862,
+      "avg_volume": 4162622.1666666665
+    },
+    {
+      "symbol": "SNDK",
+      "sector": "Information Technology",
+      "price": 1444.995,
+      "rel_strength_12w": 0.4052099656682364,
+      "stage2": true,
+      "atr": 336.7918000000001,
+      "avg_volume": 60373085.25
+    },
+    {
+      "symbol": "NTAP",
+      "sector": "Information Technology",
+      "price": 157.83,
+      "rel_strength_12w": 0.39731596480333353,
+      "stage2": true,
+      "atr": 16.836157142857143,
+      "avg_volume": 15389713.25
+    },
+    {
+      "symbol": "AMD",
+      "sector": "Information Technology",
+      "price": 502.0,
+      "rel_strength_12w": 0.38878836165824193,
+      "stage2": true,
+      "atr": 71.58594285714287,
+      "avg_volume": 159800597.08333334
+    },
+    {
+      "symbol": "CVS",
+      "sector": "Health Care",
+      "price": 107.4,
+      "rel_strength_12w": 0.3234546721537013,
+      "stage2": true,
+      "atr": 5.633921428571429,
+      "avg_volume": 38411039.5
+    },
+    {
+      "symbol": "AMAT",
+      "sector": "Information Technology",
+      "price": 567.46,
+      "rel_strength_12w": 0.3061564346539467,
+      "stage2": true,
+      "atr": 66.30462857142857,
+      "avg_volume": 45365089.25
+    },
+    {
+      "symbol": "DOC",
+      "sector": "Real Estate",
+      "price": 22.155,
+      "rel_strength_12w": 0.29391956930526275,
+      "stage2": true,
+      "atr": 1.2575714285714288,
+      "avg_volume": 39887564.5
+    },
+    {
+      "symbol": "CRL",
+      "sector": "Health Care",
+      "price": 227.58,
+      "rel_strength_12w": 0.28575429377076467,
+      "stage2": true,
+      "atr": 20.40535714285715,
+      "avg_volume": 4092608.3333333335
+    },
+    {
+      "symbol": "FLEX",
+      "sector": "Information Technology",
+      "price": 121.94,
+      "rel_strength_12w": 0.2794613249195941,
+      "stage2": true,
+      "atr": 19.66651428571429,
+      "avg_volume": 34215067.833333336
+    },
+    {
+      "symbol": "FFIV",
+      "sector": "Information Technology",
+      "price": 402.3575,
+      "rel_strength_12w": 0.27268331164934567,
+      "stage2": true,
+      "atr": 27.83927857142856,
+      "avg_volume": 3231723.8333333335
+    },
+    {
+      "symbol": "TECH",
+      "sector": "Health Care",
+      "price": 71.67,
+      "rel_strength_12w": 0.2681623898400156,
+      "stage2": true,
+      "atr": 5.673928571428571,
+      "avg_volume": 23120414.666666668
+    },
+    {
+      "symbol": "LLY",
+      "sector": "Health Care",
+      "price": 1168.88,
+      "rel_strength_12w": 0.267793885284507,
+      "stage2": true,
+      "atr": 80.12249285714282,
+      "avg_volume": 15105910.5
+    },
+    {
+      "symbol": "STX",
+      "sector": "Information Technology",
+      "price": 753.89,
+      "rel_strength_12w": 0.231424699942832,
+      "stage2": true,
+      "atr": 137.34499285714284,
+      "avg_volume": 20992864.333333332
+    },
+    {
+      "symbol": "RVTY",
+      "sector": "Health Care",
+      "price": 111.0,
+      "rel_strength_12w": 0.2247155865919226,
+      "stage2": true,
+      "atr": 8.81745,
+      "avg_volume": 6851158.916666667
+    },
+    {
+      "symbol": "BAX",
+      "sector": "Health Care",
+      "price": 23.1151,
+      "rel_strength_12w": 0.2183295377738157,
+      "stage2": true,
+      "atr": 1.855,
+      "avg_volume": 33339386.916666668
+    },
+    {
+      "symbol": "MNST",
+      "sector": "Consumer Staples",
+      "price": 99.01,
+      "rel_strength_12w": 0.21109860557400495,
+      "stage2": true,
+      "atr": 4.503971428571431,
+      "avg_volume": 26278052.25
+    },
+    {
+      "symbol": "ABBV",
+      "sector": "Health Care",
+      "price": 251.25,
+      "rel_strength_12w": 0.2098770231846716,
+      "stage2": true,
+      "atr": 14.72107142857142,
+      "avg_volume": 32892768.75
+    },
+    {
+      "symbol": "DLTR",
+      "sector": "Consumer Staples",
+      "price": 130.49,
+      "rel_strength_12w": 0.20320654801743343,
+      "stage2": true,
+      "atr": 10.01637857142857,
+      "avg_volume": 17963242.0
+    },
+    {
+      "symbol": "AKAM",
+      "sector": "Information Technology",
+      "price": 119.77,
+      "rel_strength_12w": 0.20289942978070674,
+      "stage2": true,
+      "atr": 16.220714285714283,
+      "avg_volume": 23988867.5
+    },
+    {
+      "symbol": "DXCM",
+      "sector": "Health Care",
+      "price": 77.365,
+      "rel_strength_12w": 0.20200888290514052,
+      "stage2": true,
+      "atr": 5.3984,
+      "avg_volume": 27170037.25
+    },
+    {
+      "symbol": "MRNA",
+      "sector": "Health Care",
+      "price": 63.65,
+      "rel_strength_12w": 0.20015325619847202,
+      "stage2": true,
+      "atr": 9.649757142857144,
+      "avg_volume": 37429235.25
+    },
+    {
+      "symbol": "PRU",
+      "sector": "Financials",
+      "price": 117.73,
+      "rel_strength_12w": 0.19512663426412913,
+      "stage2": true,
+      "atr": 5.3364142857142856,
+      "avg_volume": 8946827.916666666
+    },
+    {
+      "symbol": "BEN",
+      "sector": "Financials",
+      "price": 33.535,
+      "rel_strength_12w": 0.1820129061935003,
+      "stage2": true,
+      "atr": 2.0802642857142852,
+      "avg_volume": 22250277.666666668
+    },
+    {
+      "symbol": "STT",
+      "sector": "Financials",
+      "price": 184.55,
+      "rel_strength_12w": 0.16976509373007032,
+      "stage2": true,
+      "atr": 8.524335714285714,
+      "avg_volume": 10365595.083333334
+    },
+    {
+      "symbol": "AAPL",
+      "sector": "Information Technology",
+      "price": 331.84,
+      "rel_strength_12w": 0.1697024058677825,
+      "stage2": true,
+      "atr": 17.589278571428565,
+      "avg_volume": 257395643.83333334
+    },
+    {
+      "symbol": "INCY",
+      "sector": "Health Care",
+      "price": 115.82,
+      "rel_strength_12w": 0.1691377466630457,
+      "stage2": true,
+      "atr": 8.102500000000001,
+      "avg_volume": 8230686.0
+    },
+    {
+      "symbol": "UNH",
+      "sector": "Health Care",
+      "price": 431.32,
+      "rel_strength_12w": 0.16073138510951845,
+      "stage2": true,
+      "atr": 24.245735714285708,
+      "avg_volume": 31003415.583333332
+    },
+    {
+      "symbol": "CSCO",
+      "sector": "Information Technology",
+      "price": 108.03,
+      "rel_strength_12w": 0.1591554640049424,
+      "stage2": true,
+      "atr": 9.150314285714286,
+      "avg_volume": 118398455.66666667
+    },
+    {
+      "symbol": "IBKR",
+      "sector": "Financials",
+      "price": 92.85,
+      "rel_strength_12w": 0.1572961971385849,
+      "stage2": true,
+      "atr": 7.7020785714285696,
+      "avg_volume": 22392785.666666668
+    },
+    {
+      "symbol": "TROW",
+      "sector": "Financials",
+      "price": 119.54,
+      "rel_strength_12w": 0.15221499610414724,
+      "stage2": true,
+      "atr": 5.442478571428569,
+      "avg_volume": 10120126.083333334
+    },
+    {
+      "symbol": "MET",
+      "sector": "Financials",
+      "price": 93.59,
+      "rel_strength_12w": 0.14997611276290157,
+      "stage2": true,
+      "atr": 4.1027571428571425,
+      "avg_volume": 16357944.083333334
+    },
+    {
+      "symbol": "AIZ",
+      "sector": "Financials",
+      "price": 276.0,
+      "rel_strength_12w": 0.14651599468137366,
+      "stage2": true,
+      "atr": 11.276428571428571,
+      "avg_volume": 2018026.0833333333
+    },
+    {
+      "symbol": "ADM",
+      "sector": "Consumer Staples",
+      "price": 83.133,
+      "rel_strength_12w": 0.14629495073998022,
+      "stage2": true,
+      "atr": 4.951328571428569,
+      "avg_volume": 17522558.75
+    },
+    {
+      "symbol": "GL",
+      "sector": "Financials",
+      "price": 183.15,
+      "rel_strength_12w": 0.1459828825111502,
+      "stage2": true,
+      "atr": 7.558885714285716,
+      "avg_volume": 2811550.25
+    },
+    {
+      "symbol": "LRCX",
+      "sector": "Information Technology",
+      "price": 321.0438,
+      "rel_strength_12w": 0.14438041399444912,
+      "stage2": true,
+      "atr": 42.75682142857142,
+      "avg_volume": 52586822.083333336
+    },
+    {
+      "symbol": "IVZ",
+      "sector": "Financials",
+      "price": 30.53,
+      "rel_strength_12w": 0.14225718254299147,
+      "stage2": true,
+      "atr": 2.0428785714285715,
+      "avg_volume": 24331383.25
+    },
+    {
+      "symbol": "HRL",
+      "sector": "Consumer Staples",
+      "price": 25.785,
+      "rel_strength_12w": 0.14199132983612328,
+      "stage2": true,
+      "atr": 1.4419428571428572,
+      "avg_volume": 24755914.25
+    },
+    {
+      "symbol": "KHC",
+      "sector": "Consumer Staples",
+      "price": 26.175,
+      "rel_strength_12w": 0.13849804399221655,
+      "stage2": true,
+      "atr": 1.5065428571428572,
+      "avg_volume": 64500427.25
+    },
+    {
+      "symbol": "GS",
+      "sector": "Financials",
+      "price": 1103.92,
+      "rel_strength_12w": 0.13643944763870386,
+      "stage2": true,
+      "atr": 65.16208571428574,
+      "avg_volume": 9920185.416666666
+    },
+    {
+      "symbol": "CPAY",
+      "sector": "Financials",
+      "price": 371.11,
+      "rel_strength_12w": 0.13146758154144966,
+      "stage2": true,
+      "atr": 27.635592857142864,
+      "avg_volume": 2892288.3333333335
+    },
+    {
+      "symbol": "WST",
+      "sector": "Health Care",
+      "price": 363.015,
+      "rel_strength_12w": 0.13117516195581014,
+      "stage2": true,
+      "atr": 22.463571428571434,
+      "avg_volume": 3650258.75
+    },
+    {
+      "symbol": "BAC",
+      "sector": "Financials",
+      "price": 61.675,
+      "rel_strength_12w": 0.1303899560009525,
+      "stage2": true,
+      "atr": 2.6714285714285713,
+      "avg_volume": 165125498.66666666
+    },
+    {
+      "symbol": "VTRS",
+      "sector": "Health Care",
+      "price": 17.2002,
+      "rel_strength_12w": 0.12437496672309889,
+      "stage2": true,
+      "atr": 1.165671428571429,
+      "avg_volume": 51167930.75
+    },
+    {
+      "symbol": "MTB",
+      "sector": "Financials",
+      "price": 252.9121,
+      "rel_strength_12w": 0.12224482619995691,
+      "stage2": true,
+      "atr": 9.80107857142857,
+      "avg_volume": 4984809.416666667
+    },
+    {
+      "symbol": "INTC",
+      "sector": "Information Technology",
+      "price": 97.01,
+      "rel_strength_12w": 0.12078054937785443,
+      "stage2": true,
+      "atr": 20.70113571428571,
+      "avg_volume": 617868244.6666666
+    },
+    {
+      "symbol": "SJM",
+      "sector": "Consumer Staples",
+      "price": 112.89,
+      "rel_strength_12w": 0.1205522786029376,
+      "stage2": true,
+      "atr": 6.26707857142857,
+      "avg_volume": 8220503.75
+    },
+    {
+      "symbol": "V",
+      "sector": "Financials",
+      "price": 361.88,
+      "rel_strength_12w": 0.11501462422375153,
+      "stage2": true,
+      "atr": 16.422792857142863,
+      "avg_volume": 39629997.75
+    },
+    {
+      "symbol": "RF",
+      "sector": "Financials",
+      "price": 32.405,
+      "rel_strength_12w": 0.11279869759557282,
+      "stage2": true,
+      "atr": 1.3560642857142857,
+      "avg_volume": 48027043.333333336
+    },
+    {
+      "symbol": "SCHW",
+      "sector": "Financials",
+      "price": 102.87,
+      "rel_strength_12w": 0.10784448961432935,
+      "stage2": true,
+      "atr": 5.506614285714284,
+      "avg_volume": 50342469.75
+    },
+    {
+      "symbol": "ESS",
+      "sector": "Real Estate",
+      "price": 296.49,
+      "rel_strength_12w": 0.10649287152346365,
+      "stage2": true,
+      "atr": 11.369621428571438,
+      "avg_volume": 2297396.0
+    },
+    {
+      "symbol": "UDR",
+      "sector": "Real Estate",
+      "price": 40.355,
+      "rel_strength_12w": 0.1060985855376606,
+      "stage2": true,
+      "atr": 1.8100000000000012,
+      "avg_volume": 20569959.666666668
+    },
+    {
+      "symbol": "MS",
+      "sector": "Financials",
+      "price": 218.2,
+      "rel_strength_12w": 0.10567791442099628,
+      "stage2": true,
+      "atr": 12.25617142857143,
+      "avg_volume": 26945634.166666668
+    },
+    {
+      "symbol": "PNC",
+      "sector": "Financials",
+      "price": 255.035,
+      "rel_strength_12w": 0.10545978255112876,
+      "stage2": true,
+      "atr": 10.31722142857143,
+      "avg_volume": 9503323.583333334
+    },
+    {
+      "symbol": "CFG",
+      "sector": "Financials",
+      "price": 73.875,
+      "rel_strength_12w": 0.10356848864717283,
+      "stage2": true,
+      "atr": 3.5603571428571423,
+      "avg_volume": 20656293.0
+    },
+    {
+      "symbol": "QCOM",
+      "sector": "Information Technology",
+      "price": 171.83,
+      "rel_strength_12w": 0.09985521591711422,
+      "stage2": true,
+      "atr": 33.83776428571429,
+      "avg_volume": 113505434.83333333
+    },
+    {
+      "symbol": "USB",
+      "sector": "Financials",
+      "price": 64.125,
+      "rel_strength_12w": 0.09921396162291685,
+      "stage2": true,
+      "atr": 2.6378571428571425,
+      "avg_volume": 40780227.666666664
+    },
+    {
+      "symbol": "ZBRA",
+      "sector": "Information Technology",
+      "price": 262.71,
+      "rel_strength_12w": 0.0991758812371859,
+      "stage2": true,
+      "atr": 23.67802857142857,
+      "avg_volume": 4583251.0
+    },
+    {
+      "symbol": "MRVL",
+      "sector": "Information Technology",
+      "price": 188.4091,
+      "rel_strength_12w": 0.09214010074211698,
+      "stage2": true,
+      "atr": 43.97244285714286,
+      "avg_volume": 200629478.5
+    }
+  ],
+  "trend_exit_symbols": []
+}
