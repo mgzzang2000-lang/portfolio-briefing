@@ -334,10 +334,10 @@
       "stock": "003280",
       "qty": 80,
       "price": 1923,
-      "avg_price": 1912,
-      "pnl_pct": 0.58,
-      "pnl_amt": 880,
-      "reason": "익절 (복구, +0.58%)"
+      "avg_price": 1862,
+      "pnl_pct": 3.28,
+      "pnl_amt": 4880,
+      "reason": "익절 (복구, 체결내역 기준 정정, +3.28%)"
     },
     {
       "action": "buy",
@@ -345,8 +345,8 @@
       "code": "279570",
       "stock": "279570",
       "qty": 43,
-      "price": 6840,
-      "amount": 294120
+      "price": 6810,
+      "amount": 292830
     },
     {
       "action": "sell",
@@ -358,6 +358,17 @@
       "pnl_pct": 4.73,
       "pnl_amt": 7128,
       "reason": "익절 (+4.73%)"
+    },
+    {
+      "action": "sell",
+      "date": "07/16 09:58",
+      "stock": "279570",
+      "qty": 43,
+      "price": 6420,
+      "avg_price": 6810,
+      "pnl_pct": -5.73,
+      "pnl_amt": -16770,
+      "reason": "손절 (수동청산, 체결내역 기준 보강, -5.73%)"
     },
     {
       "action": "buy",
@@ -398,24 +409,13 @@
       "pnl_pct": -3.18,
       "pnl_amt": -9516,
       "reason": "손절 (-3.18%)"
-    },
-    {
-      "action": "sell",
-      "date": "07/16 12:13",
-      "stock": "003280",
-      "qty": 156,
-      "price": 1855,
-      "avg_price": 1912,
-      "pnl_pct": -2.98,
-      "pnl_amt": -8892,
-      "reason": "손절 (복구, -2.98%)"
     }
   ],
   "position": null,
   "last_updated": "2026-07-16T15:30:00.348880+09:00",
   "daily_loss_guard": {
     "date": "07/16",
-    "consecutive_losses": 2,
+    "consecutive_losses": 3,
     "notified": true
   },
   "balance_history": [

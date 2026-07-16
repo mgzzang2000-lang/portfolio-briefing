@@ -34,6 +34,16 @@ jobs:
           key: daily-filter-${{ github.run_id }}
           restore-keys: |
             daily-filter-
+      - name: git 설정 (병합 드라이버 등록)
+        # [2026-07-16] 아래 매매 실행 루프 안에서도 pull/merge를 하므로, 마지막
+        # 푸시 스텝에서만 등록하던 걸 앞으로 옮김 — 이 설정은 매 실행마다 새로
+        # 체크아웃되므로 매번 등록해야 함(커밋으로 저장 불가).
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config merge.dashboard-merge.name "Dashboard semantic JSON merge"
+          git config merge.dashboard-merge.driver "python dashboard_merge.py %O %A %B"
+          git config merge.ours.driver true
       - name: 매매 실행 (60초 간격 5회 반복 = 체감 1분 간격)
         env:
           KIS_APP_KEY:         ${{ secrets.KIS_APP_KEY }}
@@ -43,8 +53,25 @@ jobs:
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
           KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
         run: |
+          # [2026-07-16] 이 잡은 시작할 때 딱 한 번만 체크아웃하고 5회 반복 내내
+          # 그 스냅샷으로만 판단해서, concurrency(최대 2개 동시 실행) 상황에서
+          # 서로의 매매를 못 보고 각자 실주문을 내는 사고(003280 부분매도를
+          # "포지션 없음"으로 오판 → 279570 중복매수, 실손실 -16,770원)가 발생했음.
+          # 매 반복마다 최신 상태를 커밋+동기화해서 겹쳐 도는 다른 실행의 매매를
+          # 최대 ~60초 안에 알아보도록 한다.
           for i in 1 2 3 4 5; do
             python auto_trading.py
+            git add dashboard_data.json
+            git diff --cached --quiet || git commit -m "chore: update dashboard data [skip ci]"
+            for j in 1 2 3; do
+              git push && break
+              git fetch origin main
+              git merge origin/main -m "merge: 대시보드 동기화 [skip ci]" || {
+                git add dashboard_data.json
+                git commit --no-edit
+              }
+              sleep 2
+            done
             if [ $i -lt 5 ]; then sleep 60; fi
           done
       - name: 인트라데이 1분봉 수집 + 섀도우 전략 비교 스캔 (실주문 없음)
@@ -74,17 +101,9 @@ jobs:
           path: daily_filter_cache.json
           key: daily-filter-${{ github.run_id }}
       - name: 대시보드 데이터 푸시
+        # git 설정(병합 드라이버 등록)은 위 "git 설정" 스텝에서 이미 완료 — 같은 잡
+        # 내에서는 스텝 사이에도 유지되므로 여기서 다시 등록할 필요 없음.
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          # [2026-07-14] watcher.py(사용자 PC)와 이 워크플로우가 거의 동시에 같은
-          # 파일을 커밋하면서 텍스트 기반 rebase가 충돌해 매매기록이 통째로 유실되는
-          # 사고(005860 매수 기록 소실 → 손절 로직이 포지션 존재 자체를 몰라 손절 안 나감)가
-          # 발생. dashboard_merge.py가 내용을 이해해서 항상 자동으로 병합하도록 설정 —
-          # 이 설정은 매 실행마다 새로 체크아웃되므로 매번 등록해야 함(커밋으로 저장 불가).
-          git config merge.dashboard-merge.name "Dashboard semantic JSON merge"
-          git config merge.dashboard-merge.driver "python dashboard_merge.py %O %A %B"
-          git config merge.ours.driver true
           git add dashboard_data.json minute_data/ shadow_data/
           git diff --cached --quiet || git commit -m "chore: update dashboard data [skip ci]"
           # rebase는 충돌 시 ours/theirs 방향이 뒤집혀 merge driver 규칙과 안 맞을 수

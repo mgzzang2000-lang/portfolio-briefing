@@ -225,6 +225,12 @@ def recover_missing_sells(token, dash, dash_position):
     상태만 초기화해버리는 사고(흥아해운 건)가 발생해 추가."""
     code = dash_position['code']
     avg_price = dash_position['avg_price']
+    # [2026-07-16] 같은 종목을 하루에 두 번 이상 사고팔 때(평단가가 서로 다른 별개
+    # 매수분), 이번 포지션보다 "이전" 매도까지 전부 이번 avg_price로 잘못 기록되는
+    # 사고 발견(003280 1차 매수분 매도를 2차 매수분 평단가로 기록 → 손익률 오표시).
+    # 이번 진입시각 이후 체결만 복구 대상으로 제한한다.
+    entry_time_str = dash_position.get('entry_time')
+    entry_t = datetime.fromisoformat(entry_time_str).time() if entry_time_str else None
     today = datetime.now(KST).strftime('%Y%m%d')
     data = kis_get(token, "/uapi/domestic-stock/v1/trading/inquire-daily-ccld", {
         "CANO": ACCOUNT_NO, "ACNT_PRDT_CD": ACCOUNT_PROD,
@@ -245,6 +251,8 @@ def recover_missing_sells(token, dash, dash_position):
             continue
         price = float(s['avg_prvs'])
         t = datetime.strptime(s['ord_tmd'], '%H%M%S')
+        if entry_t and t.time() < entry_t:
+            continue  # 이번 포지션 진입 이전 체결 — 다른 매수분이므로 건드리지 않음
         date_str = datetime.now(KST).strftime('%m/%d ') + t.strftime('%H:%M')
         if date_str in logged_times:
             continue
@@ -914,20 +922,34 @@ def main():
         matched = [h for h in holdings
                    if bot_code and h.get('pdno') == bot_code and int(h.get('hldg_qty', 0)) > 0]
         if not matched and dash_position:
-            # 대시보드엔 포지션이 남아있는데 실제 계좌엔 없음(수동 매도, 또는 다른
-            # 프로세스가 이미 팔았는데 git 동기화만 실패한 경우) — 지우기 전에
-            # 오늘 체결내역에서 매도 기록을 복구 시도
-            print(f"[경고] 대시보드 포지션({bot_code})이 실제 계좌에 없음 — 매도 체결내역 복구 시도")
-            recovered = recover_missing_sells(kis_token, dash, dash_position)
-            if recovered:
-                print("  → 체결내역에서 매도 기록 복구 완료")
+            # [2026-07-16] 부분익절 직후 조회 시차로 실제로는 남아있는 잔고가 일시적으로
+            # 0으로 보인 사례(003280, 2회) 발견 — 279570을 중복 매수해 한때 두 종목을
+            # 동시보유하고 그중 하나가 봇 관리 밖에서 방치되는 사고로 이어졌음. 바로
+            # 지우지 말고 몇 초 뒤 한 번 더 조회해 진짜로 없는지 재확인한다.
+            time.sleep(2)
+            holdings_recheck, _ = get_balance(kis_token)
+            matched_recheck = [h for h in (holdings_recheck or [])
+                               if h.get('pdno') == bot_code and int(h.get('hldg_qty', 0)) > 0]
+            if matched_recheck:
+                print(f"[정보] {bot_code} 최초 조회는 0이었으나 재조회 결과 "
+                      f"{matched_recheck[0]['hldg_qty']}주 보유 확인 — 포지션 유지")
+                holdings = holdings_recheck
+                matched = matched_recheck
             else:
-                print("  → 체결내역 복구 실패, 기록 없이 상태만 초기화")
-                send_kakao(kakao_token,
-                            f"⚠️ {dash_position.get('name', bot_code)} 매도 기록 유실 — 체결내역 직접 확인 필요")
-            dash['position'] = None
-            save_dashboard(dash)
-            return
+                # 대시보드엔 포지션이 남아있는데 실제 계좌엔 없음(수동 매도, 또는 다른
+                # 프로세스가 이미 팔았는데 git 동기화만 실패한 경우) — 지우기 전에
+                # 오늘 체결내역에서 매도 기록을 복구 시도
+                print(f"[경고] 대시보드 포지션({bot_code})이 실제 계좌에 없음(재조회로 재확인) — 매도 체결내역 복구 시도")
+                recovered = recover_missing_sells(kis_token, dash, dash_position)
+                if recovered:
+                    print("  → 체결내역에서 매도 기록 복구 완료")
+                else:
+                    print("  → 체결내역 복구 실패, 기록 없이 상태만 초기화")
+                    send_kakao(kakao_token,
+                                f"⚠️ {dash_position.get('name', bot_code)} 매도 기록 유실 — 체결내역 직접 확인 필요")
+                dash['position'] = None
+                save_dashboard(dash)
+                return
         active = matched
         if active:
             if watcher_is_alive():
@@ -938,6 +960,17 @@ def main():
             manage_position(kis_token, kakao_token, dash, guard, now, active[0], force_sell_at)
             return
         # ② 신규 진입 스캔 (시간대별 진입 가능 여부는 scan_signals 내부에서 판정)
+        # [2026-07-16] 위 재확인까지 거쳤어도, 계좌에 봇이 모르는 종목이 남아있으면
+        # 신규 매수를 하지 않는다 — 003280 부분매도 뒤 포지션을 오판해 279570을
+        # 추가 매수하며 한때 두 종목을 동시보유했던 사고(실손실 -16,770원)의 재발 방지용
+        # 최종 안전장치. holdings는 이번 사이클 시작 시 이미 조회했으므로 API 호출 추가 없음.
+        stray = [h for h in holdings if int(h.get('hldg_qty', 0)) > 0]
+        if stray:
+            names = ', '.join(f"{h.get('pdno')}({h.get('hldg_qty')}주)" for h in stray)
+            print(f"[경고] 봇이 모르는 보유종목 존재 — 신규매수 보류: {names}")
+            send_kakao(kakao_token, f"⚠️ 계좌에 정체불명 보유종목 있음: {names}\n신규 매수를 보류합니다 — 확인 필요")
+            save_dashboard(dash)
+            return
         if guard.get('consecutive_losses', 0) >= DAILY_LOSS_LIMIT:
             if not guard.get('notified'):
                 guard['notified'] = True

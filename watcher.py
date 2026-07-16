@@ -52,7 +52,17 @@ def git_pull():
     # [2026-07-14] rebase는 충돌 시 ours/theirs 방향이 뒤집혀 dashboard_merge.py
     # 병합 규칙과 안 맞을 수 있어 merge로 통일 (충돌나도 dashboard_merge.py가
     # 항상 자동으로 풀어주므로 사람 개입 없이 진행됨).
-    run_git('pull', '--no-rebase')
+    # [2026-07-16] current_price만 바뀌어 커밋 안 된 로컬 수정이 남아있으면(qty 변화가
+    # 없어 git_push_dashboard가 실행 안 된 경우) git이 "local changes would be
+    # overwritten by merge"로 pull을 거부하는데, 이 함수는 결과를 확인하지 않아
+    # 이후 몇 시간 동안 조용히 계속 실패할 수 있었음(오늘 09:29 이후 6시간 이상
+    # 로컬 git이 멈춰 있었던 사고의 직접 원인으로 추정). pull 전에 미커밋 변경을
+    # 먼저 커밋해서 항상 pull이 성공하도록 한다.
+    run_git('add', 'dashboard_data.json')
+    commit = run_git('commit', '-m', '[로컬감시] 대시보드 업데이트(pull 전 정리) [skip ci]')
+    result = run_git('pull', '--no-rebase')
+    if result is None or result.returncode != 0:
+        print(f"[git pull 실패] {(result.stderr if result else '알 수 없는 오류')[:200]}")
 
 
 def git_push_dashboard():

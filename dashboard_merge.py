@@ -20,7 +20,11 @@ def load(path):
 
 
 def trade_key(t):
-    return (t.get('action'), t.get('date'), t.get('stock'), t.get('qty'), t.get('price'))
+    # [2026-07-16] 'stock' 필드가 종목코드/실제종목명 등 기록자마다 달라질 수 있어
+    # (003280 부분매도 뒤 포지션 오판 사고 때 같은 실제 매도 1건이 stock 값만 다르게
+    # 두 번 기록됨 — 중복 판정 실패로 거래건수·손익 통계가 부풀려짐), 실제 체결을
+    # 특정하기 충분한 action/date(분단위)/qty/price만으로 동일 거래를 식별한다.
+    return (t.get('action'), t.get('date'), t.get('qty'), t.get('price'))
 
 
 def merge_trades(a_trades, b_trades):
