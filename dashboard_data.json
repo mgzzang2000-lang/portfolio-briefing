@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 491711,
+  "current_balance": 487529,
   "trades": [
     {
       "action": "buy",
@@ -327,21 +327,21 @@
       "qty": 161,
       "price": 1861,
       "amount": 299621
+    },
+    {
+      "action": "sell",
+      "date": "07/16 09:33",
+      "stock": "흥아해운",
+      "qty": 81,
+      "price": 1950,
+      "avg_price": 1862,
+      "pnl_pct": 4.73,
+      "pnl_amt": 7128,
+      "reason": "익절 (+4.73%)"
     }
   ],
-  "position": {
-    "code": "003280",
-    "name": "003280",
-    "qty": 161,
-    "market": "J",
-    "avg_price": 1861,
-    "current_price": 1927,
-    "stop_price": 1869.448,
-    "target_price": 1936,
-    "entry_time": "2026-07-16T09:19:31.037508+09:00",
-    "trailing_activated": true
-  },
-  "last_updated": "2026-07-16T09:26:16.553265+09:00",
+  "position": null,
+  "last_updated": "2026-07-16T09:40:24.768247+09:00",
   "daily_loss_guard": {
     "date": "07/16",
     "consecutive_losses": 0,
@@ -378,7 +378,7 @@
     },
     {
       "date": "07/16",
-      "balance": 491711
+      "balance": 487529
     }
   ]
 }
