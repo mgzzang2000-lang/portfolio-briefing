@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 475767,
+  "current_balance": 178327,
   "trades": [
     {
       "action": "buy",
@@ -347,10 +347,30 @@
       "pnl_pct": 4.73,
       "pnl_amt": 7128,
       "reason": "익절 (+4.73%)"
+    },
+    {
+      "action": "buy",
+      "date": "07/16 11:29",
+      "code": "069540",
+      "stock": "069540",
+      "qty": 104,
+      "price": 2860,
+      "amount": 297440
     }
   ],
-  "position": null,
-  "last_updated": "2026-07-16T11:11:15.449038+09:00",
+  "position": {
+    "code": "069540",
+    "name": "069540",
+    "qty": 104,
+    "market": "J",
+    "avg_price": 2860,
+    "current_price": 2860,
+    "stop_price": 2831,
+    "target_price": 2990,
+    "entry_time": "2026-07-16T11:29:47.495473+09:00",
+    "trailing_activated": false
+  },
+  "last_updated": "2026-07-16T11:29:47.495672+09:00",
   "daily_loss_guard": {
     "date": "07/16",
     "consecutive_losses": 0,
@@ -387,7 +407,7 @@
     },
     {
       "date": "07/16",
-      "balance": 475767
+      "balance": 178327
     }
   ]
 }
