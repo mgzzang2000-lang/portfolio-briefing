@@ -329,6 +329,17 @@
       "amount": 299621
     },
     {
+      "action": "sell",
+      "date": "07/16 09:26",
+      "stock": "003280",
+      "qty": 80,
+      "price": 1923,
+      "avg_price": 1912,
+      "pnl_pct": 0.58,
+      "pnl_amt": 880,
+      "reason": "익절 (복구, +0.58%)"
+    },
+    {
       "action": "buy",
       "date": "07/16 09:30",
       "code": "279570",
@@ -387,6 +398,17 @@
       "pnl_pct": -3.18,
       "pnl_amt": -9516,
       "reason": "손절 (-3.18%)"
+    },
+    {
+      "action": "sell",
+      "date": "07/16 12:13",
+      "stock": "003280",
+      "qty": 156,
+      "price": 1855,
+      "avg_price": 1912,
+      "pnl_pct": -2.98,
+      "pnl_amt": -8892,
+      "reason": "손절 (복구, -2.98%)"
     }
   ],
   "position": null,
