@@ -412,11 +412,11 @@
     }
   ],
   "position": null,
-  "last_updated": "2026-07-16T15:30:00.348880+09:00",
+  "last_updated": "2026-07-17T09:01:27.295520+09:00",
   "daily_loss_guard": {
-    "date": "07/16",
-    "consecutive_losses": 3,
-    "notified": true
+    "date": "07/17",
+    "consecutive_losses": 0,
+    "notified": false
   },
   "balance_history": [
     {
@@ -449,6 +449,10 @@
     },
     {
       "date": "07/16",
+      "balance": 459726
+    },
+    {
+      "date": "07/17",
       "balance": 459726
     }
   ]
