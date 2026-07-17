@@ -1,6 +1,6 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 694.99,
+  "current_balance": 1042.93,
   "positions": {
     "FTNT": {
       "stop_price": 145.33,
@@ -11,9 +11,9 @@
       "entry_date": "20260709",
       "qty": 3,
       "sector": "Information Technology",
-      "current_price": 158.02,
-      "pnl_pct": -2.15,
-      "price_updated_at": "22:00"
+      "current_price": 157.8424,
+      "pnl_pct": -2.26,
+      "price_updated_at": "22:15"
     },
     "HUM": {
       "stop_price": 362.46,
@@ -24,22 +24,9 @@
       "entry_date": "20260709",
       "qty": 1,
       "sector": "Health Care",
-      "current_price": 389.6,
-      "pnl_pct": -3.27,
-      "price_updated_at": "22:00"
-    },
-    "UAL": {
-      "stop_price": 117.03,
-      "tp_price": 169.88,
-      "partial_tp_price": 150.28,
-      "partial_taken": false,
-      "entry_price": 130.68,
-      "entry_date": "20260709",
-      "qty": 3,
-      "sector": "Industrials",
-      "current_price": 117.24,
-      "pnl_pct": -9.72,
-      "price_updated_at": "22:00"
+      "current_price": 381.0,
+      "pnl_pct": -5.4,
+      "price_updated_at": "22:15"
     }
   },
   "trade_history": [
@@ -66,6 +53,14 @@
       "qty": 3,
       "price": 130.68,
       "reason": "RS12w=21.9%"
+    },
+    {
+      "action": "sell",
+      "date": "2026-07-17 22:15",
+      "symbol": "UAL",
+      "qty": 3,
+      "price": 115.98,
+      "reason": "하드손절 (기준 117.03)"
     }
   ],
   "balance_history": [
@@ -103,10 +98,10 @@
     },
     {
       "date": "07/17",
-      "balance": 694.99
+      "balance": 1042.93
     }
   ],
-  "total_assets": 1910.37,
+  "total_assets": 1897.46,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -122,7 +117,7 @@
     },
     {
       "date": "07/17",
-      "balance": 1910.37
+      "balance": 1897.46
     }
   ]
 }
