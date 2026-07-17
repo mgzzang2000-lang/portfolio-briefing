@@ -301,7 +301,11 @@ def get_volume_rank(token, market="J"):
         "FID_COND_SCR_DIV_CODE": scr_code,
         "FID_INPUT_ISCD": "0000",
         "FID_DIV_CLS_CODE": "0",
-        "FID_BLNG_CLS_CODE": "0",
+        # [2026-07-17] "0"(단순 평균거래량=체결 주식 수 기준)은 저가·소형 유통주식수
+        # 종목이 회전율만으로 매일 상위권을 독점하는 구조적 편향이 있었음(흥구석유·
+        # 빛과전자 등이 반복 포착된 원인) — "3"(거래금액순)으로 변경해 실제 자금이
+        # 크게 도는 종목 위주로 후보군을 넓힘.
+        "FID_BLNG_CLS_CODE": "3",
         "FID_TRGT_CLS_CODE": "111111111",
         "FID_TRGT_EXLS_CLS_CODE": "000000",
         "FID_INPUT_PRICE_1": "",

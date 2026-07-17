@@ -112,7 +112,9 @@ def get_volume_rank(token, market="J"):
         "FID_COND_MRKT_DIV_CODE": market,
         "FID_COND_SCR_DIV_CODE": scr_code,
         "FID_INPUT_ISCD": "0000",
-        "FID_DIV_CLS_CODE": "0", "FID_BLNG_CLS_CODE": "0",
+        # [2026-07-17] auto_trading.py의 실거래 랭킹 기준(거래금액순)과 맞춤 —
+        # 여기 워치리스트가 실거래 후보와 다른 기준을 쓰면 백테스트 비교가 어긋남.
+        "FID_DIV_CLS_CODE": "0", "FID_BLNG_CLS_CODE": "3",
         "FID_TRGT_CLS_CODE": "111111111",
         "FID_TRGT_EXLS_CLS_CODE": "000000",
         "FID_INPUT_PRICE_1": "", "FID_INPUT_PRICE_2": "",
