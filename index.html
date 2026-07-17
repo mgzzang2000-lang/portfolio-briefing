@@ -235,7 +235,22 @@ function renderKr(d) {
   const sells = trades.filter(t => t.action === 'sell');
   const wins = sells.filter(t => t.pnl_pct >= 0);
   const losses = sells.filter(t => t.pnl_pct < 0);
-  const winRate = sells.length ? Math.round(wins.length / sells.length * 100) : 0;
+  // [2026-07-17] 라운드트립(매수 1건) 기준 승률 — +2%부분익절/2시간부분청산도 이제
+  // log_partial_sell()로 별도 거래기록이 남게 되면서, 한 포지션이 매도 줄 여러 개로
+  // 쪼개질 수 있음(부분익절=거의 항상 승, 나머지 최종청산이 손절이어도 매도건수
+  // 기준으로 세면 "1승1패"로 부풀려짐). trade_id로 같은 포지션의 매도를 묶어
+  // 순손익(pnl_amt 합) 기준으로 승패를 판정 — trade_id가 없는 옛날 기록(이 필드
+  // 추가 이전)은 각자 독립된 라운드트립으로 취급.
+  const tripGroups = {};
+  sells.forEach((t, i) => {
+    const key = t.trade_id || `__legacy_${i}`;
+    (tripGroups[key] = tripGroups[key] || []).push(t);
+  });
+  const trips = Object.values(tripGroups).map(legs => ({
+    legs, netAmt: legs.reduce((s, t) => s + (t.pnl_amt || 0), 0)
+  }));
+  const tripWins = trips.filter(tr => tr.netAmt >= 0);
+  const winRate = trips.length ? Math.round(tripWins.length / trips.length * 100) : 0;
   const initial = d.initial_balance || 500000;
   const currentBalance = d.current_balance != null ? d.current_balance : initial;
   const totalPnl = currentBalance - initial;
@@ -280,8 +295,8 @@ function renderKr(d) {
     </div>
     <div class="chart-card"><canvas id="chartKr"></canvas></div>
     <div class="stats-grid">
-      <div class="stat-card"><div class="label">승률</div><div class="value ${winRate >= 50 ? 'up' : 'down'}">${winRate}<span style="font-size:13px">%</span></div><div class="sub">${wins.length}승 ${losses.length}패 (건수 기준)</div></div>
-      <div class="stat-card"><div class="label">총 거래</div><div class="value dim">${trades.length}<span style="font-size:13px">회</span></div><div class="sub">매도 ${sells.length}회</div></div>
+      <div class="stat-card"><div class="label">승률</div><div class="value ${winRate >= 50 ? 'up' : 'down'}">${winRate}<span style="font-size:13px">%</span></div><div class="sub">${tripWins.length}승 ${trips.length - tripWins.length}패 (라운드트립 기준)</div></div>
+      <div class="stat-card"><div class="label">총 거래</div><div class="value dim">${trades.length}<span style="font-size:13px">회</span></div><div class="sub">매도 ${sells.length}회(부분익절 포함) · 라운드트립 ${trips.length}회</div></div>
       <div class="stat-card"><div class="label">평균 수익</div><div class="value up">+${avgWin}<span style="font-size:13px">%</span></div><div class="sub">익절 건당 단순평균</div></div>
       <div class="stat-card"><div class="label">평균 손실</div><div class="value down">${avgLoss}<span style="font-size:13px">%</span></div><div class="sub">손절 건당 단순평균</div></div>
       <div class="stat-card wide"><div class="label">금액가중 평균수익률</div><div class="value ${cls(weightedReturnPct)}">${sign(weightedReturnPct)}${weightedReturnPct}<span style="font-size:13px">%</span></div><div class="sub">거래별 투입금액을 반영한 실제 수익률 — 잔고 증감과 같은 방향으로 움직임. 위 승률·평균%은 건당 단순평균이라 이 값과 다를 수 있음(예: 부분익절로 소액만 익절되고 손절은 전량 나가면, 승률·평균%은 좋아 보여도 이 값은 마이너스일 수 있음)</div></div>

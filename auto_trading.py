@@ -215,8 +215,13 @@ def check_daily_guard(dash, now):
 def log_buy(dash, code, name, qty, price, cash_after, stop_price, target_price, market="J"):
     """stop_price: ATR×1.5 동적 손절가, target_price: +4% 익절가"""
     entry_time = datetime.now(KST)
+    # [2026-07-17] trade_id — 한 포지션의 매수+부분익절(들)+최종청산을 하나로 묶어
+    # 라운드트립 기준 승률을 계산할 수 있게 함(부분익절도 이제 log_partial_sell로
+    # 별도 기록되므로, 같은 포지션의 여러 매도 줄을 구분 없이 다 "1승"으로 세면
+    # 승률이 부풀려짐 — index.html에서 이 trade_id로 묶어서 순손익 기준으로 승패 판정).
+    trade_id = f"{code}-{entry_time.strftime('%Y%m%d%H%M%S')}"
     dash['trades'].append({
-        'action': 'buy',
+        'action': 'buy', 'trade_id': trade_id,
         'date': entry_time.strftime('%m/%d %H:%M'),
         'code': code, 'stock': name, 'qty': qty,
         'price': int(price), 'amount': int(price * qty)
@@ -228,6 +233,7 @@ def log_buy(dash, code, name, qty, price, cash_after, stop_price, target_price, 
         'target_price': int(target_price),  # +4% 익절가
         'entry_time': entry_time.isoformat(),  # 2시간 부분청산 용도
         'trailing_activated': False,  # 트레일링 스탑 활성화 여부
+        'trade_id': trade_id,
     }
     dash['current_balance'] = int(cash_after)
 def recover_missing_sells(token, dash, dash_position):
@@ -272,7 +278,8 @@ def recover_missing_sells(token, dash, dash_position):
         pnl_pct = (price - avg_price) / avg_price * 100
         pnl_amt = int((price - avg_price) * qty)
         dash['trades'].append({
-            'action': 'sell', 'date': date_str,
+            'action': 'sell', 'date': date_str, 'partial': False,
+            'trade_id': dash_position.get('trade_id'),
             'stock': dash_position.get('name', code),
             'qty': qty, 'price': int(price), 'avg_price': int(avg_price),
             'pnl_pct': round(pnl_pct, 2), 'pnl_amt': pnl_amt,
@@ -281,14 +288,31 @@ def recover_missing_sells(token, dash, dash_position):
         recovered = True
     return recovered
 def log_sell(dash, name, qty, avg_price, sell_price, pnl_pct, pnl_amt, reason, new_cash):
+    """포지션의 마지막(전량) 청산 — 기록 후 position을 비운다."""
     dash['trades'].append({
-        'action': 'sell',
+        'action': 'sell', 'partial': False,
+        'trade_id': (dash.get('position') or {}).get('trade_id'),
         'date': datetime.now(KST).strftime('%m/%d %H:%M'),
         'stock': name, 'qty': qty, 'price': int(sell_price),
         'avg_price': int(avg_price), 'pnl_pct': round(pnl_pct, 2),
         'pnl_amt': int(pnl_amt), 'reason': reason
     })
     dash['position'] = None
+    dash['current_balance'] = int(new_cash)
+
+
+def log_partial_sell(dash, name, qty, avg_price, sell_price, pnl_pct, pnl_amt, reason, new_cash):
+    """[2026-07-17 신설] +2% 부분익절/2시간 부분청산처럼 포지션 일부만 파는 경우 —
+    기존엔 log_sell()을 아예 안 불러서 부분익절 자체가 거래기록에 안 남았음(사용자
+    지적으로 발견). position은 그대로 두고(나머지 수량은 계속 관리) 거래기록만 남긴다."""
+    dash['trades'].append({
+        'action': 'sell', 'partial': True,
+        'trade_id': (dash.get('position') or {}).get('trade_id'),
+        'date': datetime.now(KST).strftime('%m/%d %H:%M'),
+        'stock': name, 'qty': qty, 'price': int(sell_price),
+        'avg_price': int(avg_price), 'pnl_pct': round(pnl_pct, 2),
+        'pnl_amt': int(pnl_amt), 'reason': reason
+    })
     dash['current_balance'] = int(new_cash)
 def update_position_price(dash, current_price):
     if dash.get('position'):
@@ -900,10 +924,15 @@ def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
             _, new_cash = get_balance(kis_token)
             # [2026-07-09] 매도 자체는 이미 성공했으니 잔고 재조회 실패해도 되돌리지 않음.
             # 다만 실패 시(None) 0원으로 덮어쓰지 말고 이전 값을 그대로 유지.
-            if new_cash is not None:
-                dash['current_balance'] = int(new_cash)
-            else:
+            balance_known = new_cash is not None
+            balance_for_dash = new_cash if balance_known else dash.get('current_balance', 0)
+            if not balance_known:
                 print("  [경고] 부분익절 후 잔고 재조회 실패 — 이전 잔고 유지")
+            # [2026-07-17] 부분익절도 거래기록으로 남긴다 — 기존엔 아예 기록이 안 남아
+            # 승률/거래내역에서 이 수익실현이 통째로 안 보였음(사용자 지적으로 발견).
+            partial_pnl_amt = int((cur_price - avg_price) * partial_qty)
+            log_partial_sell(dash, name, partial_qty, avg_price, cur_price,
+                              pnl, partial_pnl_amt, f"+2% 부분익절 ({pnl:+.2f}%)", balance_for_dash)
             print(f"  [+2%] {PARTIAL_TP_FRACTION*100:.0f}% 부분익절 ({partial_qty}주) → 나머지 손절선: {stop_price:,.0f}")
             save_dashboard(dash)
             return
@@ -929,10 +958,14 @@ def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
                     time.sleep(1)
                     _, new_cash = get_balance(kis_token)
                     pos['stop_price'] = avg_price * 1.004
-                    if new_cash is not None:
-                        dash['current_balance'] = int(new_cash)
-                    else:
+                    balance_known = new_cash is not None
+                    balance_for_dash = new_cash if balance_known else dash.get('current_balance', 0)
+                    if not balance_known:
                         print("  [경고] 2시간 부분청산 후 잔고 재조회 실패 — 이전 잔고 유지")
+                    # [2026-07-17] 이 부분청산도 거래기록으로 남긴다(위 +2% 부분익절과 동일 이유)
+                    partial_pnl_amt = int((cur_price - avg_price) * sell_qty)
+                    log_partial_sell(dash, name, sell_qty, avg_price, cur_price,
+                                      pnl, partial_pnl_amt, f"2시간 부분청산 ({pnl:+.2f}%)", balance_for_dash)
                     print(f"  [2시간] 50% 부분청산 ({sell_qty}주) → 나머지 손절: {pos['stop_price']:,.0f}")
                     save_dashboard(dash)
                     return
