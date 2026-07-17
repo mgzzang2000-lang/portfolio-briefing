@@ -293,6 +293,28 @@ def log_sell(dash, name, qty, avg_price, sell_price, pnl_pct, pnl_amt, reason, n
 def update_position_price(dash, current_price):
     if dash.get('position'):
         dash['position']['current_price'] = int(current_price)
+INDEX_CODE = {"J": "0001", "Q": "1001"}  # 코스피종합/코스닥종합 지수코드
+MIN_INDEX_CHANGE_PCT = -0.3  # [2026-07-17] 이보다 더 하락한 지수 방향에서는 그 시장
+# 종목의 롱(매수) 신규진입을 보류 — "상위 타임프레임(시장 전체) 추세와 반대되는
+# 개별 신호는 승률이 떨어진다"는 원칙(SMC/ICT 자료조사, 4번 논의 참고) 적용.
+# 작은 음수(-0.3%)까지는 노이즈로 보고 허용, 그보다 뚜렷한 하락일 때만 차단.
+
+
+def get_index_direction(token, market="J"):
+    """코스피(J)/코스닥(Q) 종합지수의 당일 등락률(%)을 조회.
+    조회 실패 시 None 반환 — 호출측은 None을 "필터 통과"로 취급해야 한다
+    (지수 조회 실패로 매수 자체가 막히는 새로운 장애점을 만들지 않기 위함)."""
+    data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-index-price", {
+        "FID_COND_MRKT_DIV_CODE": "U",
+        "FID_INPUT_ISCD": INDEX_CODE[market],
+    }, "FHPUP02100000")
+    o = data.get('output', {})
+    try:
+        return float(o.get('bstp_nmix_prdy_ctrt', ''))
+    except (TypeError, ValueError):
+        return None
+
+
 # ── 시장 데이터 ───────────────────────────────────────────────
 def get_volume_rank(token, market="J"):
     scr_code = "20172" if market == "Q" else "20171"
@@ -569,6 +591,8 @@ def scan_signals(token):
       ⑥ 갭 필터 5% (전 구간 단일 기준) [2026-07-13: 09:00~14:50 단일 구간으로 통합,
          14:00~14:30 고가근접 특례 제거 — 거래 빈도를 늘리기 위한 필터 단순화]
          [2026-07-17: 09:00~09:20 재차단 — 아래 시간대 주석 참고]
+      ⑦ [2026-07-17 추가] 지수 방향 필터 — 그 종목이 속한 시장(코스피/코스닥) 지수가
+         당일 -0.3% 넘게 하락 중이면 신규 매수 보류
     정렬: 1순위 당일 신규 돌파 > 2순위 스퀴즈 종목 > 3순위 거래량 비율 순
     """
     # [2026-07-13] 진입 가능 시간대 — 기존 09:00~11:00/14:00~14:30 이원화 게이트가
@@ -606,6 +630,11 @@ def scan_signals(token):
     if not stocks:
         print("[경고] 스캔 대상 없음")
         return []
+    # [2026-07-17] 지수 방향 필터 — 종목마다 조회하면 낭비이므로 시장별로 한 번만 조회
+    index_pct = {"J": get_index_direction(token, "J"), "Q": get_index_direction(token, "Q")}
+    for m, pct in index_pct.items():
+        label = "코스피" if m == "J" else "코스닥"
+        print(f"[지수] {label} 당일 {pct:+.2f}%" if pct is not None else f"[지수] {label} 조회 실패 — 필터 미적용")
     # [2026-07-07] MA20/BB스퀴즈/20일평균거래량(어제 종가 기준, 하루 안엔 안 바뀜)은
     # 종목당 하루 1회만 계산해 캐싱 — 매 사이클 재계산으로 인한 스캔 지연(35~40초) 완화
     daily_cache = load_daily_cache()
@@ -657,6 +686,10 @@ def scan_signals(token):
                 continue
             # [2026-07-07] 실제 판별은 bstp_name/mrkt_name 기반 is_derivative_etf()로 수행
             if is_derivative_etf(token, code, cur.get('bstp_name', ''), cur.get('mrkt_name', '')):
+                continue
+            # [2026-07-17] 지수 방향 필터 — 그 종목이 속한 시장 지수가 뚜렷이 하락 중이면
+            # 개별 종목의 롱 신호와 상위 타임프레임 추세가 반대라 승률이 떨어짐(4번 논의).
+            if index_pct[market] is not None and index_pct[market] < MIN_INDEX_CHANGE_PCT:
                 continue
             gap = (cur['open'] - cur['prev_close']) / cur['prev_close'] * 100
             # ── 필터 ──────────────────────────────────────────
