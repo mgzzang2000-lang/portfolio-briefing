@@ -708,8 +708,9 @@ def check_pullback_reclaim(closes, highs, lows, volumes, lookback=15):
     """
     [2026-07-06 추가] 눌림목+불플래그 진입 필터.
     "이미 26~30% 오른 상태에서 즉시 매수"하던 문제를 해결하기 위해,
-    돌파 즉시가 아니라 ①상승(깃대) → ②거래량 줄며 쉬는 눌림 → ③거래량 급증하며
-    직전 고점 재돌파, 이 3단계를 확인한 뒤에만 진입 신호를 준다.
+    돌파 즉시가 아니라 ①상승(깃대) → ②거래량 줄며 쉬는 눌림(절대%+깃대 대비
+    되돌림비율[2026-07-17 추가] 둘 다 확인) → ③거래량 급증하며 직전 고점 재돌파,
+    이 단계들을 확인한 뒤에만 진입 신호를 준다.
     closes/highs/lows/volumes: 최신이 index 0.
     반환: (ok, info_str)
     """
@@ -739,14 +740,28 @@ def check_pullback_reclaim(closes, highs, lows, volumes, lookback=15):
     cur_close = asc_c[-1]
     cur_vol   = asc_v[-1]
 
+    # [2026-07-17] 되돌림 "비율" 확인 — 깃대(상승 시작점) 대비 이번 눌림이 그 상승폭의
+    # 30~60% 구간인지 확인. 기존 pullback_pct(peak 대비 절대 %)만으로는 종목별 변동성
+    # 차이를 못 걸러냄(변동성 큰 종목은 절대 %는 기준 안에 들어도 실제로는 상승폭의
+    # 대부분을 반납한 눌림일 수 있음) — 절대 % 조건에 더해 상대적 위치도 같이 확인.
+    flagpole_base_range = asc_l[:peak_idx]
+    if len(flagpole_base_range) < 2:
+        return False, "깃대 기준점 부족"
+    flagpole_base = min(flagpole_base_range)
+    up_move = peak_price - flagpole_base
+    retracement_ratio = (peak_price - trough_price) / up_move if up_move > 0 else None
+    healthy_retracement_ratio = retracement_ratio is not None and 0.3 <= retracement_ratio <= 0.6
+
     # [2026-07-13] volume_dried_up(눌림구간 거래량<깃대의 80%) 조건 제거 — 나머지
     # 3개 조건과 상관성이 높아 사실상 중복 필터였음. 필터 단순화 차원에서 제외.
     healthy_pullback = 0.2 <= pullback_pct <= 4.0        # 너무 얕지도(노이즈) 깊지도(추세훼손) 않은 눌림
     reclaim          = cur_close >= peak_price * 0.997    # 직전 고점 근처까지 재돌파
     volume_surge     = cur_vol >= pullback_vol * 1.5      # 재돌파 시 거래량 급증
 
-    ok = healthy_pullback and reclaim and volume_surge
+    ok = healthy_pullback and healthy_retracement_ratio and reclaim and volume_surge
+    ratio_str = f"{retracement_ratio*100:.0f}%" if retracement_ratio is not None else "N/A"
     info = (f"눌림{pullback_pct:.1f}%({'✓' if healthy_pullback else '✗'}) "
+            f"되돌림비율{ratio_str}({'✓' if healthy_retracement_ratio else '✗'}) "
             f"재돌파{'✓' if reclaim else '✗'} "
             f"거래량급증{'✓' if volume_surge else '✗'}")
     return ok, info
