@@ -22,6 +22,7 @@
 # ═══════════════════════════════════════════════════════════
 import os, json, time, requests
 from datetime import datetime, timezone, timedelta
+import market_calendar
 KST = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
 MAX_BET = 300_000  # [2026-07-06] 눌림목+불플래그 진입 로직 검증 전까지 축소 운용 (20만→30만 조정)
@@ -352,6 +353,12 @@ def get_minute_ohlcv(token, code, market="J", n=30):
     output = data.get('output2', [])
     if not output or len(output) < 10:
         print(f"  [1분봉] {code} 데이터 부족 ({len(output)}봉)")
+        return None
+    # [2026-07-17] 휴장일에도 이 API가 오류 없이 마지막 실제 거래일 데이터를 그대로
+    # 돌려줘서 "오늘 데이터"로 오인하던 사고의 2차 방어선 — 휴장일조회(market_calendar)가
+    # 놓친 경우에도 여기서 최신 봉의 실제 날짜를 직접 대조한다.
+    if not market_calendar.is_fresh_bar(output[0], now.strftime('%Y%m%d')):
+        print(f"  [1분봉] {code} 최신 봉 날짜가 오늘과 불일치 — 휴장/데이터지연 추정, 스킵")
         return None
     result = output[:n]
     closes  = [float(x.get('stck_prpr', 0)) for x in result]
@@ -918,6 +925,14 @@ def main():
         print("장 시간 외 — 종료")
         return
     kis_token   = get_kis_token()
+    # [2026-07-17] 요일(주말)만 체크해서는 법정공휴일 등 평일 휴장일을 못 걸러냄 —
+    # 그런 날에도 KIS API가 오류 없이 마지막 실제 거래일 데이터를 그대로 돌려주는 바람에
+    # "오늘 신호"로 오인해 매수를 시도한 사고가 있었음. 휴장일이 확인되면 전체 사이클을
+    # 건너뛴다(판단 불가 시엔 기존처럼 진행 — API 장애로 봇이 통째로 멈추는 것을 방지).
+    trading_today = market_calendar.is_trading_day(kis_token, now.strftime('%Y%m%d'))
+    if trading_today is False:
+        print(f"[휴장일] {now.strftime('%Y-%m-%d')}은 증시 휴장일 — 종료")
+        return
     kakao_token = get_kakao_token()
     dash = load_dashboard()
     guard = check_daily_guard(dash, now)

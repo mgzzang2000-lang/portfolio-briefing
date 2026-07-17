@@ -47,6 +47,7 @@
 import os, json, time
 from datetime import datetime, timezone, timedelta
 import shadow_scan
+import market_calendar
 
 KST = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
@@ -292,8 +293,15 @@ def main():
     today_str = now.strftime('%Y%m%d')
     watchlist_path = f"{DATA_DIR}/watchlist_{today_str}.json"
 
-    watchlist = load_json(watchlist_path, None)
     token = get_kis_token()
+    # [2026-07-17] 휴장일에도 실행되어 어제 데이터가 오늘 날짜 파일에 그대로 쌓이던
+    # 사고 계기로 추가(get_minute_ohlcv_raw가 stck_bsop_date를 확인 안 하고 그대로
+    # append했음). 휴장일이 확인되면 수집 자체를 건너뛴다.
+    if market_calendar.is_trading_day(token, today_str) is False:
+        print(f"[휴장일] {today_str} — 인트라데이 수집/섀도우 스캔 건너뜀")
+        return
+
+    watchlist = load_json(watchlist_path, None)
 
     if watchlist is None:
         print("오늘 첫 실행 - 워치리스트 산출 중...")
@@ -336,6 +344,10 @@ def main():
         stored_times = {b['stck_cntg_hour'] for b in stored}
 
         raw = get_minute_ohlcv_raw(token, code, market)
+        # [2026-07-17] dedup 키(stck_cntg_hour)가 시각만 보고 날짜를 안 봐서, 휴장일처럼
+        # API가 예전 거래일 봉을 그대로 돌려주면 오늘 날짜 파일에 그 봉이 섞여 들어갔음 —
+        # 위 main()의 휴장일 게이트가 걸러주지만, 혹시 놓친 경우를 대비해 여기서도 재확인.
+        raw = [b for b in raw if market_calendar.is_fresh_bar(b, today_str)]
         new_bars = [b for b in raw if b.get('stck_cntg_hour') and b['stck_cntg_hour'] not in stored_times]
         if new_bars:
             stored.extend(new_bars)

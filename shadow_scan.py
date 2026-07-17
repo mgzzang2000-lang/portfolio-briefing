@@ -51,6 +51,7 @@
 """
 import os, json, time
 from datetime import datetime, timezone, timedelta
+import market_calendar
 
 KST = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
@@ -724,6 +725,9 @@ def main():
         return
     today_str = now.strftime('%Y%m%d')
     token = get_kis_token()
+    if market_calendar.is_trading_day(token, today_str) is False:
+        print(f"[휴장일] {today_str} — 섀도우 스캔 건너뜀")
+        return
     stocks, kospi_set = get_universe(token)
     if not stocks:
         print("[섀도우 스캔] 스캔 대상 없음")

@@ -28,6 +28,7 @@ def load_env():
 
 load_env()
 import auto_trading as bot  # noqa: E402  (환경변수 세팅 후 import 필요)
+import market_calendar  # noqa: E402
 
 KST = bot.KST
 NO_POSITION_INTERVAL = 20   # 포지션 없을 때 대기(초)
@@ -122,6 +123,7 @@ def main():
     kakao_token = None
     kakao_fetched_at = 0
     loop_count = 0
+    holiday_cache = {'date': None, 'is_holiday': False}
 
     while True:
         now = datetime.now(KST)
@@ -151,6 +153,20 @@ def main():
         except Exception as e:
             print(f"[토큰 오류] {e}")
             wait_seconds(10)
+            continue
+
+        # [2026-07-17] 요일(주말)만 체크해서는 법정공휴일 등 평일 휴장일을 못 걸러냄 —
+        # 보유 포지션이 휴장일까지 넘어오면 이 루프가 마지막 실제 거래일의 고정된
+        # (그러나 신선하지 않은) 가격으로 손절/익절을 오판할 위험이 있음. 하루 1회만
+        # 조회해서 캐시(같은 날 반복 호출로 API 낭비 방지).
+        today_str = now.strftime('%Y%m%d')
+        if holiday_cache['date'] != today_str:
+            trading_today = market_calendar.is_trading_day(kis_token, today_str)
+            holiday_cache['date'] = today_str
+            holiday_cache['is_holiday'] = (trading_today is False)
+        if holiday_cache['is_holiday']:
+            print(f"[{now.strftime('%H:%M:%S')}] 휴장일 — 30분 대기")
+            wait_seconds(1800)
             continue
 
         dash = bot.load_dashboard()
