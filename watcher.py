@@ -1,6 +1,11 @@
-# 로컬 실시간 포지션 감시 — GitHub Actions(5분 간격)의 반응 지연을 보완
-# 포지션 보유 중엔 5초 간격으로 가격을 확인해 손절/익절/상한가를 즉시 처리한다.
-# 종목 스캔·매수는 계속 GitHub Actions가 담당하고, 이 스크립트는 "판다" 역할만 한다.
+# 상시 실시간 감시 — GitHub Actions(5분 간격)의 반응 지연을 보완.
+# 포지션 보유 중엔 5초 간격으로 가격을 확인해 손절/익절/상한가를 즉시 처리하고,
+# 포지션이 없을 때도 20초 간격으로 신규 매수 스캔을 직접 돈다("사고 판다" 둘 다 담당).
+# [2026-07-18] 원래는 "판다" 역할만 하고 매수는 GitHub Actions(5분 cron)에 맡겼는데,
+# 매도(5초 반응)와 매수(최대 5~6분 지연) 사이 비대칭이 심하다는 지적으로 매수 스캔도
+# 이쪽(오라클 클라우드 상시 인스턴스에서 구동)으로 옮김. GitHub Actions는 이 프로세스가
+# 살아있으면(하트비트 90초 이내) 매수 스캔도 양보하고, 죽었을 때만 백업으로 개입한다
+# (auto_trading.main()의 watcher_is_alive() 가드 참고).
 import os, sys, time, json, subprocess
 from datetime import datetime
 
@@ -174,7 +179,43 @@ def main():
         dash_position = dash.get('position')
 
         if not dash_position:
-            print(f"[{now.strftime('%H:%M:%S')}] 포지션 없음 — 대기")
+            # [2026-07-18] 예전엔 여기서 그냥 대기만 하고 매수는 GitHub Actions(5분 cron)에
+            # 맡겼는데, 매도(5초 반응)와 비교해 매수만 최대 5~6분 지연되는 비대칭이 있어
+            # 이 루프에서 직접 매수 스캔까지 돌도록 확장(20초 간격 — GH Actions 내부
+            # 60초 루프보다 빠름). 로직은 auto_trading.attempt_entry_scan()을 그대로
+            # 재사용해 GitHub Actions와 완전히 동일한 조건으로 판단한다.
+            try:
+                holdings, cash = bot.get_balance(kis_token)
+            except Exception as e:
+                print(f"[잔고조회 오류] {e}")
+                wait_seconds(5)
+                continue
+            if cash is None:
+                # [2026-07-09] get_balance()는 API 응답이 불완전하면 "0원"이 아니라
+                # None을 반환해 "값을 모른다"를 표시함(auto_trading.main()과 동일 원칙) —
+                # 이 상태로 매수 스캔을 진행하면 잘못된 수량 계산으로 이어질 수 있어 스킵.
+                print(f"[{now.strftime('%H:%M:%S')}] 잔고 조회 실패(None) — 이번 스캔 건너뜀")
+                wait_seconds(5)
+                continue
+            print(f"[{now.strftime('%H:%M:%S')}] 포지션 없음 — 매수 스캔")
+            try:
+                bot.attempt_entry_scan(kis_token, kakao_token, dash, guard, holdings, cash)
+            except Exception as e:
+                print(f"[매수 스캔 오류] {e}")
+                try:
+                    bot.send_kakao(kakao_token, f"⚠️ 상시감시 매수스캔 오류\n{str(e)[:150]}")
+                except Exception:
+                    pass
+            if dash.get('position'):
+                # 이번 iteration에서 실제로 매수가 체결됨 — 다른 감시자(GH Actions 등)가
+                # 곧바로 알 수 있도록 대기하지 말고 즉시 push.
+                print(f"[{now.strftime('%H:%M:%S')}] 매수 체결 — 대시보드 즉시 반영")
+                git_push_dashboard()
+            # [2026-07-18] 하트비트를 포지션 보유 중에만 갱신했었는데, 포지션이 없는
+            # 스캔 구간에도 이 프로세스가 살아있다는 신호를 보내야 GitHub Actions가
+            # 매수 스캔을 양보할 수 있다 — 매 iteration(20초)마다 갱신해 90초 임계값
+            # 대비 넉넉한 여유를 둔다.
+            push_heartbeat()
             git_pull()
             wait_seconds(NO_POSITION_INTERVAL)
             continue

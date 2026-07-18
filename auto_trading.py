@@ -1007,6 +1007,85 @@ def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
         send_kakao(kakao_token, msg)
     else:
         save_dashboard(dash)
+
+
+# [2026-07-18] GitHub Actions main()과 오라클 클라우드 상시감시(watcher.py) 양쪽에서
+# 동일하게 호출하기 위해 "② 신규 진입 스캔" 블록을 함수로 분리 — 두 곳이 서로 다른
+# 로직으로 갈라지며 생기는 버그 위험을 없앤다. 호출 전 daily guard/stray 종목 체크까지
+# 이 함수 안에서 전부 처리하고, 각 분기가 끝나면 항상 save_dashboard(dash)를 호출한다.
+def attempt_entry_scan(kis_token, kakao_token, dash, guard, holdings, cash):
+    # [2026-07-16] 계좌에 봇이 모르는 종목이 남아있으면 신규 매수를 하지 않는다 —
+    # 003280 부분매도 뒤 포지션을 오판해 279570을 추가 매수하며 한때 두 종목을
+    # 동시보유했던 사고(실손실 -16,770원)의 재발 방지용 최종 안전장치.
+    stray = [h for h in holdings if int(h.get('hldg_qty', 0)) > 0]
+    if stray:
+        names = ', '.join(f"{h.get('pdno')}({h.get('hldg_qty')}주)" for h in stray)
+        print(f"[경고] 봇이 모르는 보유종목 존재 — 신규매수 보류: {names}")
+        send_kakao(kakao_token, f"⚠️ 계좌에 정체불명 보유종목 있음: {names}\n신규 매수를 보류합니다 — 확인 필요")
+        save_dashboard(dash)
+        return
+    if guard.get('consecutive_losses', 0) >= DAILY_LOSS_LIMIT:
+        if not guard.get('notified'):
+            guard['notified'] = True
+            send_kakao(kakao_token,
+                       f"🛑 오늘 연속 손절 {guard['consecutive_losses']}회 — 신규 진입을 중단합니다 (내일 재개)")
+        save_dashboard(dash)
+        print(f"[일일 가드] 연속 손절 {guard['consecutive_losses']}회 — 신규 진입 중단")
+        return
+    print("포지션 없음 → [1단계] 일봉 신호 스캔")
+    candidates = scan_signals(kis_token)
+    if not candidates:
+        save_dashboard(dash)
+        print("일봉 조건 충족 종목 없음")
+        return
+    # 상위 3 후보 → 1분봉 타이밍 확인
+    top_n = min(3, len(candidates))
+    print(f"\n→ [2단계] 1분봉 진입 타이밍 확인 (상위 {top_n}종목)")
+    chosen = None
+    for c in candidates[:top_n]:
+        time.sleep(0.1)
+        ok, stop_px, target_px, info = check_1min_entry(
+            kis_token, c['code'], c['name'], c.get('market', 'J'))
+        if ok:
+            chosen = {**c, 'stop_price': stop_px, 'target_price': target_px}
+            print(f"  → 진입 결정: {c['name']}")
+            break
+        print(f"  → 패스: {c['name']}")
+    if not chosen:
+        save_dashboard(dash)
+        print("1분봉 타이밍 조건 미충족 — 다음 스캔 대기")
+        return
+    # ③ 매수 ──────────────────────────────────────────────
+    price = chosen['price']
+    qty   = int(min(cash, MAX_BET) / price)
+    if qty < 1:
+        save_dashboard(dash)
+        print(f"매수 수량 부족 (가격:{price:,}원)")
+        return
+    ok, order_result = place_order(kis_token, chosen['code'], qty, "buy")
+    if not ok:
+        err_msg = f"⚠️ 매수 주문 실패\n{chosen['name']} {qty}주\n{order_result.get('msg1', '')}"
+        print(err_msg)
+        send_kakao(kakao_token, err_msg)
+        save_dashboard(dash)
+        return
+    used = int(price * qty)
+    log_buy(dash, chosen['code'], chosen['name'], qty, price,
+            cash - used, chosen['stop_price'], chosen['target_price'],
+            chosen.get('market', 'J'))
+    save_dashboard(dash)
+    ma200_str   = f"{chosen['ma200']:,.0f}" if chosen['ma200'] else "N/A"
+    squeeze_tag = "🔥스퀴즈" if chosen['in_squeeze'] else "📈BB상단"
+    breakout_tag = "🆕당일돌파" if chosen['is_new_breakout'] else "기존상단"
+    msg = (f"📥 매수 {squeeze_tag} {breakout_tag}\n{chosen['name']} {qty}주\n"
+           f"가격: {price:,.0f}원\n"
+           f"거래량: {chosen['vol_ratio']:.1f}배\n"
+           f"갭: {chosen['gap']:+.1f}% | MA200(참고): {ma200_str}\n"
+           f"익절: {chosen['target_price']:,.0f} | ATR손절: {chosen['stop_price']:,.0f}\n"
+           f"💰 투입: {used:,.0f}원")
+    send_kakao(kakao_token, msg)
+
+
 # ── 메인 ──────────────────────────────────────────────────────
 def main():
     now = datetime.now(KST)
@@ -1097,77 +1176,17 @@ def main():
             manage_position(kis_token, kakao_token, dash, guard, now, active[0], force_sell_at)
             return
         # ② 신규 진입 스캔 (시간대별 진입 가능 여부는 scan_signals 내부에서 판정)
-        # [2026-07-16] 위 재확인까지 거쳤어도, 계좌에 봇이 모르는 종목이 남아있으면
-        # 신규 매수를 하지 않는다 — 003280 부분매도 뒤 포지션을 오판해 279570을
-        # 추가 매수하며 한때 두 종목을 동시보유했던 사고(실손실 -16,770원)의 재발 방지용
-        # 최종 안전장치. holdings는 이번 사이클 시작 시 이미 조회했으므로 API 호출 추가 없음.
-        stray = [h for h in holdings if int(h.get('hldg_qty', 0)) > 0]
-        if stray:
-            names = ', '.join(f"{h.get('pdno')}({h.get('hldg_qty')}주)" for h in stray)
-            print(f"[경고] 봇이 모르는 보유종목 존재 — 신규매수 보류: {names}")
-            send_kakao(kakao_token, f"⚠️ 계좌에 정체불명 보유종목 있음: {names}\n신규 매수를 보류합니다 — 확인 필요")
+        # [2026-07-18] 오라클 클라우드 상시감시(watcher.py)가 살아있으면 매수 스캔도
+        # 그쪽에 양보한다 — 포지션 관리(위 ①)에 이미 있던 watcher_is_alive() 가드와
+        # 동일한 원칙. watcher.py가 이제 포지션 관리뿐 아니라 매수 스캔까지 훨씬 빠른
+        # 주기(20초)로 돌기 때문에, 상시감시자가 살아있는 한 GitHub Actions가 5분 주기로
+        # 끼어들어 중복 스캔·중복 매수를 시도할 이유가 없다. 상시감시자가 죽었을 때만
+        # (하트비트 90초 초과) 이 5분 cron이 백업으로 매수 스캔을 대신한다.
+        if watcher_is_alive():
+            print("[백업 대기] 상시감시(watcher.py)가 살아있음 — 매수 스캔도 그쪽에 양보")
             save_dashboard(dash)
             return
-        if guard.get('consecutive_losses', 0) >= DAILY_LOSS_LIMIT:
-            if not guard.get('notified'):
-                guard['notified'] = True
-                send_kakao(kakao_token,
-                           f"🛑 오늘 연속 손절 {guard['consecutive_losses']}회 — 신규 진입을 중단합니다 (내일 재개)")
-            save_dashboard(dash)
-            print(f"[일일 가드] 연속 손절 {guard['consecutive_losses']}회 — 신규 진입 중단")
-            return
-        print("포지션 없음 → [1단계] 일봉 신호 스캔")
-        candidates = scan_signals(kis_token)
-        if not candidates:
-            save_dashboard(dash)
-            print("일봉 조건 충족 종목 없음")
-            return
-        # 상위 3 후보 → 1분봉 타이밍 확인
-        top_n = min(3, len(candidates))
-        print(f"\n→ [2단계] 1분봉 진입 타이밍 확인 (상위 {top_n}종목)")
-        chosen = None
-        for c in candidates[:top_n]:
-            time.sleep(0.1)
-            ok, stop_px, target_px, info = check_1min_entry(
-                kis_token, c['code'], c['name'], c.get('market', 'J'))
-            if ok:
-                chosen = {**c, 'stop_price': stop_px, 'target_price': target_px}
-                print(f"  → 진입 결정: {c['name']}")
-                break
-            print(f"  → 패스: {c['name']}")
-        if not chosen:
-            save_dashboard(dash)
-            print("1분봉 타이밍 조건 미충족 — 다음 스캔 대기")
-            return
-        # ③ 매수 ──────────────────────────────────────────────
-        price = chosen['price']
-        qty   = int(min(cash, MAX_BET) / price)
-        if qty < 1:
-            save_dashboard(dash)
-            print(f"매수 수량 부족 (가격:{price:,}원)")
-            return
-        ok, order_result = place_order(kis_token, chosen['code'], qty, "buy")
-        if not ok:
-            err_msg = f"⚠️ 매수 주문 실패\n{chosen['name']} {qty}주\n{order_result.get('msg1', '')}"
-            print(err_msg)
-            send_kakao(kakao_token, err_msg)
-            save_dashboard(dash)
-            return
-        used = int(price * qty)
-        log_buy(dash, chosen['code'], chosen['name'], qty, price,
-                cash - used, chosen['stop_price'], chosen['target_price'],
-                chosen.get('market', 'J'))
-        save_dashboard(dash)
-        ma200_str   = f"{chosen['ma200']:,.0f}" if chosen['ma200'] else "N/A"
-        squeeze_tag = "🔥스퀴즈" if chosen['in_squeeze'] else "📈BB상단"
-        breakout_tag = "🆕당일돌파" if chosen['is_new_breakout'] else "기존상단"
-        msg = (f"📥 매수 {squeeze_tag} {breakout_tag}\n{chosen['name']} {qty}주\n"
-               f"가격: {price:,.0f}원\n"
-               f"거래량: {chosen['vol_ratio']:.1f}배\n"
-               f"갭: {chosen['gap']:+.1f}% | MA200(참고): {ma200_str}\n"
-               f"익절: {chosen['target_price']:,.0f} | ATR손절: {chosen['stop_price']:,.0f}\n"
-               f"💰 투입: {used:,.0f}원")
-        send_kakao(kakao_token, msg)
+        attempt_entry_scan(kis_token, kakao_token, dash, guard, holdings, cash)
     except Exception as e:
         err_msg = f"⚠️ 자동매매 오류\n{str(e)[:150]}"
         print(err_msg)
