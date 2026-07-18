@@ -39,6 +39,13 @@ MAX_POSITIONS = 3
 PER_POSITION_KRW = 1_000_000
 MAX_POSITION_USD = 500  # [2026-07-09] 사용자 확정 — 종목당 매수금액 상한. 현재 환율 기준
                          # PER_POSITION_KRW(100만원)보다 낮아서 이 값이 실질적 캡으로 작동.
+                         # [2026-07-18] 리스크 기준 사이징 도입 이후로도 "한 종목에 계좌
+                         # 절반 이상 몰빵하지 않는다"는 상한선 역할로 그대로 유지.
+RISK_PCT_PER_TRADE = 0.015  # [2026-07-18 신규] 계좌 총자산의 이 비율만큼만 이 트레이드
+# 하나에서 잃도록 수량을 정한다(Minervini 권장 1.25~2.5% 범위 중간값). 기존엔 손절폭이
+# 종목마다 달라도(ATR 기반) 다 똑같은 정액($500)을 사서, 변동성 큰(손절폭 넓은) 종목이
+# 오히려 계좌 대비 더 큰 %를 거는 비일관성이 있었음 — 수량 = 리스크예산 / 손절폭(1주당)
+# 으로 바꿔서 트레이드마다 실제 손실 위험을 항상 같은 비율로 맞춘다.
 STOP_LOSS_FLOOR_PCT = 0.10  # [2026-07-09] 백테스트로 확인한 익절30%/손절10% 조합 채택
 ATR_MULT = 2.0
 TAKE_PROFIT_PCT = 0.30      # 최종 목표가(잔여 물량) — 분할익절 이후에도 적용
@@ -113,6 +120,17 @@ def main():
         time.sleep(0.3)
 
     # ── 2. 빈 슬롯만큼 신규 매수 ──
+    # [2026-07-18 신규] 시장 전체 건강도(SPY Stage2) 필터 — SPY 자체가 하락/조정
+    # 국면이면 섹터RS/개별RS가 아무리 좋아도 신규매수를 이번 사이클 통째로 보류.
+    # 매도(추세이탈/하드손절)는 이 필터와 무관하게 항상 실행되므로 이 분기보다 위에서
+    # 이미 처리됨. 리서치 근거: "지수 자체를 먼저 걸러내는 게 어떤 손절 규칙보다도
+    # 하락장에서 자본을 더 많이 지켰다"(Weinstein 방법론 위계 구조).
+    if not scan_result.get("spy_market_healthy", True):
+        print("[시장필터] SPY가 Stage2(상승국면) 아님 — 이번 사이클 신규매수 보류")
+        sync_total_assets(state, [h for h in holdings if h["symbol"] in held_symbols])
+        save_json(STATE_FILE, state)
+        return
+
     free_slots = MAX_POSITIONS - len(held_symbols)
     if free_slots <= 0:
         print(f"빈 슬롯 없음 (보유 {len(held_symbols)}/{MAX_POSITIONS})")
@@ -123,6 +141,13 @@ def main():
     usd_krw = get_usd_krw_rate()
     budget_usd = min(PER_POSITION_KRW / usd_krw, MAX_POSITION_USD)
     excd_cache = load_json(os.path.join(DATA_DIR, "excd_cache.json"), {})
+
+    # [2026-07-18] 리스크 기준 사이징의 기준 자산 — 방금 갱신한 현금(current_balance,
+    # sync_live_balance) + 보유종목 평가금액(holdings, 이번 사이클 시작 시 조회)을
+    # 합쳐서 계산. sync_total_assets()가 이 값을 state["total_assets"]에 저장하는 건
+    # 매수 루프 이후라, 그걸 기다리지 않고 여기서 직접 같은 방식으로 구한다.
+    equity_usd = state.get("current_balance", 0) + sum(h["qty"] * h["current_price"] for h in holdings)
+    risk_budget_usd = equity_usd * RISK_PCT_PER_TRADE
 
     # [2026-07-09] 섹터 쏠림 방지 — 최대 3종목만 보유하는데 상위 후보 3개가
     # 같은 섹터에 몰려도 그대로 다 사던 문제. 섹터당 최대 1종목으로 제한해서
@@ -160,11 +185,6 @@ def main():
         if not current_price:
             print(f"  [건너뜀] {symbol}: 현재가 조회 실패")
             continue
-        qty = int(budget_usd // current_price)
-        if qty < 1:
-            print(f"  [건너뜀] {symbol}: 예산 부족(가격 {current_price}, 예산 ${budget_usd:.2f})")
-            continue
-        limit_price = round(current_price * 1.005, 2)
 
         # [2026-07-07] -8%는 "최대 손실 한도"(cap)임 — ATR이 그보다 더 넓은
         # 손절폭을 제시해도 8%보다 더 잃게 두면 안 됨. 대신 ATR상 변동성이
@@ -177,6 +197,21 @@ def main():
             stop_price = max(dynamic_stop, floor_price)
         else:
             stop_price = floor_price
+
+        # [2026-07-18] 리스크 기준 사이징 — "손절폭(1주당 손실) × 수량 = 리스크예산"이
+        # 되도록 수량을 정하고, 기존 정액 예산(budget_usd)은 상한선으로만 유지(변동성
+        # 낮은/손절폭 좁은 종목이 계좌 대비 과도하게 큰 포지션이 되는 것 방지).
+        risk_per_share = current_price - stop_price
+        if risk_per_share <= 0:
+            print(f"  [건너뜀] {symbol}: 손절가가 현재가 이상 — 계산 오류로 추정")
+            continue
+        qty_by_risk = int(risk_budget_usd // risk_per_share)
+        qty_by_budget = int(budget_usd // current_price)
+        qty = min(qty_by_risk, qty_by_budget)
+        if qty < 1:
+            print(f"  [건너뜀] {symbol}: 수량 부족(리스크기준 {qty_by_risk}주, 예산기준 {qty_by_budget}주)")
+            continue
+        limit_price = round(current_price * 1.005, 2)
 
         ok, resp = place_order(token, ACCOUNT_NO, ACCOUNT_PROD, trade_excd,
                                 symbol, qty, limit_price, "buy")

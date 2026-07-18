@@ -91,6 +91,16 @@ def main():
     spy_closes = spy_ohlcv["closes"]
     excd_cache["SPY"] = spy_excd
 
+    # [2026-07-18 신규] 시장 전체 건강도(레짐) 필터 — Weinstein 방법론의 핵심인
+    # "지수 먼저, 섹터 다음, 개별종목 마지막" 위계 구조에서 지금까지 빠져있던
+    # 최상위 단계. 섹터RS/개별RS/Stage2는 전부 "다른 종목·섹터 대비 상대적으로"
+    # 판단할 뿐, SPY 자체가 하락 국면(Stage3/4)일 때도 그 안에서 "그나마 덜 빠지는"
+    # 종목을 신규매수할 위험을 못 막는다. SPY 자체가 Stage2(30주선 위 + 30주선
+    # 상승 중)일 때만 신규매수를 허용 — 매도(추세이탈/하드손절)는 이 필터와 무관하게
+    # 항상 실행됨(trade_execution.py/position_monitor.py 참고).
+    spy_market_healthy = is_stage2(spy_closes)
+    print(f"SPY 시장 건강도(Stage2): {'양호 — 신규매수 허용' if spy_market_healthy else '악화 — 이번 사이클 신규매수 보류'}")
+
     universe = get_universe()
     print(f"S&P500 {len(universe)}종목 스캔 시작")
 
@@ -188,6 +198,7 @@ def main():
     out_path = os.path.join(DATA_DIR, f"candidates_{today_str}.json")
     save_json(out_path, {
         "date": today_str,
+        "spy_market_healthy": spy_market_healthy,
         "sector_ranking": [{"sector": s, "avg_rel_strength_12w": round(sector_rs[s], 4)} for s in ranked_sectors],
         "candidates": candidates,
         "trend_exit_symbols": trend_exit_symbols,
