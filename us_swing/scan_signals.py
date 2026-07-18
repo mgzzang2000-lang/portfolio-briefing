@@ -41,6 +41,13 @@ DATA_DIR = os.path.dirname(__file__)
 EXCD_CACHE_FILE = os.path.join(DATA_DIR, "excd_cache.json")
 LOOKBACK_WEEKS = 12  # 상대강도 계산에 쓸 기간
 MA_PERIOD = 30        # Stage2 판정용 이평선(주)
+# [2026-07-18 신규] Minervini Trend Template(8개조건)을 주봉 기준으로 적용할 때 쓰는
+# 추가 이평선/범위 파라미터 — is_stage2()가 이 값들로 정배열·52주 고저 범위까지 확인.
+MA_SHORT_PERIOD = 10   # 정배열 확인용 단기 이평선(주) — Minervini의 50일선에 해당
+MA_LONG_PERIOD = 40    # 정배열/추세 확인용 장기 이평선(주) — Minervini의 200일선에 해당
+FIFTY_TWO_WEEK_LOOKBACK = 52
+ABOVE_52W_LOW_MULT = 1.30   # 52주 최저가 대비 이 배수 이상 위에 있어야 함(+30%)
+NEAR_52W_HIGH_MULT = 0.75   # 52주 최고가 대비 이 배수 이상(=25% 이내)이어야 함
 
 # [2026-07-09] 신뢰도 강화 4종 세트 — 사용자 확정
 RS_TOP_PERCENTILE = 0.30    # 통과 섹터 내에서도 상대강도 상위 30%만 최종 후보 인정
@@ -71,13 +78,34 @@ def rel_strength(closes, spy_closes, weeks=LOOKBACK_WEEKS):
     return stock_ret - spy_ret
 
 
-def is_stage2(closes):
-    ma_now = calc_ma(closes, MA_PERIOD)
-    ma_prev = calc_ma(closes[4:], MA_PERIOD)  # 4주 전 시점의 30주 이평
-    if ma_now is None or ma_prev is None:
+def is_stage2(closes, highs, lows):
+    """
+    [2026-07-18 확장] 기존엔 "가격>30주선 AND 30주선 상승"만 봤는데, 이 조건은 Stage2
+    진입 후 한참 지나 이미 많이 오른 종목도 계속 통과시킴(진입이 늦어지는 문제).
+    Minervini Trend Template(8개조건)을 주봉 기준으로 적용해 정배열·52주 고저
+    범위까지 같이 확인 — "건강한 상승 구조인지"를 더 명확하게 판별한다.
+      ① 가격 > 10주선 > 30주선 > 40주선 (정배열)
+      ② 40주선이 4주 전보다 상승 중
+      ③ 가격이 52주 최저가 대비 30% 이상 위(막 바닥 다지던 수준이 아님)
+      ④ 가격이 52주 최고가 대비 25% 이내(신고가권 근접 — "이미 다 오른 뒤" 방지)
+    52주치 데이터가 없는(최근 상장 등) 종목은 판단 불가로 보고 제외.
+    """
+    if len(closes) < FIFTY_TWO_WEEK_LOOKBACK or len(highs) < FIFTY_TWO_WEEK_LOOKBACK or len(lows) < FIFTY_TWO_WEEK_LOOKBACK:
+        return False
+    ma_short = calc_ma(closes, MA_SHORT_PERIOD)
+    ma_mid = calc_ma(closes, MA_PERIOD)
+    ma_long = calc_ma(closes, MA_LONG_PERIOD)
+    ma_long_prev = calc_ma(closes[4:], MA_LONG_PERIOD)  # 4주 전 시점의 40주 이평
+    if None in (ma_short, ma_mid, ma_long, ma_long_prev):
         return False
     price = closes[0]
-    return price > ma_now and ma_now > ma_prev
+    aligned = price > ma_short > ma_mid > ma_long
+    ma_long_rising = ma_long > ma_long_prev
+    low_52w = min(lows[:FIFTY_TWO_WEEK_LOOKBACK])
+    high_52w = max(highs[:FIFTY_TWO_WEEK_LOOKBACK])
+    above_52w_low = price >= low_52w * ABOVE_52W_LOW_MULT
+    near_52w_high = price >= high_52w * NEAR_52W_HIGH_MULT
+    return aligned and ma_long_rising and above_52w_low and near_52w_high
 
 
 def main():
@@ -98,7 +126,7 @@ def main():
     # 종목을 신규매수할 위험을 못 막는다. SPY 자체가 Stage2(30주선 위 + 30주선
     # 상승 중)일 때만 신규매수를 허용 — 매도(추세이탈/하드손절)는 이 필터와 무관하게
     # 항상 실행됨(trade_execution.py/position_monitor.py 참고).
-    spy_market_healthy = is_stage2(spy_closes)
+    spy_market_healthy = is_stage2(spy_closes, spy_ohlcv["highs"], spy_ohlcv["lows"])
     print(f"SPY 시장 건강도(Stage2): {'양호 — 신규매수 허용' if spy_market_healthy else '악화 — 이번 사이클 신규매수 보류'}")
 
     universe = get_universe()
@@ -118,7 +146,7 @@ def main():
         if rs is not None and abs(rs) > ANOMALY_RS_ABS_THRESHOLD:
             print(f"  [이상치 제외] {symbol}: 12주 상대강도 {rs:+.1%} — 데이터 오류로 추정, 후보/섹터평균 계산에서 제외")
             rs = None
-        stage2 = is_stage2(closes)
+        stage2 = is_stage2(closes, ohlcv["highs"], ohlcv["lows"])
         atr = calc_atr(ohlcv["highs"], ohlcv["lows"], closes)
         vols = ohlcv["volumes"][:LOOKBACK_WEEKS]
         avg_volume = sum(vols) / len(vols) if vols else 0

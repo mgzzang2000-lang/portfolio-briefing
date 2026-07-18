@@ -34,7 +34,7 @@ os.environ.setdefault("KIS_APP_SECRET", "backtest-dummy")
 
 from kis_common import calc_ma, calc_atr
 from scan_signals import (
-    rel_strength, is_stage2, LOOKBACK_WEEKS, MA_PERIOD,
+    rel_strength, is_stage2, LOOKBACK_WEEKS, MA_PERIOD, FIFTY_TWO_WEEK_LOOKBACK,
     RS_TOP_PERCENTILE, ANOMALY_RS_ABS_THRESHOLD, MIN_AVG_WEEKLY_VOLUME,
 )
 from get_universe import get_universe
@@ -43,12 +43,15 @@ from get_universe import get_universe
 # 강화 4종(RS상위30%/이상치제외/거래량필터/섹터당1종목)을 백테스트도 그대로
 # 반영 — 그래야 여기서 나온 승률/손익 숫자가 실제 돌아가는 로직과 일치함.
 MAX_POSITIONS = 3
-STOP_LOSS_FLOOR_PCT = 0.10  # [코드리뷰 수정] trade_execution.py의 현재 값(0.10)과 동기화.
+STOP_LOSS_FLOOR_PCT = 0.07  # [코드리뷰 수정] trade_execution.py의 현재 값과 동기화
+                             # (2026-07-09 최초 0.10, 2026-07-18 Minervini 권장치로 0.07 재조정).
                              # main()의 그리드서치는 항상 run_backtest(stop_loss_floor_pct=...)로
                              # 명시 override하므로 그리드 결과엔 영향 없었지만, run_backtest()를
                              # 파라미터 없이 직접 호출하면(REPL 등) 이 기본값이 조용히 쓰이므로 동기화.
 ATR_MULT = 2.0
-WARMUP_WEEKS = 40  # MA_PERIOD(30)+여유 — 신호 계산에 필요한 최소 과거 주수
+# [2026-07-18] is_stage2()가 이제 52주 고저 범위까지 확인하는 Trend Template
+# 방식으로 확장돼서 최소 52주치 데이터가 필요함 — 기존 40(MA_PERIOD+여유)에서 상향.
+WARMUP_WEEKS = FIFTY_TWO_WEEK_LOOKBACK + 10
 YEARS = "6y"
 
 
@@ -109,7 +112,7 @@ def run_backtest(universe, series_by_symbol, spy_series, take_profit_pct=None,
     ratchet_pct: 부분 익절 이후 남은 물량의 손절가를 entry_price*(1+ratchet_pct)로
     올림(0.0=본절, 0.05=+5% 등). None이면 손절가 유지(래칫 없음)."""
     n_weeks = len(spy_series["close"])
-    need = MA_PERIOD + 10  # is_stage2가 필요로 하는 최소 과거 길이(여유 포함)
+    need = FIFTY_TWO_WEEK_LOOKBACK + 10  # is_stage2가 필요로 하는 최소 과거 길이(여유 포함)
 
     symbols_by_sector = {}
     symbol_to_sector = {}
@@ -230,7 +233,7 @@ def run_backtest(universe, series_by_symbol, spy_series, take_profit_pct=None,
             rs, closes, highs, lows = cached
             if rs is None or rs <= 0 or rs < rs_threshold:
                 continue
-            if not is_stage2(closes):
+            if not is_stage2(closes, highs, lows):
                 continue
             s = series_by_symbol[symbol]
             vols = s["volume"].iloc[max(0, t - LOOKBACK_WEEKS + 1): t + 1]
