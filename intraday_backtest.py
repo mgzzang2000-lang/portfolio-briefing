@@ -40,6 +40,8 @@ KIS_APP_KEY    = os.environ['KIS_APP_KEY']
 KIS_APP_SECRET = os.environ['KIS_APP_SECRET']
 TOKEN_FILE     = "kis_token.json"
 DATA_DIR       = "minute_data"
+PULLBACK_CONFIRM_WINDOW = 3  # [2026-07-18] auto_trading.py와 동일 — 반전봉이 확인돌파
+# 시점 기준 너무 옛날 봉이면 뒤늦은 진입이 되므로 최근 N봉 이내만 인정.
 
 TRADING_MINUTES_PER_DAY = 390  # 09:00~15:30
 
@@ -234,12 +236,25 @@ def check_pullback_support_hold(closes, highs, lows, volumes, lookback=15):
     cur_vol = asc_v[-1]
     confirm_break = cur_close > reversal_h
     volume_surge = cur_vol >= pullback_vol * 1.5
-    ok = (healthy_pullback and healthy_retracement_ratio and
-          strong_reversal_candle and confirm_break and volume_surge)
+    trough_recent = trough_idx >= (lookback - 1) - PULLBACK_CONFIRM_WINDOW
+    ok = (healthy_pullback and healthy_retracement_ratio and strong_reversal_candle
+          and confirm_break and volume_surge and trough_recent)
     ratio_str = f"{retracement_ratio*100:.0f}%" if retracement_ratio is not None else "N/A"
     info = (f"눌림{pullback_pct:.1f}% 되돌림비율{ratio_str} 반전봉{strong_reversal_candle} "
-            f"확인돌파{confirm_break} 거래량급증{volume_surge}")
+            f"확인돌파{confirm_break} 거래량급증{volume_surge} 저점최신성{trough_recent}")
     return ok, info, trough_price
+
+def check_5min_momentum(closes, n_candles=4):
+    """[2026-07-18] auto_trading.py의 check_5min_momentum과 동일 로직(백테스트 모듈
+    독립 유지 위해 복제). 반환: (ok, info_str)"""
+    need = (n_candles + 1) * 5
+    if len(closes) < need:
+        return False, "5분봉 데이터 부족"
+    closes5 = [closes[i * 5] for i in range(n_candles + 1)]
+    momentum_up = closes5[0] > closes5[n_candles]
+    holding_up  = closes5[0] > closes5[1]
+    ok = momentum_up and holding_up
+    return ok, f"5분봉모멘텀 상승{momentum_up} 직전봉대비{holding_up}"
 
 def calc_atr_from_minutes(minute_bars_desc, period=14):
     """1분봉 원본 dict 리스트(최신이 index0) 기준 ATR"""
@@ -553,6 +568,9 @@ def run_intraday_backtest():
                         # [2026-07-18] 눌림목 지지확인 (기존 "직전고점 재돌파" 대체)
                         pullback_ok, _, _support_price = check_pullback_support_hold(closes_desc, highs_desc, lows_desc, volumes_desc)
                         if not pullback_ok:
+                            continue
+                        momentum_ok, _ = check_5min_momentum(closes_desc)
+                        if not momentum_ok:
                             continue
                         entry_price = closes_desc[0]
                         atr = calc_atr_from_minutes(bars_desc)
