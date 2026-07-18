@@ -764,41 +764,46 @@ def scan_signals(token):
     candidates.sort(key=lambda x: (-int(x['is_new_breakout']), -int(x['in_squeeze']), -x['vol_ratio']))
     return candidates
 # ── [2단계] 1분봉 진입 타이밍 확인 ──────────────────────────────
-def check_pullback_reclaim(closes, highs, lows, volumes, lookback=15):
+def check_pullback_support_hold(closes, highs, lows, volumes, lookback=15):
     """
-    [2026-07-06 추가] 눌림목+불플래그 진입 필터.
-    "이미 26~30% 오른 상태에서 즉시 매수"하던 문제를 해결하기 위해,
-    돌파 즉시가 아니라 ①상승(깃대) → ②거래량 줄며 쉬는 눌림(절대%+깃대 대비
-    되돌림비율[2026-07-17 추가] 둘 다 확인) → ③거래량 급증하며 직전 고점 재돌파,
-    이 단계들을 확인한 뒤에만 진입 신호를 준다.
+    [2026-07-18 재설계] 눌림목 진입 트리거 — "직전고점 재돌파" 방식 폐기.
+    기존엔 눌림 확인 후 "직전 고점을 다시 돌파"해야 진입했는데, 이는 눌림목(싸게
+    사기)과 재돌파(가격이 이미 고점까지 회복한 뒤 사기)가 서로 다른 셋업이라
+    모순이라는 걸 사용자와 논의로 확인함 — 실거래에서도 손실거래가 승리거래보다
+    시가대비 더 높은 지점(+9.4% vs +5.8%, 2026-07-16 분석)에서 진입한 것과 같은 맥락.
+    "직전 고점 재돌파" 대신 "눌림 저점에서 지지를 확인하고 반전이 이어지는지"를
+    트리거로 삼아 진입가를 눌림 저점 가까이로 당긴다.
+      ① 상승(깃대) → ② 거래량 줄며 쉬는 눌림(절대%+깃대 대비 되돌림비율 둘 다 확인,
+      기존과 동일) → ③ 눌림 저점을 만든 봉이 자기 range 상단에서 마감(반전봉) →
+      ④ 다음 봉이 그 반전봉의 고가를 돌파(반전이 실제로 이어지는지 확인) →
+      ⑤ 거래량 급증
     closes/highs/lows/volumes: 최신이 index 0.
-    반환: (ok, info_str)
+    반환: (ok, info_str, support_price) — support_price는 손절 기준(눌림 저점)으로 사용.
     """
     if len(closes) < lookback + 3 or len(volumes) < lookback + 3:
-        return False, "데이터 부족(눌림목 확인 불가)"
+        return False, "데이터 부족(눌림목 확인 불가)", None
     # 분석 편의를 위해 오래된 → 최신 순으로 변환
     asc_c = list(reversed(closes[:lookback]))
     asc_h = list(reversed(highs[:lookback]))
     asc_l = list(reversed(lows[:lookback]))
     asc_v = list(reversed(volumes[:lookback]))
 
-    # 최근 3봉은 "재돌파 확인" 구간으로 남겨두고, 그 이전 구간에서 고점(깃대 상단) 탐색
+    # 최근 3봉은 "반전확인" 구간으로 남겨두고, 그 이전 구간에서 고점(깃대 상단) 탐색
     search_end = lookback - 3
     if search_end < 3:
-        return False, "탐색 구간 부족"
+        return False, "탐색 구간 부족", None
     peak_idx = max(range(search_end), key=lambda i: asc_h[i])
     peak_price = asc_h[peak_idx]
 
     # 고점 이후 ~ 직전 봉까지가 눌림(횡보/조정) 구간
-    pullback_range = range(peak_idx + 1, lookback - 1)
-    if len(list(pullback_range)) < 2:
-        return False, "눌림 구간 부족"
-    trough_price = min(asc_l[i] for i in pullback_range)
-    pullback_vol = sum(asc_v[i] for i in pullback_range) / len(list(pullback_range))
+    pullback_range = list(range(peak_idx + 1, lookback - 1))
+    if len(pullback_range) < 2:
+        return False, "눌림 구간 부족", None
+    trough_idx = min(pullback_range, key=lambda i: asc_l[i])
+    trough_price = asc_l[trough_idx]
+    pullback_vol = sum(asc_v[i] for i in pullback_range) / len(pullback_range)
 
     pullback_pct = (peak_price - trough_price) / peak_price * 100 if peak_price else 0
-    cur_close = asc_c[-1]
-    cur_vol   = asc_v[-1]
 
     # [2026-07-17] 되돌림 "비율" 확인 — 깃대(상승 시작점) 대비 이번 눌림이 그 상승폭의
     # 30~60% 구간인지 확인. 기존 pullback_pct(peak 대비 절대 %)만으로는 종목별 변동성
@@ -806,31 +811,44 @@ def check_pullback_reclaim(closes, highs, lows, volumes, lookback=15):
     # 대부분을 반납한 눌림일 수 있음) — 절대 % 조건에 더해 상대적 위치도 같이 확인.
     flagpole_base_range = asc_l[:peak_idx]
     if len(flagpole_base_range) < 2:
-        return False, "깃대 기준점 부족"
+        return False, "깃대 기준점 부족", None
     flagpole_base = min(flagpole_base_range)
     up_move = peak_price - flagpole_base
     retracement_ratio = (peak_price - trough_price) / up_move if up_move > 0 else None
     healthy_retracement_ratio = retracement_ratio is not None and 0.3 <= retracement_ratio <= 0.6
+    healthy_pullback = 0.2 <= pullback_pct <= 4.0  # 너무 얕지도(노이즈) 깊지도(추세훼손) 않은 눌림
 
-    # [2026-07-13] volume_dried_up(눌림구간 거래량<깃대의 80%) 조건 제거 — 나머지
-    # 3개 조건과 상관성이 높아 사실상 중복 필터였음. 필터 단순화 차원에서 제외.
-    healthy_pullback = 0.2 <= pullback_pct <= 4.0        # 너무 얕지도(노이즈) 깊지도(추세훼손) 않은 눌림
-    reclaim          = cur_close >= peak_price * 0.997    # 직전 고점 근처까지 재돌파
-    volume_surge     = cur_vol >= pullback_vol * 1.5      # 재돌파 시 거래량 급증
+    # [2026-07-18] 반전봉 — 눌림 저점을 만든 그 봉이 저가에서 밀렸다가 종가는 자기
+    # range 상단부(상위 50% 이상)에서 마감했는지 확인. 매도세를 저점에서 매수세가
+    # 되받아쳤다는 신호(예: 망치형). 이 봉의 고가가 이후 진입 트리거 기준선이 된다
+    # (직전 고점보다 훨씬 낮아서 진입가가 눌림 저점 가까이로 당겨짐).
+    reversal_h, reversal_l = asc_h[trough_idx], asc_l[trough_idx]
+    reversal_range = reversal_h - reversal_l
+    reversal_close = asc_c[trough_idx]
+    strong_reversal_candle = (reversal_range > 0 and
+                               (reversal_close - reversal_l) / reversal_range >= 0.5)
 
-    ok = healthy_pullback and healthy_retracement_ratio and reclaim and volume_surge
+    cur_close = asc_c[-1]
+    cur_vol   = asc_v[-1]
+    confirm_break = cur_close > reversal_h                # 반전이 실제로 이어지는지 확인
+    volume_surge  = cur_vol >= pullback_vol * 1.5          # 확인 시 거래량 급증
+
+    ok = (healthy_pullback and healthy_retracement_ratio and
+          strong_reversal_candle and confirm_break and volume_surge)
     ratio_str = f"{retracement_ratio*100:.0f}%" if retracement_ratio is not None else "N/A"
     info = (f"눌림{pullback_pct:.1f}%({'✓' if healthy_pullback else '✗'}) "
             f"되돌림비율{ratio_str}({'✓' if healthy_retracement_ratio else '✗'}) "
-            f"재돌파{'✓' if reclaim else '✗'} "
+            f"반전봉{'✓' if strong_reversal_candle else '✗'} "
+            f"확인돌파{'✓' if confirm_break else '✗'} "
             f"거래량급증{'✓' if volume_surge else '✗'}")
-    return ok, info
+    return ok, info, trough_price
 def check_1min_entry(token, code, name, market="J"):
     """
     1분봉 기준 진입 최종 확인
       ① 스토캐스틱RSI: K > D AND K > 20
-      ② [2026-07-06 변경] 단순 "BB중심선 위" 대신 눌림목+불플래그(재돌파+거래량급증) 확인
-    ATR(14) × 1.5 = 동적 손절가 계산
+      ② [2026-07-18 재설계] 눌림목 지지확인(check_pullback_support_hold) — 저점에서
+         반전봉+확인돌파+거래량급증을 트리거로 사용(기존 "직전고점 재돌파" 폐기)
+    손절가 = 눌림 저점 기준(구조적 손절) — 있으면 ATR×1.5보다 우선, 없으면 ATR 폴백
     returns: (ok, stop_price, target_price, info_str)
     """
     minute = get_minute_ohlcv(token, code, market)
@@ -855,15 +873,23 @@ def check_1min_entry(token, code, name, market="J"):
     if stoch_k is None:
         return False, 0, 0, "스토캐스틱RSI 계산 불가"
     stoch_ok = (stoch_k > stoch_d and stoch_k > 20)
-    # ② [2026-07-06] 눌림목+불플래그 재돌파 확인 (기존 "BB중심선 위" 단순조건 대체)
-    pullback_ok, pullback_info = check_pullback_reclaim(closes, highs, lows, volumes)
-    # ③ ATR×1.5 손절가
+    # ② [2026-07-18] 눌림목 지지확인 (기존 "직전고점 재돌파" 대체)
+    pullback_ok, pullback_info, support_price = check_pullback_support_hold(closes, highs, lows, volumes)
+    # ③ 손절가 — [2026-07-18] 지지가 확인됐으면(눌림 저점) 그 바로 아래를 구조적
+    # 손절선으로 우선 사용 — "이 저점이 깨지면 지지확인 시나리오 자체가 무효"라는
+    # 원칙과 일치. 지지가 없으면(pullback_ok=False로 어차피 진입 안 하지만, info 표시용
+    # 계산은 계속 진행) 기존 ATR×1.5로 폴백.
     atr_1m = calc_atr(highs, lows, closes, period=14)
-    if atr_1m:
+    if support_price:
+        stop_price = support_price * 0.999
+    elif atr_1m:
         stop_price = price - atr_1m * 1.5
+    else:
+        stop_price = None
+    if stop_price is not None:
         stop_price = min(stop_price, price * 0.985)  # 최소 -1.5% 보호
-        # [2026-07-13] 실거래 로그 확인 결과 ATR 손절에 상한이 없어 -2.79%,
-        # -2.89%, -3.71% 손실이 실제로 발생함 — 최대 -2.5%로 손실 상한 추가
+        # [2026-07-13] 실거래 로그 확인 결과 손절에 상한이 없어 -2.79%,
+        # -2.89%, -3.71% 손실이 실제로 발생함 — 최대 -2.5%로 손실 상한 유지
         stop_price = max(stop_price, price * 0.975)
     else:
         stop_price = price * 0.98  # ATR 계산 불가 시 폴백
