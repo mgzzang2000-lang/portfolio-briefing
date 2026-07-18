@@ -45,12 +45,20 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # [2026-07-18] trade_execution.py와 동시 커밋 충돌 시 rebase 재시도가
+          # JSON 파일 특성상 사람 개입 없이는 안 풀려 커밋이 통째로 유실되던 사고
+          # (DOC 22주 매수기록 유실) 재발방지 — merge 드라이버 등록 후 merge로 전환.
+          git config merge.portfolio-merge.name "Portfolio state semantic JSON merge"
+          git config merge.portfolio-merge.driver "python us_swing/portfolio_merge.py %O %A %B"
           git add portfolio_state.json
           git diff --cached --quiet || git commit -m "chore: 미국주식 스윙 포지션 업데이트 (손절 모니터링) [skip ci]"
           for i in 1 2 3 4 5; do
             git push && exit 0
             git fetch origin main
-            git rebase origin/main
+            git merge origin/main -m "merge: 포지션 동기화 [skip ci]" || {
+              git add portfolio_state.json
+              git commit --no-edit
+            }
             sleep 3
           done
           git push

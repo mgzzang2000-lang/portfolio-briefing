@@ -74,6 +74,12 @@ def load_json(path, default):
 
 
 def save_json(path, data):
+    # [2026-07-18] portfolio_merge.py가 병합 시 "더 최신 쪽"을 판단하는 기준 —
+    # 이 필드 없이는 trade_execution.py/position_monitor.py 중 어느 쪽 저장분이
+    # 더 최신인지 알 수 없어 병합 규칙을 못 정함(DOC 매수기록이 git push 충돌로
+    # 통째로 유실됐던 사고의 재발방지 조치, [[project-us-swing]] 참고).
+    if isinstance(data, dict):
+        data["last_updated"] = datetime.now(KST).isoformat()
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 

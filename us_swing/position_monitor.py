@@ -40,6 +40,10 @@ def load_json(path, default):
 
 
 def save_json(path, data):
+    # [2026-07-18] portfolio_merge.py가 병합 시 "더 최신 쪽"을 판단하는 기준 —
+    # trade_execution.py의 동일 함수와 같은 이유(DOC 매수기록 유실 사고 재발방지).
+    if isinstance(data, dict):
+        data["last_updated"] = datetime.now(KST).isoformat()
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 

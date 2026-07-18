@@ -44,12 +44,23 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # [2026-07-18] trade_execution.py와 position_monitor.py가 동시에 커밋해서
+          # 생기던 push 충돌을 기존엔 rebase 재시도로 처리했는데, JSON 파일이라 텍스트
+          # 기반 rebase가 충돌하면 사람 개입 없이는 안 풀려서 그 사이클 커밋이 통째로
+          # 유실됨(DOC 22주 매수기록 유실 사고). 국내봇의 dashboard_merge.py와 동일하게
+          # 병합 드라이버를 등록하고 rebase 대신 merge로 전환 — 이 드라이버는 항상
+          # 저장소 최상위 경로 기준으로 실행되므로 us_swing/ 접두사 필요(실측 확인함).
+          git config merge.portfolio-merge.name "Portfolio state semantic JSON merge"
+          git config merge.portfolio-merge.driver "python us_swing/portfolio_merge.py %O %A %B"
           git add portfolio_state.json
           git diff --cached --quiet || git commit -m "chore: 미국주식 스윙 포지션 업데이트 (매매실행) [skip ci]"
           for i in 1 2 3 4 5; do
             git push && exit 0
             git fetch origin main
-            git rebase origin/main
+            git merge origin/main -m "merge: 포지션 동기화 [skip ci]" || {
+              git add portfolio_state.json
+              git commit --no-edit
+            }
             sleep 3
           done
           git push
