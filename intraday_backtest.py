@@ -195,35 +195,51 @@ def calc_stoch_rsi(closes, rsi_period=14, stoch_period=5, smooth_k=3, smooth_d=3
               for i in range(smooth_d - 1, len(k_vals))]
     return k_vals[-1], d_vals[-1]
 
-def check_pullback_reclaim(closes, highs, lows, volumes, lookback=15):
-    """auto_trading.py의 check_pullback_reclaim과 동일 로직(2026-07-06 눌림목+불플래그 진입 필터)"""
+def check_pullback_support_hold(closes, highs, lows, volumes, lookback=15):
+    """[2026-07-18] auto_trading.py의 check_pullback_support_hold와 동일 로직
+    (눌림목 진입 트리거를 "직전고점 재돌파"에서 "지지확인+반전확인"으로 재설계).
+    반환: (ok, info_str, support_price)"""
     if len(closes) < lookback + 3 or len(volumes) < lookback + 3:
-        return False, "데이터 부족"
+        return False, "데이터 부족", None
     asc_c = list(reversed(closes[:lookback]))
     asc_h = list(reversed(highs[:lookback]))
     asc_l = list(reversed(lows[:lookback]))
     asc_v = list(reversed(volumes[:lookback]))
     search_end = lookback - 3
     if search_end < 3:
-        return False, "탐색 구간 부족"
+        return False, "탐색 구간 부족", None
     peak_idx = max(range(search_end), key=lambda i: asc_h[i])
     peak_price = asc_h[peak_idx]
-    flag_start = max(0, peak_idx - 3)
-    flagpole_vol = sum(asc_v[flag_start:peak_idx + 1]) / max(1, peak_idx + 1 - flag_start)
-    pullback_range = range(peak_idx + 1, lookback - 1)
-    if len(list(pullback_range)) < 2:
-        return False, "눌림 구간 부족"
-    trough_price = min(asc_l[i] for i in pullback_range)
-    pullback_vol = sum(asc_v[i] for i in pullback_range) / len(list(pullback_range))
+    pullback_range = list(range(peak_idx + 1, lookback - 1))
+    if len(pullback_range) < 2:
+        return False, "눌림 구간 부족", None
+    trough_idx = min(pullback_range, key=lambda i: asc_l[i])
+    trough_price = asc_l[trough_idx]
+    pullback_vol = sum(asc_v[i] for i in pullback_range) / len(pullback_range)
     pullback_pct = (peak_price - trough_price) / peak_price * 100 if peak_price else 0
+    flagpole_base_range = asc_l[:peak_idx]
+    if len(flagpole_base_range) < 2:
+        return False, "깃대 기준점 부족", None
+    flagpole_base = min(flagpole_base_range)
+    up_move = peak_price - flagpole_base
+    retracement_ratio = (peak_price - trough_price) / up_move if up_move > 0 else None
+    healthy_retracement_ratio = retracement_ratio is not None and 0.3 <= retracement_ratio <= 0.6
+    healthy_pullback = 0.2 <= pullback_pct <= 4.0
+    reversal_h, reversal_l = asc_h[trough_idx], asc_l[trough_idx]
+    reversal_range = reversal_h - reversal_l
+    reversal_close = asc_c[trough_idx]
+    strong_reversal_candle = (reversal_range > 0 and
+                               (reversal_close - reversal_l) / reversal_range >= 0.5)
     cur_close = asc_c[-1]
     cur_vol = asc_v[-1]
-    healthy_pullback = 0.2 <= pullback_pct <= 4.0
-    volume_dried_up = pullback_vol < flagpole_vol * 0.8
-    reclaim = cur_close >= peak_price * 0.997
+    confirm_break = cur_close > reversal_h
     volume_surge = cur_vol >= pullback_vol * 1.5
-    ok = healthy_pullback and volume_dried_up and reclaim and volume_surge
-    return ok, f"눌림{pullback_pct:.1f}% 거래량감소{volume_dried_up} 재돌파{reclaim} 거래량급증{volume_surge}"
+    ok = (healthy_pullback and healthy_retracement_ratio and
+          strong_reversal_candle and confirm_break and volume_surge)
+    ratio_str = f"{retracement_ratio*100:.0f}%" if retracement_ratio is not None else "N/A"
+    info = (f"눌림{pullback_pct:.1f}% 되돌림비율{ratio_str} 반전봉{strong_reversal_candle} "
+            f"확인돌파{confirm_break} 거래량급증{volume_surge}")
+    return ok, info, trough_price
 
 def calc_atr_from_minutes(minute_bars_desc, period=14):
     """1분봉 원본 dict 리스트(최신이 index0) 기준 ATR"""
@@ -534,8 +550,8 @@ def run_intraday_backtest():
                         stoch_k, stoch_d = calc_stoch_rsi(closes_desc)
                         if stoch_k is None or not (stoch_k > stoch_d and stoch_k > 20):
                             continue
-                        # [2026-07-06] 눌림목+불플래그 재돌파 확인 (기존 "BB중심선 위" 단순조건 대체)
-                        pullback_ok, _ = check_pullback_reclaim(closes_desc, highs_desc, lows_desc, volumes_desc)
+                        # [2026-07-18] 눌림목 지지확인 (기존 "직전고점 재돌파" 대체)
+                        pullback_ok, _, _support_price = check_pullback_support_hold(closes_desc, highs_desc, lows_desc, volumes_desc)
                         if not pullback_ok:
                             continue
                         entry_price = closes_desc[0]

@@ -313,45 +313,59 @@ def calc_stoch_rsi(closes, rsi_period=14, stoch_period=5, smooth_k=3, smooth_d=3
     return k_vals[-1], d_vals[-1]
 
 
-def check_pullback_reclaim(closes, highs, lows, volumes, lookback=15):
-    """눌림목+불플래그 재돌파 확인. auto_trading.py와 동일 로직(섀도우 모듈 독립 유지 위해 복제).
-    반환: (ok, info_str)"""
+def check_pullback_support_hold(closes, highs, lows, volumes, lookback=15):
+    """[2026-07-18] 눌림목 지지확인. auto_trading.py의 check_pullback_support_hold와
+    동일 로직(섀도우 모듈 독립 유지 위해 복제) — "직전고점 재돌파" 대신 눌림 저점의
+    반전봉+확인돌파+거래량급증을 트리거로 사용. 반환: (ok, info_str, support_price)"""
     if len(closes) < lookback + 3 or len(volumes) < lookback + 3:
-        return False, "데이터 부족(눌림목 확인 불가)"
+        return False, "데이터 부족(눌림목 확인 불가)", None
     asc_c = list(reversed(closes[:lookback]))
     asc_h = list(reversed(highs[:lookback]))
     asc_l = list(reversed(lows[:lookback]))
     asc_v = list(reversed(volumes[:lookback]))
     search_end = lookback - 3
     if search_end < 3:
-        return False, "탐색 구간 부족"
+        return False, "탐색 구간 부족", None
     peak_idx = max(range(search_end), key=lambda i: asc_h[i])
     peak_price = asc_h[peak_idx]
-    flag_start = max(0, peak_idx - 3)
-    flagpole_vol = sum(asc_v[flag_start:peak_idx + 1]) / max(1, peak_idx + 1 - flag_start)
-    pullback_range = range(peak_idx + 1, lookback - 1)
-    if len(list(pullback_range)) < 2:
-        return False, "눌림 구간 부족"
-    trough_price = min(asc_l[i] for i in pullback_range)
-    pullback_vol = sum(asc_v[i] for i in pullback_range) / len(list(pullback_range))
+    pullback_range = list(range(peak_idx + 1, lookback - 1))
+    if len(pullback_range) < 2:
+        return False, "눌림 구간 부족", None
+    trough_idx = min(pullback_range, key=lambda i: asc_l[i])
+    trough_price = asc_l[trough_idx]
+    pullback_vol = sum(asc_v[i] for i in pullback_range) / len(pullback_range)
     pullback_pct = (peak_price - trough_price) / peak_price * 100 if peak_price else 0
+    flagpole_base_range = asc_l[:peak_idx]
+    if len(flagpole_base_range) < 2:
+        return False, "깃대 기준점 부족", None
+    flagpole_base = min(flagpole_base_range)
+    up_move = peak_price - flagpole_base
+    retracement_ratio = (peak_price - trough_price) / up_move if up_move > 0 else None
+    healthy_retracement_ratio = retracement_ratio is not None and 0.3 <= retracement_ratio <= 0.6
+    healthy_pullback = 0.2 <= pullback_pct <= 4.0
+    reversal_h, reversal_l = asc_h[trough_idx], asc_l[trough_idx]
+    reversal_range = reversal_h - reversal_l
+    reversal_close = asc_c[trough_idx]
+    strong_reversal_candle = (reversal_range > 0 and
+                               (reversal_close - reversal_l) / reversal_range >= 0.5)
     cur_close = asc_c[-1]
     cur_vol   = asc_v[-1]
-    healthy_pullback = 0.2 <= pullback_pct <= 4.0
-    volume_dried_up  = pullback_vol < flagpole_vol * 0.8
-    reclaim          = cur_close >= peak_price * 0.997
-    volume_surge     = cur_vol >= pullback_vol * 1.5
-    ok = healthy_pullback and volume_dried_up and reclaim and volume_surge
+    confirm_break = cur_close > reversal_h
+    volume_surge  = cur_vol >= pullback_vol * 1.5
+    ok = (healthy_pullback and healthy_retracement_ratio and
+          strong_reversal_candle and confirm_break and volume_surge)
+    ratio_str = f"{retracement_ratio*100:.0f}%" if retracement_ratio is not None else "N/A"
     info = (f"눌림{pullback_pct:.1f}%({'✓' if healthy_pullback else '✗'}) "
-            f"거래량감소{'✓' if volume_dried_up else '✗'} "
-            f"재돌파{'✓' if reclaim else '✗'} "
+            f"되돌림비율{ratio_str}({'✓' if healthy_retracement_ratio else '✗'}) "
+            f"반전봉{'✓' if strong_reversal_candle else '✗'} "
+            f"확인돌파{'✓' if confirm_break else '✗'} "
             f"거래량급증{'✓' if volume_surge else '✗'}")
-    return ok, info
+    return ok, info, trough_price
 
 
 def check_1min_timing(token, code, market, cur):
     """[2026-07-13] 실거래 봇(auto_trading.check_1min_entry)과 동일한 진입 타이밍
-    확인을 섀도우A에도 적용 — 스토캐스틱RSI + 눌림목/불플래그 재돌파 + VI필터.
+    확인을 섀도우A에도 적용 — 스토캐스틱RSI + 눌림목 지지확인[2026-07-18 재설계] + VI필터.
     섀도우A가 일봉 조건만 통과하면 그 순간 가격을 바로 "매수"로 기록하던 문제
     (003280 사례: 09:00~09:09 9분간 +9.6% 급등한 상태에서 그대로 진입 후 손절)를
     막기 위해 추가. auto_trading.py와 의도적으로 독립된 모듈이라 로직만 복제.
@@ -372,7 +386,7 @@ def check_1min_timing(token, code, market, cur):
     stoch_k, stoch_d = calc_stoch_rsi(closes)
     if stoch_k is None or not (stoch_k > stoch_d and stoch_k > 20):
         return False, "스토캐스틱RSI 미충족"
-    pullback_ok, pullback_info = check_pullback_reclaim(closes, highs, lows, volumes)
+    pullback_ok, pullback_info, _support_price = check_pullback_support_hold(closes, highs, lows, volumes)
     if not pullback_ok:
         return False, f"눌림목 미충족({pullback_info})"
     return True, "OK"
