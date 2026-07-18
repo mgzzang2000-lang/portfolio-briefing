@@ -39,6 +39,14 @@ MAX_EXTENSION_FROM_OPEN_PCT = 5.0
 # 마이너스(-0.56%)였던 근본 원인. 부분익절 비율을 낮춰 이긴 거래에 더 많은 물량을
 # 남겨(계속 추세를 태워) 이 비대칭을 줄임(50%→30%).
 PARTIAL_TP_FRACTION = 0.3
+# [2026-07-18] 손절을 구조적(눌림 저점) 기준으로 바꾸면서 트레이드마다 리스크폭이
+# 달라지는데, 목표가는 여전히 +4% 고정이라 손익비가 트레이드마다 들쭉날쭉했음.
+# 목표가를 "진입가-손절가(=리스크)"에 비례하게 바꿔 손익비를 항상 일정하게 유지.
+TARGET_R_MULTIPLE = 2.5
+# [2026-07-18] 눌림 저점(반전봉)이 확인돌파 시점으로부터 너무 옛날 봉이면, 이미
+# 가격이 저점에서 많이 벗어난 뒤에야 뒤늦게 진입하는(재돌파 문제의 축소판) 결과로
+# 이어짐 — 반전봉이 확인돌파 캔들 기준 최근 N봉 이내인 경우만 인정.
+PULLBACK_CONFIRM_WINDOW = 3
 ACCOUNT_NO   = os.environ['KIS_ACCOUNT_NO']
 ACCOUNT_PROD = "01"
 KIS_APP_KEY    = os.environ['KIS_APP_KEY']
@@ -832,16 +840,45 @@ def check_pullback_support_hold(closes, highs, lows, volumes, lookback=15):
     cur_vol   = asc_v[-1]
     confirm_break = cur_close > reversal_h                # 반전이 실제로 이어지는지 확인
     volume_surge  = cur_vol >= pullback_vol * 1.5          # 확인 시 거래량 급증
+    # [2026-07-18] 반전봉이 확인돌파(마지막 봉) 기준 너무 옛날이면 뒤늦은 진입 —
+    # 최근 PULLBACK_CONFIRM_WINDOW봉 이내에서 나온 저점만 인정.
+    trough_recent = trough_idx >= (lookback - 1) - PULLBACK_CONFIRM_WINDOW
 
-    ok = (healthy_pullback and healthy_retracement_ratio and
-          strong_reversal_candle and confirm_break and volume_surge)
+    ok = (healthy_pullback and healthy_retracement_ratio and strong_reversal_candle
+          and confirm_break and volume_surge and trough_recent)
     ratio_str = f"{retracement_ratio*100:.0f}%" if retracement_ratio is not None else "N/A"
     info = (f"눌림{pullback_pct:.1f}%({'✓' if healthy_pullback else '✗'}) "
             f"되돌림비율{ratio_str}({'✓' if healthy_retracement_ratio else '✗'}) "
             f"반전봉{'✓' if strong_reversal_candle else '✗'} "
             f"확인돌파{'✓' if confirm_break else '✗'} "
-            f"거래량급증{'✓' if volume_surge else '✗'}")
+            f"거래량급증{'✓' if volume_surge else '✗'} "
+            f"저점최신성{'✓' if trough_recent else '✗'}")
     return ok, info, trough_price
+
+
+def check_5min_momentum(closes, n_candles=4):
+    """
+    [2026-07-18 신규] 상위 타임프레임(5분봉) 모멘텀 확인 — 1분봉 신호가 좋아도
+    종목 자체의 중기 흐름이 하락/횡보 중이면 신뢰도가 떨어진다는 원칙(지수방향필터와
+    같은 취지를 종목 개별 흐름에도 적용). 별도 API 호출 없이 이미 가져온 1분봉
+    종가를 5개씩 묶어 5분봉 종가로 근사 집계(벽시계 5분 경계 정렬은 안 함 — 모멘텀
+    참고용이라 근사치로 충분).
+    closes: 1분봉 종가, 최신이 index 0.
+    반환: (ok, info_str)
+    """
+    need = (n_candles + 1) * 5
+    if len(closes) < need:
+        return False, "5분봉 데이터 부족 — 모멘텀 확인 불가"
+    closes5 = [closes[i * 5] for i in range(n_candles + 1)]  # 각 5분 구간의 최신 종가, index0=현재
+    momentum_up = closes5[0] > closes5[n_candles]  # n_candles*5분 전 대비 상승
+    holding_up  = closes5[0] > closes5[1]          # 직전 5분봉 대비도 꺾이지 않음
+    ok = momentum_up and holding_up
+    info = (f"5분봉모멘텀 {n_candles*5}분전대비{'상승' if momentum_up else '하락'}"
+            f"({'✓' if momentum_up else '✗'}) 직전5분봉대비{'상승' if holding_up else '하락'}"
+            f"({'✓' if holding_up else '✗'})")
+    return ok, info
+
+
 def check_1min_entry(token, code, name, market="J"):
     """
     1분봉 기준 진입 최종 확인
@@ -893,14 +930,21 @@ def check_1min_entry(token, code, name, market="J"):
         stop_price = max(stop_price, price * 0.975)
     else:
         stop_price = price * 0.98  # ATR 계산 불가 시 폴백
-    target_price = price * 1.04
+    # [2026-07-18] 목표가 = 진입가 + 리스크(진입가-손절가) × TARGET_R_MULTIPLE.
+    # 손절이 구조적(눌림 저점) 기준이라 트레이드마다 리스크폭이 다른데, 기존엔
+    # 목표가가 +4% 고정이라 손익비가 트레이드마다 들쭉날쭉했음 — 리스크에 비례하게
+    # 바꿔 손익비를 일정하게(기본 2.5:1) 유지.
+    risk = price - stop_price
+    target_price = price + risk * TARGET_R_MULTIPLE
     atr_str = f"{atr_1m:.0f}" if atr_1m else "N/A"
     s_tag = "✓" if stoch_ok else "✗"
+    # ④ [2026-07-18 신규] 5분봉 상승 모멘텀 확인
+    momentum_ok, momentum_info = check_5min_momentum(closes)
     info = (f"StochRSI K={stoch_k:.1f}/D={stoch_d:.1f}({s_tag}) "
-            f"{pullback_info} "
-            f"ATR={atr_str} 손절={stop_price:,.0f}")
+            f"{pullback_info} {momentum_info} "
+            f"ATR={atr_str} 손절={stop_price:,.0f} 목표={target_price:,.0f}")
     print(f"  [1분봉] {name}: {info}")
-    if stoch_ok and pullback_ok:
+    if stoch_ok and pullback_ok and momentum_ok:
         return True, stop_price, target_price, info
     return False, 0, 0, info
 # ── 보유 포지션 관리 (GitHub Actions·로컬 감시 스크립트 공용) ──────
