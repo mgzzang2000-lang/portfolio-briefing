@@ -43,6 +43,16 @@ def merge_history_list(a_hist, b_hist, fresher):
     return [by_date[d] for d in sorted(by_date.keys())][-60:]
 
 
+def merge_pending_deltas(a_list, b_list):
+    # [2026-07-19] current_balance/total_assets는 "fresher 쪽 전체를 base로" 방식이라,
+    # 한쪽에만 있는 pending_cash_deltas(해외주식 결제지연 이중계산 방지용)가 fresher 쪽에
+    # 없으면 통째로 증발함 — positions와 같은 이유로 합집합 필수(날짜+델타로 동일 항목 식별).
+    seen = {}
+    for d in (a_list or []) + (b_list or []):
+        seen[(d.get("date"), d.get("delta"))] = d
+    return list(seen.values())
+
+
 def merge_positions(a_pos, b_pos, fresher):
     # symbol -> position dict. 합집합이 핵심(한쪽에만 있는 종목이 사라지면 안 됨 —
     # DOC 사고가 정확히 이 케이스: 한쪽 커밋에만 있던 신규 포지션이 통째로 증발함).
@@ -71,6 +81,10 @@ def merge_states(a, b):
         a.get("balance_history"), b.get("balance_history"), fresher_tag)
     result["total_assets_history"] = merge_history_list(
         a.get("total_assets_history"), b.get("total_assets_history"), fresher_tag)
+    result["pending_cash_deltas"] = merge_pending_deltas(
+        a.get("pending_cash_deltas"), b.get("pending_cash_deltas"))
+    if "_last_raw_cash" not in result:
+        result["_last_raw_cash"] = other.get("_last_raw_cash")
     return result
 
 
