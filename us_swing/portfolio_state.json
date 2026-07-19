@@ -3,8 +3,14 @@
   "current_balance": 545.51,
   "_last_raw_cash": 694.99,
   "pending_cash_deltas": [
-    {"date": "2026-07-17", "delta": 347.94},
-    {"date": "2026-07-17", "delta": -497.42}
+    {
+      "date": "2026-07-17",
+      "delta": 347.94
+    },
+    {
+      "date": "2026-07-17",
+      "delta": -497.42
+    }
   ],
   "positions": {
     "FTNT": {
@@ -18,7 +24,7 @@
       "sector": "Information Technology",
       "current_price": 161.61,
       "pnl_pct": 0.08,
-      "price_updated_at": "06:45"
+      "price_updated_at": "22:02"
     },
     "HUM": {
       "stop_price": 362.46,
@@ -31,7 +37,7 @@
       "sector": "Health Care",
       "current_price": 400.0,
       "pnl_pct": -0.68,
-      "price_updated_at": "06:45"
+      "price_updated_at": "22:02"
     },
     "DOC": {
       "stop_price": 20.25,
@@ -44,7 +50,7 @@
       "sector": "Real Estate",
       "current_price": 22.51,
       "pnl_pct": 0.0,
-      "price_updated_at": "06:45"
+      "price_updated_at": "22:02"
     }
   },
   "trade_history": [
@@ -162,5 +168,5 @@
       "balance": 1925.56
     }
   ],
-  "last_updated": "2026-07-19T06:45:27.430465+09:00"
+  "last_updated": "2026-07-19T22:02:05.060614+09:00"
 }
