@@ -177,7 +177,14 @@ def get_kakao_token():
         'client_secret': KAKAO_CLIENT_SECRET,
         'refresh_token': KAKAO_REFRESH_TOKEN,
     }, timeout=10)
-    return r.json()['access_token']
+    data = r.json()
+    if 'access_token' not in data:
+        # [2026-07-20] 기존엔 실패 이유를 안 남기고 그냥 KeyError('access_token')로
+        # 터져서 watcher.py 로그에 "[카카오 토큰 오류] 'access_token'"만 찍히고 카카오가
+        # 실제로 뭐라고 거절했는지(예: invalid_grant, KOE006 client 불일치 등) 알 방법이
+        # 없었음. 카카오 응답 본문은 에러코드/설명뿐 우리 비밀값은 포함 안 하므로 그대로 로그.
+        raise Exception(f"카카오 토큰 오류: HTTP {r.status_code} {data}")
+    return data['access_token']
 def send_kakao(kakao_token, msg):
     obj = json.dumps({
         'object_type': 'text',
