@@ -152,13 +152,25 @@ def main():
 
         try:
             kis_token = bot.get_kis_token()
-            if kakao_token is None or (time.time() - kakao_fetched_at) > KAKAO_TOKEN_REFRESH_SEC:
-                kakao_token = bot.get_kakao_token()
-                kakao_fetched_at = time.time()
         except Exception as e:
-            print(f"[토큰 오류] {e}")
+            print(f"[KIS 토큰 오류] {e}")
             wait_seconds(10)
             continue
+
+        # [2026-07-20] 카카오 알림 토큰 발급 실패가 이 try에 같이 묶여 있으면(예: 리프레시
+        # 토큰 만료, 카카오 서버 순간 오류) 알림 하나 때문에 kis_token까지 못 쓰게 되고
+        # 이후 모든 로직(휴장일 체크·매수 스캔·포지션 관리)을 건너뛰며 10초마다 재시도만
+        # 반복 — 실제로 09:14~09:49(오늘) 사이 289회 연속 실패하며 감시가 통째로 멈췄던
+        # 사고의 원인. 카카오는 "알림"일 뿐 매매 감시의 필수 조건이 아니므로 실패해도
+        # kakao_token=None으로 두고 계속 진행한다(send_kakao는 실패해도 각 호출부에서
+        # try/except로 이미 감싸져 있어 None 토큰이어도 감시 자체는 안전).
+        if kakao_token is None or (time.time() - kakao_fetched_at) > KAKAO_TOKEN_REFRESH_SEC:
+            try:
+                kakao_token = bot.get_kakao_token()
+            except Exception as e:
+                print(f"[카카오 토큰 오류] {e} — 알림 없이 매매 감시는 계속 진행")
+                kakao_token = None
+            kakao_fetched_at = time.time()
 
         # [2026-07-17] 요일(주말)만 체크해서는 법정공휴일 등 평일 휴장일을 못 걸러냄 —
         # 보유 포지션이 휴장일까지 넘어오면 이 루프가 마지막 실제 거래일의 고정된
