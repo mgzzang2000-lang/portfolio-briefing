@@ -102,7 +102,11 @@ def get_naver_news(query, n=3):
     try:
         r = requests.get(url, headers=UA, timeout=10)
         titles = re.findall(r'<title>(.*?)</title>', r.text)
-        result = [re.sub('<[^>]+>', '', t)[:50] for t in titles[1:n+1]]
+        # [2026-07-20] 구글뉴스 RSS는 채널 제목(index 0) 바로 다음에 <image><title>Google
+        # 뉴스</title>가 한 번 더 끼어있어서(index 1), 그동안 이게 실제 기사 제목인 것처럼
+        # 1번 자리에 들어가고 진짜 기사는 하나 밀려서 n개 중 마지막 1개가 누락되고 있었음.
+        titles = [t for t in titles[1:] if t != 'Google 뉴스']
+        result = [re.sub('<[^>]+>', '', t)[:50] for t in titles[:n]]
         # [2026-07-20] 구글 뉴스가 에러 없이 빈 결과만 주는 경우(일시적 차단/지연 추정)가
         # 있어서, 예외가 안 났어도 결과가 비어있으면 그냥 빈 항목(①②③ 공란)으로 조용히
         # 나가지 않고 실패했다는 걸 알 수 있게 표시.
@@ -131,7 +135,8 @@ def get_global_news():
         url = "https://news.google.com/rss/search?q=글로벌+증시+미국+주식&hl=ko&gl=KR&ceid=KR:ko"
         r = requests.get(url, headers=UA, timeout=10)
         titles = re.findall(r'<title>(.*?)</title>', r.text)
-        result = [re.sub('<[^>]+>', '', t)[:60] for t in titles[1:4]]
+        titles = [t for t in titles[1:] if t != 'Google 뉴스']  # get_naver_news와 동일 이유
+        result = [re.sub('<[^>]+>', '', t)[:60] for t in titles[:3]]
         # [2026-07-20] 2026-07-20 아침 브리핑에서 실제로 발생한 사고 — 에러 없이 빈
         # 리스트만 와서 ①②③이 전부 공란으로 나갔음. 결과 비어있으면 실패로 표시.
         return result if result else ['글로벌 뉴스 수집 실패', '', '']
