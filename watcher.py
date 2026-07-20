@@ -98,7 +98,14 @@ def push_heartbeat():
     GitHub Actions가 이 신호(90초 이내)를 보면 같은 포지션을 동시에 건드리지 않고
     양보한다 — 흥구석유·금호전기·흥아해운에서 두 감시자가 거의 동시에 +2% 부분익절
     조건을 각자 판단해 중복 매도했던 레이스 컨디션 방지용. 실패해도 다음 주기에
-    다시 시도하면 되므로 조용히 넘어간다."""
+    다시 시도하면 되므로 조용히 넘어간다.
+    [2026-07-20] 재시도가 3회(1초 간격)뿐이라 GH Actions 쪽 커밋이 잦아지는 시간대엔
+    거의 매번 밀려서, 로컬 파일은 계속 갱신되는데 GitHub엔 1시간 내내 한 번도 못
+    올라가는 사고가 실제로 발생 — 그 사이 GH Actions가 "watcher 죽음"으로 오판해
+    자체 매수스캔을 같이 돌리며 이 하트비트가 막으려던 레이스 컨디션이 재현될 뻔함.
+    같은 파일 안 dashboard 푸시(git_push_dashboard)는 원래도 10회/2초로 훨씬 강하게
+    설정돼 있었는데 정작 레이스 컨디션 방지 목적인 이쪽이 더 약했던 게 문제 — 동일한
+    강도로 맞춘다."""
     try:
         with open(HEARTBEAT_FILE, 'w', encoding='utf-8') as f:
             json.dump({'alive_at': datetime.now(KST).isoformat()}, f)
@@ -109,14 +116,14 @@ def push_heartbeat():
     commit = run_git('commit', '-m', '[로컬감시] heartbeat [skip ci]')
     if commit and 'nothing to commit' in (commit.stdout + commit.stderr):
         return
-    for _ in range(3):
+    for _ in range(10):
         push = run_git('push')
         if push and push.returncode == 0:
             return
         run_git('fetch', 'origin', 'main')
         run_git('merge', 'origin/main', '-m', 'merge: heartbeat 동기화 [skip ci]')
-        time.sleep(1)
-    print("[하트비트 푸시] 재시도 끝까지 실패 — 다음 주기에 재시도")
+        time.sleep(2)
+    print("[하트비트 푸시] 10회 재시도 끝까지 실패 — 다음 주기에 재시도")
 
 
 def wait_seconds(sec):
