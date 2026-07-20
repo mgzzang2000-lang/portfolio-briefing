@@ -1,7 +1,480 @@
 {
   "initial_balance": 500000,
   "current_balance": 500000,
-  "trades": [],
+  "trades": [
+    {
+      "action": "buy",
+      "trade_id": "037070-20260706093425",
+      "date": "07/06 09:34",
+      "code": "037070",
+      "stock": "파세코",
+      "qty": 55,
+      "price": 8610,
+      "amount": 473550
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "037070-20260706093425",
+      "date": "07/06 10:00",
+      "stock": "파세코",
+      "qty": 55,
+      "price": 8380,
+      "avg_price": 8610,
+      "pnl_pct": -2.67,
+      "pnl_amt": -12650,
+      "reason": "손절 (정정, -2.67%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "073240-20260707142759",
+      "date": "07/07 14:27",
+      "code": "073240",
+      "stock": "금호타이어",
+      "qty": 48,
+      "price": 6240,
+      "amount": 299520
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "073240-20260707142759",
+      "date": "07/07 14:30",
+      "stock": "금호타이어",
+      "qty": 48,
+      "price": 6140,
+      "avg_price": 6240,
+      "pnl_pct": -1.6,
+      "pnl_amt": -4800,
+      "reason": "손절 (정정, -1.60%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "024060-20260709102156",
+      "date": "07/09 10:21",
+      "code": "024060",
+      "stock": "흥구석유",
+      "qty": 27,
+      "price": 11050,
+      "amount": 298350
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "024060-20260709102156",
+      "date": "07/09 10:37",
+      "stock": "흥구석유",
+      "qty": 13,
+      "price": 11380,
+      "avg_price": 11050,
+      "pnl_pct": 2.99,
+      "pnl_amt": 4290,
+      "reason": "부분익절 (정정, +2.99%)"
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "024060-20260709102156",
+      "date": "07/09 10:38",
+      "stock": "흥구석유",
+      "qty": 7,
+      "price": 11330,
+      "avg_price": 11050,
+      "pnl_pct": 2.53,
+      "pnl_amt": 1960,
+      "reason": "부분익절 (정정, +2.53%)"
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "024060-20260709102156",
+      "date": "07/09 10:58",
+      "stock": "흥구석유",
+      "qty": 7,
+      "price": 11570,
+      "avg_price": 11050,
+      "pnl_pct": 4.71,
+      "pnl_amt": 3640,
+      "reason": "익절 (정정, +4.71%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "001210-20260709141951",
+      "date": "07/09 14:19",
+      "code": "001210",
+      "stock": "금호전기",
+      "qty": 199,
+      "price": 1521,
+      "amount": 302679
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "001210-20260709141951",
+      "date": "07/09 14:31",
+      "stock": "금호전기",
+      "qty": 99,
+      "price": 1573,
+      "avg_price": 1521,
+      "pnl_pct": 3.42,
+      "pnl_amt": 5148,
+      "reason": "부분익절 (정정, +3.42%)"
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "001210-20260709141951",
+      "date": "07/09 14:32",
+      "stock": "금호전기",
+      "qty": 100,
+      "price": 1593,
+      "avg_price": 1521,
+      "pnl_pct": 4.73,
+      "pnl_amt": 7200,
+      "reason": "익절 (정정, +4.73%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "002990-20260710090138",
+      "date": "07/10 09:01",
+      "code": "002990",
+      "stock": "금호건설",
+      "qty": 15,
+      "price": 18310,
+      "amount": 274650
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "002990-20260710090138",
+      "date": "07/10 09:04",
+      "stock": "금호건설",
+      "qty": 7,
+      "price": 18690,
+      "avg_price": 18310,
+      "pnl_pct": 2.08,
+      "pnl_amt": 2660,
+      "reason": "부분익절 (정정, +2.08%)"
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "002990-20260710090138",
+      "date": "07/10 09:05",
+      "stock": "금호건설",
+      "qty": 8,
+      "price": 17783,
+      "avg_price": 18310,
+      "pnl_pct": -2.88,
+      "pnl_amt": -4216,
+      "reason": "손절 (정정, -2.88%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "003280-20260710092623",
+      "date": "07/10 09:26",
+      "code": "003280",
+      "stock": "흥아해운",
+      "qty": 176,
+      "price": 1703,
+      "amount": 299728
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "003280-20260710092623",
+      "date": "07/10 11:57",
+      "stock": "흥아해운",
+      "qty": 88,
+      "price": 1737,
+      "avg_price": 1703,
+      "pnl_pct": 2.0,
+      "pnl_amt": 2992,
+      "reason": "부분익절 (정정, +2.00%)"
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "003280-20260710092623",
+      "date": "07/10 12:30",
+      "stock": "흥아해운",
+      "qty": 88,
+      "price": 1775,
+      "avg_price": 1703,
+      "pnl_pct": 4.23,
+      "pnl_amt": 6336,
+      "reason": "익절 (정정, +4.23%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "002880-20260713090602",
+      "date": "07/13 09:06",
+      "code": "002880",
+      "stock": "디와이에이",
+      "qty": 256,
+      "price": 1158,
+      "amount": 296448
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "002880-20260713090602",
+      "date": "07/13 09:07",
+      "stock": "디와이에이",
+      "qty": 256,
+      "price": 1119,
+      "avg_price": 1158,
+      "pnl_pct": -3.37,
+      "pnl_amt": -9984,
+      "reason": "손절 (정정, -3.37%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "002700-20260713105253",
+      "date": "07/13 10:52",
+      "code": "002700",
+      "stock": "신일전자",
+      "qty": 232,
+      "price": 1286,
+      "amount": 298352
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "002700-20260713105253",
+      "date": "07/13 11:09",
+      "stock": "신일전자",
+      "qty": 232,
+      "price": 1262,
+      "avg_price": 1286,
+      "pnl_pct": -1.87,
+      "pnl_amt": -5568,
+      "reason": "손절 (정정, -1.87%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "069540-20260714103503",
+      "date": "07/14 10:35",
+      "code": "069540",
+      "stock": "빛과전자",
+      "qty": 120,
+      "price": 2505,
+      "amount": 300600
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "069540-20260714103503",
+      "date": "07/14 10:38",
+      "stock": "빛과전자",
+      "qty": 60,
+      "price": 2625,
+      "avg_price": 2505,
+      "pnl_pct": 4.79,
+      "pnl_amt": 7200,
+      "reason": "부분익절 (정정, +4.79%)"
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "069540-20260714103503",
+      "date": "07/14 10:38",
+      "stock": "빛과전자",
+      "qty": 60,
+      "price": 2605,
+      "avg_price": 2505,
+      "pnl_pct": 3.99,
+      "pnl_amt": 6000,
+      "reason": "익절 (정정, +3.99%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "005860-20260714103941",
+      "date": "07/14 10:39",
+      "code": "005860",
+      "stock": "한일사료",
+      "qty": 110,
+      "price": 2715,
+      "amount": 298650
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "005860-20260714103941",
+      "date": "07/14 13:49",
+      "stock": "한일사료",
+      "qty": 110,
+      "price": 2585,
+      "avg_price": 2715,
+      "pnl_pct": -4.79,
+      "pnl_amt": -14300,
+      "reason": "손절 (정정, -4.79%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "069540-20260714143338",
+      "date": "07/14 14:33",
+      "code": "069540",
+      "stock": "빛과전자",
+      "qty": 120,
+      "price": 2494,
+      "amount": 299280
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "069540-20260714143338",
+      "date": "07/14 14:36",
+      "stock": "빛과전자",
+      "qty": 120,
+      "price": 2450,
+      "avg_price": 2494,
+      "pnl_pct": -1.76,
+      "pnl_amt": -5280,
+      "reason": "손절 (정정, -1.76%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "003280-20260715115036",
+      "date": "07/15 11:50",
+      "code": "003280",
+      "stock": "흥아해운",
+      "qty": 166,
+      "price": 1801,
+      "amount": 298966
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "003280-20260715115036",
+      "date": "07/15 13:50",
+      "stock": "흥아해운",
+      "qty": 83,
+      "price": 1801,
+      "avg_price": 1801,
+      "pnl_pct": 0.0,
+      "pnl_amt": 0,
+      "reason": "부분익절 (정정, +0.00%)"
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "003280-20260715115036",
+      "date": "07/15 13:51",
+      "stock": "흥아해운",
+      "qty": 83,
+      "price": 1799,
+      "avg_price": 1801,
+      "pnl_pct": -0.11,
+      "pnl_amt": -166,
+      "reason": "손절 (정정, -0.11%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "003280-20260716091930",
+      "date": "07/16 09:19",
+      "code": "003280",
+      "stock": "흥아해운",
+      "qty": 161,
+      "price": 1862,
+      "amount": 299782
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "003280-20260716091930",
+      "date": "07/16 09:26",
+      "stock": "흥아해운",
+      "qty": 80,
+      "price": 1923,
+      "avg_price": 1862,
+      "pnl_pct": 3.28,
+      "pnl_amt": 4880,
+      "reason": "부분익절 (정정, +3.28%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "279570-20260716093050",
+      "date": "07/16 09:30",
+      "code": "279570",
+      "stock": "케이뱅크",
+      "qty": 43,
+      "price": 6810,
+      "amount": 292830
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "003280-20260716091930",
+      "date": "07/16 09:33",
+      "stock": "흥아해운",
+      "qty": 81,
+      "price": 1947,
+      "avg_price": 1862,
+      "pnl_pct": 4.56,
+      "pnl_amt": 6885,
+      "reason": "익절 (정정, +4.56%)"
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "279570-20260716093050",
+      "date": "07/16 09:58",
+      "stock": "케이뱅크",
+      "qty": 43,
+      "price": 6420,
+      "avg_price": 6810,
+      "pnl_pct": -5.73,
+      "pnl_amt": -16770,
+      "reason": "손절 (정정, -5.73%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "069540-20260716112947",
+      "date": "07/16 11:29",
+      "code": "069540",
+      "stock": "빛과전자",
+      "qty": 104,
+      "price": 2875,
+      "amount": 299000
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "069540-20260716112947",
+      "date": "07/16 11:42",
+      "stock": "빛과전자",
+      "qty": 104,
+      "price": 2825,
+      "avg_price": 2875,
+      "pnl_pct": -1.74,
+      "pnl_amt": -5200,
+      "reason": "손절 (정정, -1.74%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "003280-20260716114350",
+      "date": "07/16 11:43",
+      "code": "003280",
+      "stock": "흥아해운",
+      "qty": 156,
+      "price": 1916,
+      "amount": 298896
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "003280-20260716114350",
+      "date": "07/16 12:13",
+      "stock": "흥아해운",
+      "qty": 156,
+      "price": 1855,
+      "avg_price": 1916,
+      "pnl_pct": -3.18,
+      "pnl_amt": -9516,
+      "reason": "손절 (정정, -3.18%)"
+    }
+  ],
   "position": null,
   "last_updated": "2026-07-20T10:20:06.143113+09:00",
   "daily_loss_guard": {
@@ -10,6 +483,42 @@
     "notified": false
   },
   "balance_history": [
+    {
+      "date": "07/06",
+      "balance": 486309
+    },
+    {
+      "date": "07/07",
+      "balance": 480840
+    },
+    {
+      "date": "07/09",
+      "balance": 501734
+    },
+    {
+      "date": "07/10",
+      "balance": 508217
+    },
+    {
+      "date": "07/13",
+      "balance": 491348
+    },
+    {
+      "date": "07/14",
+      "balance": 482931
+    },
+    {
+      "date": "07/15",
+      "balance": 482090
+    },
+    {
+      "date": "07/16",
+      "balance": 459726
+    },
+    {
+      "date": "07/17",
+      "balance": 459726
+    },
     {
       "date": "07/20",
       "balance": 500000
