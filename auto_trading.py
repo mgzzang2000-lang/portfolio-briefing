@@ -352,9 +352,13 @@ def get_index_direction(token, market="J"):
 
 # ── 시장 데이터 ───────────────────────────────────────────────
 def get_volume_rank(token, market="J"):
+    # [2026-07-20] 거래량순위(FHPST01710000) API는 FID_COND_MRKT_DIV_CODE에 "J"만
+    # 허용함 — 여기 "Q"를 넣으면 "ERROR INVALID FID_COND_MRKT_DIV_CODE"로 거절당해
+    # 코스닥 조회가 매번 빈 결과였음. 코스피/코스닥 구분은 이 필드가 아니라
+    # FID_COND_SCR_DIV_CODE(화면분류코드 20171/20172)로만 한다.
     scr_code = "20172" if market == "Q" else "20171"
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/volume-rank", {
-        "FID_COND_MRKT_DIV_CODE": market,
+        "FID_COND_MRKT_DIV_CODE": "J",
         "FID_COND_SCR_DIV_CODE": scr_code,
         "FID_INPUT_ISCD": "0000",
         "FID_DIV_CLS_CODE": "0",
