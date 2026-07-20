@@ -105,13 +105,24 @@ def get_kis_token():
     except Exception:
         pass
     print("[토큰] 새로 발급 중...")
-    r = requests.post(f"{BASE_URL}/oauth2/tokenP", json={
-        "grant_type": "client_credentials",
-        "appkey": KIS_APP_KEY,
-        "appsecret": KIS_APP_SECRET
-    }, timeout=10)
-    data = r.json()
-    if 'access_token' not in data:
+    # [2026-07-20] 오라클 watcher.py와 GitHub Actions(또는 여러 워크플로우)가 장 시작 등
+    # 같은 순간에 트리거되면 KIS 토큰 발급 "1분당 1회" 제한에 서로 걸려 그 실행 전체가
+    # 실패하는 사고가 반복(오늘 국내 09:00, 미국주식 22:00 두 번 확인). 이 에러(EGW00133)만
+    # 한정해 65초 기다렸다 한 번 더 시도 — 그 사이 다른 프로세스가 이미 받은 분(分)이
+    # 지나가므로 재시도는 거의 항상 성공한다.
+    for attempt in range(2):
+        r = requests.post(f"{BASE_URL}/oauth2/tokenP", json={
+            "grant_type": "client_credentials",
+            "appkey": KIS_APP_KEY,
+            "appsecret": KIS_APP_SECRET
+        }, timeout=10)
+        data = r.json()
+        if 'access_token' in data:
+            break
+        if data.get('error_code') == 'EGW00133' and attempt == 0:
+            print("[토큰] 1분당1회 제한 충돌 — 65초 대기 후 재시도")
+            time.sleep(65)
+            continue
         raise Exception(f"KIS 토큰 오류: {data}")
     with open(TOKEN_FILE, 'w') as f:
         json.dump({'access_token': data['access_token'],

@@ -32,12 +32,21 @@ def get_kis_token():
     except Exception:
         pass
     import requests
-    r = requests.post(f"{BASE_URL}/oauth2/tokenP", json={
-        "grant_type": "client_credentials",
-        "appkey": KIS_APP_KEY, "appsecret": KIS_APP_SECRET
-    }, timeout=10)
-    data = r.json()
-    if "access_token" not in data:
+    # [2026-07-20] 미국주식 스캔·모니터링 등 여러 워크플로우가 같은 순간(미장 개장 등)에
+    # 트리거되면서 토큰을 동시에 새로 받으려다 KIS "1분당 1회" 제한(EGW00133)에 걸려
+    # 포지션 모니터링(손절체크)이 통째로 실패한 사고 실제 발생(2026-07-20 22:00 KST) —
+    # 이 에러만 한정해 65초 대기 후 한 번 더 시도(분 경계를 넘기면 거의 항상 성공).
+    for attempt in range(2):
+        r = requests.post(f"{BASE_URL}/oauth2/tokenP", json={
+            "grant_type": "client_credentials",
+            "appkey": KIS_APP_KEY, "appsecret": KIS_APP_SECRET
+        }, timeout=10)
+        data = r.json()
+        if "access_token" in data:
+            break
+        if data.get("error_code") == "EGW00133" and attempt == 0:
+            time.sleep(65)
+            continue
         raise Exception(f"KIS 토큰 오류: {data}")
     with open(TOKEN_FILE, "w") as f:
         json.dump({"access_token": data["access_token"],
