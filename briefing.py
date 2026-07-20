@@ -11,6 +11,49 @@ NAVER_CLIENT_ID = os.environ['NAVER_CLIENT_ID']
 NAVER_CLIENT_SECRET = os.environ['NAVER_CLIENT_SECRET']
 UA = {'User-Agent': 'Mozilla/5.0'}
 
+# [2026-07-20] "미국 경제지표" 섹션이 처음부터 날짜가 하드코딩(7/2, 7/14 등)돼 있어서
+# 매일 오래된 내용이 나가고 있었음. FOMC(연준 공식 발표)·CPI(BLS 공식 일정)는 미리
+# 확정 발표되는 고정 일정이라 연 1회만 갱신하면 되는 상수로 박아두고, 그날 기준으로
+# "향후 2주"만 골라 보여주도록 변경. NFP는 통상 매월 첫째 금요일(공휴일로 밀리는
+# 예외적인 달이 가끔 있음 — 근사치).
+FOMC_DATES_2026 = [
+    ("1/27~28", (2026, 1, 28)), ("3/17~18", (2026, 3, 18)),
+    ("4/28~29", (2026, 4, 29)), ("6/16~17", (2026, 6, 17)),
+    ("7/28~29", (2026, 7, 29)), ("9/15~16", (2026, 9, 16)),
+    ("10/27~28", (2026, 10, 28)), ("12/8~9", (2026, 12, 9)),
+]
+CPI_DATES_2026 = [
+    (2026, 1, 13), (2026, 2, 13), (2026, 3, 11), (2026, 4, 10),
+    (2026, 5, 12), (2026, 6, 10), (2026, 7, 14), (2026, 8, 12),
+    (2026, 9, 11), (2026, 10, 14), (2026, 11, 10), (2026, 12, 10),
+]
+
+def _first_friday(year, month):
+    d = datetime(year, month, 1)
+    return d + timedelta(days=(4 - d.weekday()) % 7)
+
+def get_us_events(days=14):
+    today = datetime.now(KST).date()
+    end = today + timedelta(days=days)
+    events = []
+    for m_off in (0, 1):
+        y, m = today.year, today.month + m_off
+        if m > 12:
+            y, m = y + 1, m - 12
+        nfp = _first_friday(y, m).date()
+        if today <= nfp <= end:
+            events.append((nfp, f"{nfp.month}/{nfp.day} NFP 비농업고용 ⭐⭐⭐"))
+    for (y, m, d) in CPI_DATES_2026:
+        dt = datetime(y, m, d).date()
+        if today <= dt <= end:
+            events.append((dt, f"{m}/{d} CPI 소비자물가 ⭐⭐⭐"))
+    for label, (y, m, d) in FOMC_DATES_2026:
+        dt = datetime(y, m, d).date()
+        if today <= dt <= end:
+            events.append((dt, f"{label} FOMC 금리결정 ⭐⭐⭐"))
+    events.sort(key=lambda x: x[0])
+    return "\n".join(e[1] for e in events) if events else "향후 2주 내 주요 지표 없음"
+
 def get_access_token():
     r = requests.post('https://kauth.kakao.com/oauth/token', timeout=10, data={
         'grant_type': 'refresh_token',
@@ -59,7 +102,11 @@ def get_naver_news(query, n=3):
     try:
         r = requests.get(url, headers=UA, timeout=10)
         titles = re.findall(r'<title>(.*?)</title>', r.text)
-        return [re.sub('<[^>]+>', '', t)[:50] for t in titles[1:n+1]]
+        result = [re.sub('<[^>]+>', '', t)[:50] for t in titles[1:n+1]]
+        # [2026-07-20] 구글 뉴스가 에러 없이 빈 결과만 주는 경우(일시적 차단/지연 추정)가
+        # 있어서, 예외가 안 났어도 결과가 비어있으면 그냥 빈 항목(①②③ 공란)으로 조용히
+        # 나가지 않고 실패했다는 걸 알 수 있게 표시.
+        return result if result else ['뉴스 수집 실패']
     except Exception as e:
         print(f"News error ({query}): {e}")
         return ['뉴스 수집 실패']
@@ -84,7 +131,10 @@ def get_global_news():
         url = "https://news.google.com/rss/search?q=글로벌+증시+미국+주식&hl=ko&gl=KR&ceid=KR:ko"
         r = requests.get(url, headers=UA, timeout=10)
         titles = re.findall(r'<title>(.*?)</title>', r.text)
-        return [re.sub('<[^>]+>', '', t)[:60] for t in titles[1:4]]
+        result = [re.sub('<[^>]+>', '', t)[:60] for t in titles[1:4]]
+        # [2026-07-20] 2026-07-20 아침 브리핑에서 실제로 발생한 사고 — 에러 없이 빈
+        # 리스트만 와서 ①②③이 전부 공란으로 나갔음. 결과 비어있으면 실패로 표시.
+        return result if result else ['글로벌 뉴스 수집 실패', '', '']
     except Exception as e:
         print(f"Global news error: {e}")
         return ['글로벌 뉴스 수집 실패', '', '']
@@ -112,7 +162,7 @@ def main():
 
     msgs = [
         f"📰 포트폴리오 브리핑 {TODAY}\n━━━━━━━━━━━━━━\n📊 시장 심리 & 야간선물\n🇺🇸 공포탐욕: {fg}\n🌙 야간선물: {fut}",
-        "🗓️ 미국 경제지표 (향후 2주)\n━━━━━━━━━━━━━━\n7/2(목) NFP 비농업고용 ⭐⭐⭐\n7/14(월) CPI 소비자물가 ⭐⭐⭐\n7/28~29(화수) FOMC 금리결정 ⭐⭐⭐\n※ NFP 독립기념일 영향 7/2 조기 발표",
+        f"🗓️ 미국 경제지표 (향후 2주)\n━━━━━━━━━━━━━━\n{get_us_events()}",
         f"🌐 글로벌 빅이슈\n━━━━━━━━━━━━━━\n① {nl(gn,0)}\n② {nl(gn,1)}\n③ {nl(gn,2)}",
         f"🇰🇷 삼성전자 {fmt(sec_p,sec_c,True)}\n━━━━━━━━━━━━━━\n① {nl(sn,0)}\n② {nl(sn,1)}\n③ {nl(sn,2)}",
         f"🇰🇷 SK하이닉스 {fmt(skh_p,skh_c,True)}\n━━━━━━━━━━━━━━\n① {nl(hn,0)}\n② {nl(hn,1)}\n③ {nl(hn,2)}",
