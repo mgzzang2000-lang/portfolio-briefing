@@ -188,8 +188,19 @@ def _touch_balance_history(state):
 
 def record_balance(state, delta_usd):
     """매수/매도로 변한 현금을 반영하고, 대시보드용 잔고 추이(일별)에 기록.
-    KR 봇의 save_dashboard() 잔고추이 로직과 동일한 패턴."""
+    KR 봇의 save_dashboard() 잔고추이 로직과 동일한 패턴.
+
+    [2026-07-19] delta_usd를 pending_cash_deltas에도 같이 남긴다 — 해외주식은
+    결제(settlement)가 며칠 늦게 반영돼서, 이 직후 사이클의 sync_live_balance()가
+    KIS 실계좌 조회값으로 current_balance를 덮어쓸 때 아직 이 거래가 반영 안 된
+    "옛날" 현금을 그대로 가져올 수 있음. pending_cash_deltas가 있으면
+    sync_live_balance()가 그 옛날 값 위에 이 델타를 다시 얹어서, 실제로 이미
+    쓴/받은 돈이 화면에서 사라지거나(매수) 이중으로 잡히지(매도 대금+보유금액)
+    않게 한다. 실제 KIS 잔고가 움직여서 결제가 확인되면 자동으로 정리됨(아래
+    sync_live_balance 참고)."""
     state["current_balance"] = round(state.get("current_balance", 0) + delta_usd, 2)
+    today = datetime.now(KST).strftime("%Y-%m-%d")
+    state.setdefault("pending_cash_deltas", []).append({"date": today, "delta": delta_usd})
     _touch_balance_history(state)
 
 
@@ -204,7 +215,14 @@ def sync_live_balance(token, cano, acnt_prdt_cd, state):
     대시보드에 찍힌 $2294.69가 안 맞는 걸 보고 발견). 국내 예수금이 섞이지 않은
     output2의 통화별 배열에서 USD 행의 frcr_dncl_amt_2(외화예수금액2)를 쓰면
     이미 USD 단위라 환율 계산도 필요 없고, 국내 계좌와도 안 섞임.
-    조회 실패 시 기존 값을 그대로 두고 아무 것도 하지 않는다."""
+    조회 실패 시 기존 값을 그대로 두고 아무 것도 하지 않는다.
+
+    [2026-07-19 수정] 해외주식 결제 지연 때문에 방금 산/판 종목의 대금이
+    이 raw 값에 며칠간 반영 안 될 수 있음(UAL 손절 매도 + DOC 매수 직후,
+    total_assets가 DOC 매수금액만큼 이중계산돼 손절 손실이 가려지고 누적손익이
+    +로 보였던 사고가 계기). raw 값이 지난 사이클과 그대로면(=아직 결제 전)
+    미정산 델타(pending_cash_deltas)를 이번에도 얹어서 쓰고, raw 값이
+    달라졌으면(=결제가 실제로 반영됨) 그 시점 이전 델타는 전부 정리한다."""
     data = kis_get(token, "/uapi/overseas-stock/v1/trading/inquire-present-balance", {
         "CANO": cano, "ACNT_PRDT_CD": acnt_prdt_cd,
         "WCRC_FRCR_DVSN_CD": "02", "NATN_CD": "840",
@@ -222,7 +240,17 @@ def sync_live_balance(token, cano, acnt_prdt_cd, state):
         return
     if usd_balance <= 0:
         return
-    state["current_balance"] = round(usd_balance, 2)
+
+    last_raw = state.get("_last_raw_cash")
+    if last_raw is not None and abs(usd_balance - last_raw) > 0.01:
+        # KIS raw 잔고 자체가 지난 사이클과 달라졌다 = 그 사이 결제가 실제로
+        # 반영됐다는 뜻이므로, 그때까지 쌓인 미정산 델타는 이제 raw 안에 이미
+        # 녹아있다고 보고 정리(계속 남겨두면 다음부터 반대로 이중차감/이중가산됨).
+        state["pending_cash_deltas"] = []
+    state["_last_raw_cash"] = usd_balance
+
+    pending_total = sum(d["delta"] for d in state.get("pending_cash_deltas", []))
+    state["current_balance"] = round(usd_balance + pending_total, 2)
     _touch_balance_history(state)
 
 

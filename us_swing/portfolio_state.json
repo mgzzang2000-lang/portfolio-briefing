@@ -1,6 +1,17 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 694.99,
+  "current_balance": 545.51,
+  "_last_raw_cash": 694.99,
+  "pending_cash_deltas": [
+    {
+      "date": "2026-07-17",
+      "delta": 347.94
+    },
+    {
+      "date": "2026-07-17",
+      "delta": -497.42
+    }
+  ],
   "positions": {
     "FTNT": {
       "stop_price": 145.33,
@@ -123,14 +134,18 @@
     },
     {
       "date": "07/18",
-      "balance": 694.99
+      "balance": 545.51
     },
     {
       "date": "07/19",
-      "balance": 694.99
+      "balance": 545.51
+    },
+    {
+      "date": "07/20",
+      "balance": 545.51
     }
   ],
-  "total_assets": 2075.04,
+  "total_assets": 1925.56,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -150,12 +165,16 @@
     },
     {
       "date": "07/18",
-      "balance": 2075.04
+      "balance": 1927.76
     },
     {
       "date": "07/19",
-      "balance": 2075.04
+      "balance": 1925.56
+    },
+    {
+      "date": "07/20",
+      "balance": 1925.56
     }
   ],
-  "last_updated": "2026-07-19T06:45:27.430465+09:00"
+  "last_updated": "2026-07-20T06:45:29.518178+09:00"
 }
