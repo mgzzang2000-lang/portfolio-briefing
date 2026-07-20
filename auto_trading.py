@@ -352,15 +352,15 @@ def get_index_direction(token, market="J"):
 
 # ── 시장 데이터 ───────────────────────────────────────────────
 def get_volume_rank(token, market="J"):
-    # [2026-07-20] 거래량순위(FHPST01710000) API는 FID_COND_MRKT_DIV_CODE에 "J"만
-    # 허용함 — 여기 "Q"를 넣으면 "ERROR INVALID FID_COND_MRKT_DIV_CODE"로 거절당해
-    # 코스닥 조회가 매번 빈 결과였음. 코스피/코스닥 구분은 이 필드가 아니라
-    # FID_COND_SCR_DIV_CODE(화면분류코드 20171/20172)로만 한다.
-    scr_code = "20172" if market == "Q" else "20171"
+    # [2026-07-20] 거래량순위(FHPST01710000) API는 KIS 공식 예제 기준
+    # FID_COND_MRKT_DIV_CODE="J" 고정, FID_COND_SCR_DIV_CODE="20171" 고정만 유효함
+    # (20172는 존재하지 않는 값이라 "정상처리"인데 결과는 항상 빈 배열로 나왔음).
+    # 코스피/코스닥 구분은 FID_INPUT_ISCD(업종코드)로 해야 하며, get_index_direction()의
+    # INDEX_CODE 매핑("J"→"0001" 코스피종합, "Q"→"1001" 코스닥종합)을 그대로 재사용한다.
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/volume-rank", {
         "FID_COND_MRKT_DIV_CODE": "J",
-        "FID_COND_SCR_DIV_CODE": scr_code,
-        "FID_INPUT_ISCD": "0000",
+        "FID_COND_SCR_DIV_CODE": "20171",
+        "FID_INPUT_ISCD": INDEX_CODE[market],
         "FID_DIV_CLS_CODE": "0",
         # [2026-07-17] "0"(단순 평균거래량=체결 주식 수 기준)은 저가·소형 유통주식수
         # 종목이 회전율만으로 매일 상위권을 독점하는 구조적 편향이 있었음(흥구석유·
