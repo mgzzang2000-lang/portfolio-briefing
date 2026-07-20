@@ -1186,7 +1186,18 @@ def main():
     if trading_today is False:
         print(f"[휴장일] {now.strftime('%Y-%m-%d')}은 증시 휴장일 — 종료")
         return
-    kakao_token = get_kakao_token()
+    try:
+        # [2026-07-20] watcher.py에서 먼저 발견·수정한 것과 동일한 버그가 여기(GitHub
+        # Actions가 쓰는 main())에도 있었음 — 카카오 토큰 발급 실패(리프레시 토큰 만료,
+        # 시크릿 재발급 등) 하나 때문에 예외가 그대로 위로 뚫고 올라가 KIS 매매 로직
+        # 전체가(bash -e라 이번 5분 사이클 전체가) 실행조차 안 되고 죽었음(실제로 시크릿
+        # 재발급 직후 실행 1건이 이렇게 죽는 걸 확인). 카카오는 알림용일 뿐이라 실패해도
+        # None으로 두고 매매는 계속 진행한다(send_kakao는 토큰이 None이어도 그냥 그
+        # 알림 1건만 조용히 실패할 뿐 예외를 던지지 않음).
+        kakao_token = get_kakao_token()
+    except Exception as e:
+        print(f"[카카오 토큰 오류] {e} — 알림 없이 매매는 계속 진행")
+        kakao_token = None
     dash = load_dashboard()
     guard = check_daily_guard(dash, now)
     try:
