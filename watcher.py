@@ -105,13 +105,20 @@ def push_heartbeat():
     자체 매수스캔을 같이 돌리며 이 하트비트가 막으려던 레이스 컨디션이 재현될 뻔함.
     같은 파일 안 dashboard 푸시(git_push_dashboard)는 원래도 10회/2초로 훨씬 강하게
     설정돼 있었는데 정작 레이스 컨디션 방지 목적인 이쪽이 더 약했던 게 문제 — 동일한
-    강도로 맞춘다."""
+    강도로 맞춘다.
+    [2026-07-21] git_pull()의 07-16 수정과 같은 원인으로 계속 실패 중이었음: dashboard_data.json이
+    커밋 안 된 채 남아있으면(qty 변화 없어 git_push_dashboard 미실행) 아래 merge가 "local
+    changes would be overwritten"로 매번 거부돼 10회 재시도가 전부 헛돎 — 실제로 10시간 동안
+    27번 실패, 로컬이 origin보다 8커밋 밀리는 사고 발생. merge 전에 dashboard_data.json부터
+    먼저 커밋해 항상 merge가 가능한 상태로 만든다."""
     try:
         with open(HEARTBEAT_FILE, 'w', encoding='utf-8') as f:
             json.dump({'alive_at': datetime.now(KST).isoformat()}, f)
     except Exception as e:
         print(f"[하트비트 기록 실패] {e}")
         return
+    run_git('add', 'dashboard_data.json')
+    run_git('commit', '-m', '[로컬감시] 대시보드 업데이트(heartbeat 전 정리) [skip ci]')
     run_git('add', 'watcher_heartbeat.json')
     commit = run_git('commit', '-m', '[로컬감시] heartbeat [skip ci]')
     if commit and 'nothing to commit' in (commit.stdout + commit.stderr):
@@ -121,7 +128,11 @@ def push_heartbeat():
         if push and push.returncode == 0:
             return
         run_git('fetch', 'origin', 'main')
-        run_git('merge', 'origin/main', '-m', 'merge: heartbeat 동기화 [skip ci]')
+        merge = run_git('merge', 'origin/main', '-m', 'merge: heartbeat 동기화 [skip ci]')
+        if merge and merge.returncode != 0:
+            run_git('add', 'dashboard_data.json')
+            run_git('add', 'watcher_heartbeat.json')
+            run_git('commit', '--no-edit')
         time.sleep(2)
     print("[하트비트 푸시] 10회 재시도 끝까지 실패 — 다음 주기에 재시도")
 
