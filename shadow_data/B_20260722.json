@@ -524,5 +524,28 @@
         "market_cap": 8764.0
       }
     ]
+  },
+  {
+    "time": "11:48:23",
+    "candidates": [
+      {
+        "code": "138360",
+        "name": "138360",
+        "price": 2390.0,
+        "open": 1994.0,
+        "gap_from_open_pct": 19.86,
+        "approx_execution_strength": null,
+        "market_cap": 2163.0
+      },
+      {
+        "code": "090710",
+        "name": "090710",
+        "price": 7300.0,
+        "open": 7070.0,
+        "gap_from_open_pct": 3.25,
+        "approx_execution_strength": 51.3,
+        "market_cap": 8728.0
+      }
+    ]
   }
 ]
