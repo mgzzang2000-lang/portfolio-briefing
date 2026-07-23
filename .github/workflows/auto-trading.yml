@@ -68,7 +68,18 @@ jobs:
           # "포지션 없음"으로 오판 → 279570 중복매수, 실손실 -16,770원)가 발생했음.
           # 매 반복마다 최신 상태를 커밋+동기화해서 겹쳐 도는 다른 실행의 매매를
           # 최대 ~60초 안에 알아보도록 한다.
+          # [2026-07-23] watcher_heartbeat.json은 merge=ours라, 이 스텝이 자체적으로는
+          # 그 파일을 절대 수정하지 않는데도 "우리 쪽 커밋이 충돌 없이 그냥 fast-forward
+          # 푸시되면" fetch/merge 자체가 아예 안 일어나 하트비트가 이번 잡을 체크아웃한
+          # 시점 값에 계속 고정됨 — watcher.py(오라클)가 계속 살아있는데도 90초 문턱을
+          # 넘겨 "죽었다"고 오판, 상시감시봇이 방금 패스한 096770을 이 잡이 혼자 매수한
+          # 사고(실거래, 손실은 없었음) 발생. push 충돌 여부와 무관하게 매 반복 시작
+          # 전에 하트비트 파일만 origin의 최신값으로 직접 갱신해 이 판단 근거 자체를
+          # 항상 신선하게 유지한다(merge 없이 checkout이라 merge=ours의 영향을 안 받음 —
+          # fetch+checkout으로 갱신됨을 재현 테스트로 확인함).
           for i in 1 2 3 4 5; do
+            git fetch origin main --quiet
+            git checkout origin/main -- watcher_heartbeat.json 2>/dev/null || true
             python auto_trading.py
             git add dashboard_data.json
             git diff --cached --quiet || git commit -m "chore: update dashboard data [skip ci]"
