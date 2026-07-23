@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 459726,
+  "current_balance": 211126,
   "trades": [
     {
       "action": "buy",
@@ -473,10 +473,32 @@
       "pnl_pct": -3.18,
       "pnl_amt": -9516,
       "reason": "손절 (정정, -3.18%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "096770-20260723102142",
+      "date": "07/23 10:21",
+      "code": "096770",
+      "stock": "096770",
+      "qty": 2,
+      "price": 124300,
+      "amount": 248600
     }
   ],
-  "position": null,
-  "last_updated": "2026-07-23T10:19:50.797357+09:00",
+  "position": {
+    "code": "096770",
+    "name": "096770",
+    "qty": 2,
+    "market": "J",
+    "avg_price": 124300,
+    "current_price": 124300,
+    "stop_price": 122731,
+    "target_price": 129272,
+    "entry_time": "2026-07-23T10:21:42.105361+09:00",
+    "trailing_activated": false,
+    "trade_id": "096770-20260723102142"
+  },
+  "last_updated": "2026-07-23T10:21:42.105610+09:00",
   "daily_loss_guard": {
     "date": "07/23",
     "consecutive_losses": 0,
@@ -533,7 +555,7 @@
     },
     {
       "date": "07/23",
-      "balance": 459726
+      "balance": 211126
     }
   ]
 }
