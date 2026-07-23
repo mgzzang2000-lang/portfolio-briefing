@@ -194,5 +194,28 @@
         "market_cap": 3620.0
       }
     ]
+  },
+  {
+    "time": "11:49:13",
+    "candidates": [
+      {
+        "code": "229200",
+        "name": "229200",
+        "price": 12920.0,
+        "open": 12745.0,
+        "gap_from_open_pct": 1.37,
+        "approx_execution_strength": 909.7,
+        "market_cap": 40756.0
+      },
+      {
+        "code": "064260",
+        "name": "064260",
+        "price": 4700.0,
+        "open": 3945.0,
+        "gap_from_open_pct": 19.14,
+        "approx_execution_strength": 344.4,
+        "market_cap": 3555.0
+      }
+    ]
   }
 ]
