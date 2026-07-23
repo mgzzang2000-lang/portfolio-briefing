@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 211126,
+  "current_balance": 459726,
   "trades": [
     {
       "action": "buy",
@@ -485,20 +485,8 @@
       "amount": 248600
     }
   ],
-  "position": {
-    "code": "096770",
-    "name": "096770",
-    "qty": 2,
-    "market": "J",
-    "avg_price": 124300,
-    "current_price": 124300,
-    "stop_price": 122731,
-    "target_price": 129272,
-    "entry_time": "2026-07-23T10:21:42.105361+09:00",
-    "trailing_activated": false,
-    "trade_id": "096770-20260723102142"
-  },
-  "last_updated": "2026-07-23T10:21:42.105610+09:00",
+  "position": null,
+  "last_updated": "2026-07-23T10:24:38.071388+09:00",
   "daily_loss_guard": {
     "date": "07/23",
     "consecutive_losses": 0,
@@ -555,7 +543,7 @@
     },
     {
       "date": "07/23",
-      "balance": 211126
+      "balance": 459726
     }
   ]
 }
