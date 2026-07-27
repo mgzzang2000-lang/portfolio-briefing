@@ -13,9 +13,9 @@
       "entry_date": "20260709",
       "qty": 3,
       "sector": "Information Technology",
-      "current_price": 152.725,
-      "pnl_pct": -5.42,
-      "price_updated_at": "04:45"
+      "current_price": 152.36,
+      "pnl_pct": -5.65,
+      "price_updated_at": "05:00"
     },
     "HUM": {
       "stop_price": 362.46,
@@ -26,9 +26,9 @@
       "entry_date": "20260709",
       "qty": 1,
       "sector": "Health Care",
-      "current_price": 383.385,
-      "pnl_pct": -4.81,
-      "price_updated_at": "04:45"
+      "current_price": 381.0,
+      "pnl_pct": -5.4,
+      "price_updated_at": "05:00"
     },
     "DOC": {
       "stop_price": 20.25,
@@ -39,9 +39,9 @@
       "entry_date": "20260717",
       "qty": 22,
       "sector": "Real Estate",
-      "current_price": 22.49,
-      "pnl_pct": -0.09,
-      "price_updated_at": "04:45"
+      "current_price": 22.52,
+      "pnl_pct": 0.04,
+      "price_updated_at": "05:00"
     }
   },
   "trade_history": [
@@ -168,7 +168,7 @@
       "balance": 547.88
     }
   ],
-  "total_assets": 1884.22,
+  "total_assets": 1881.4,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -228,8 +228,8 @@
     },
     {
       "date": "07/28",
-      "balance": 1884.22
+      "balance": 1881.4
     }
   ],
-  "last_updated": "2026-07-28T04:45:31.080523+09:00"
+  "last_updated": "2026-07-28T05:00:50.121063+09:00"
 }
