@@ -1007,5 +1007,28 @@
         "market_cap": 5129.0
       }
     ]
+  },
+  {
+    "time": "12:51:15",
+    "candidates": [
+      {
+        "code": "002700",
+        "name": "002700",
+        "price": 1117.0,
+        "open": 1088.0,
+        "gap_from_open_pct": 2.67,
+        "approx_execution_strength": 162.0,
+        "market_cap": 766.0
+      },
+      {
+        "code": "950160",
+        "name": "950160",
+        "price": 15760.0,
+        "open": 15530.0,
+        "gap_from_open_pct": 1.48,
+        "approx_execution_strength": 377.2,
+        "market_cap": 13391.0
+      }
+    ]
   }
 ]
