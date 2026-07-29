@@ -483,6 +483,19 @@
       "qty": 2,
       "price": 124300,
       "amount": 248600
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "096770-20260723102142",
+      "date": "07/23 15:29",
+      "stock": "096770",
+      "qty": 2,
+      "price": 131300,
+      "avg_price": 124300,
+      "pnl_pct": 5.63,
+      "pnl_amt": 14000,
+      "reason": "익절 (사용자 직접매도, +5.63%)"
     }
   ],
   "position": null,
