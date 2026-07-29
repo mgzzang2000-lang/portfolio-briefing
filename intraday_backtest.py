@@ -243,7 +243,7 @@ def check_pullback_support_hold(closes, highs, lows, volumes, lookback=15):
     cur_close = asc_c[-1]
     cur_vol = asc_v[-1]
     confirm_break = cur_close > reversal_h
-    volume_surge = cur_vol >= pullback_vol * 1.5
+    volume_surge = cur_vol >= pullback_vol * 1.2  # [2026-07-29] auto_trading.py와 동일하게 완화
     trough_recent = trough_idx >= (lookback - 1) - PULLBACK_CONFIRM_WINDOW
     ok = (healthy_pullback and healthy_retracement_ratio and strong_reversal_candle
           and confirm_break and volume_surge and trough_recent)

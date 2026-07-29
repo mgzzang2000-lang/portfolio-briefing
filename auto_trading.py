@@ -866,7 +866,11 @@ def check_pullback_support_hold(closes, highs, lows, volumes, lookback=15):
     cur_close = asc_c[-1]
     cur_vol   = asc_v[-1]
     confirm_break = cur_close > reversal_h                # 반전이 실제로 이어지는지 확인
-    volume_surge  = cur_vol >= pullback_vol * 1.5          # 확인 시 거래량 급증
+    # [2026-07-29] 1.5배는 7/21~7/29 실측 1,531건 중 95.4%가 여기서 탈락 — 8개 조건
+    # 중 압도적 1위 병목이라 실거래 빈도가 9거래일에 1건까지 떨어진 주원인으로 판단,
+    # 1.2배로 완화. 나머지 조건(눌림폭/되돌림비율/반전봉 등)은 셋업 품질을 걸러내는
+    # 핵심 조건이라 그대로 두고, 이 조건 하나만 먼저 풀어서 효과를 지켜보기로 함.
+    volume_surge  = cur_vol >= pullback_vol * 1.2          # 확인 시 거래량 급증
     # [2026-07-18] 반전봉이 확인돌파(마지막 봉) 기준 너무 옛날이면 뒤늦은 진입 —
     # 최근 PULLBACK_CONFIRM_WINDOW봉 이내에서 나온 저점만 인정.
     trough_recent = trough_idx >= (lookback - 1) - PULLBACK_CONFIRM_WINDOW
