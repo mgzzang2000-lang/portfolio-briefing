@@ -18,9 +18,9 @@
       "entry_date": "20260709",
       "qty": 3,
       "sector": "Information Technology",
-      "current_price": 146.06,
-      "pnl_pct": -9.55,
-      "price_updated_at": "23:45"
+      "current_price": 146.425,
+      "pnl_pct": -9.33,
+      "price_updated_at": "00:00"
     },
     "DOC": {
       "stop_price": 20.25,
@@ -31,9 +31,9 @@
       "entry_date": "20260717",
       "qty": 22,
       "sector": "Real Estate",
-      "current_price": 22.705,
-      "pnl_pct": 0.87,
-      "price_updated_at": "23:45"
+      "current_price": 22.645,
+      "pnl_pct": 0.6,
+      "price_updated_at": "00:00"
     }
   },
   "trade_history": [
@@ -170,9 +170,13 @@
     {
       "date": "07/29",
       "balance": 905.39
+    },
+    {
+      "date": "07/30",
+      "balance": 905.39
     }
   ],
-  "total_assets": 1843.08,
+  "total_assets": 1842.86,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -237,7 +241,11 @@
     {
       "date": "07/29",
       "balance": 1843.08
+    },
+    {
+      "date": "07/30",
+      "balance": 1842.86
     }
   ],
-  "last_updated": "2026-07-29T23:45:36.006435+09:00"
+  "last_updated": "2026-07-30T00:00:48.772717+09:00"
 }
