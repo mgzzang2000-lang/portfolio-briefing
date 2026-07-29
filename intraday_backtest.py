@@ -555,7 +555,12 @@ def run_intraday_backtest():
                             continue
                         cur_bar = bars_asc[-1]
                         cur_price = float(cur_bar['stck_prpr'])
-                        cum_vol   = int(cur_bar.get('acml_vol', 0))
+                        # [2026-07-29] 버그 발견: 저장된 1분봉엔 'acml_vol'(누적거래량) 필드가
+                        # 아예 없음(collect_intraday_data.py가 안 저장함, 실측 확인) — 항상
+                        # 기본값 0을 읽어서 거래량 페이스 필터가 매 사이클 무조건 탈락시키고
+                        # 있었음(백테스트가 신설 이후 단 한 번도 거래를 만든 적이 없었던 원인).
+                        # 봉별 체결량(cntg_vol)을 그날 누적합해서 누적거래량을 직접 계산.
+                        cum_vol = sum(int(b.get('cntg_vol', 0)) for b in bars_asc)
                         if not passes_gap_or_high_filter(window, info, cur_price, day_high_so_far[code]):
                             continue
                         if not passes_volume_pace(info, cum_vol, elapsed_minutes):
