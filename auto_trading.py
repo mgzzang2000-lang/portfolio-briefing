@@ -261,6 +261,9 @@ def log_buy(dash, code, name, qty, price, cash_after, stop_price, target_price, 
         'trailing_activated': False,  # 트레일링 스탑 활성화 여부
         'trade_id': trade_id,
     }
+    # [2026-07-29] position_version — dashboard_merge.py가 last_updated(벽시계) 대신
+    # 이 값으로 position 승자를 가리기 위한 카운터. position이 실제로 바뀔 때만 증가.
+    dash['position_version'] = dash.get('position_version', 0) + 1
     dash['current_balance'] = int(cash_after)
 def recover_missing_sells(token, dash, dash_position):
     """대시보드엔 포지션이 남아있는데 실계좌엔 없을 때, 조용히 지우기 전에
@@ -324,6 +327,7 @@ def log_sell(dash, name, qty, avg_price, sell_price, pnl_pct, pnl_amt, reason, n
         'pnl_amt': int(pnl_amt), 'reason': reason
     })
     dash['position'] = None
+    dash['position_version'] = dash.get('position_version', 0) + 1
     dash['current_balance'] = int(new_cash)
 
 
@@ -1268,6 +1272,7 @@ def main():
                     send_kakao(kakao_token,
                                 f"⚠️ {dash_position.get('name', bot_code)} 매도 기록 유실 — 체결내역 직접 확인 필요")
                 dash['position'] = None
+                dash['position_version'] = dash.get('position_version', 0) + 1
                 save_dashboard(dash)
                 return
         active = matched

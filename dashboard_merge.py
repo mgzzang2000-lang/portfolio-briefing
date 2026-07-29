@@ -53,7 +53,21 @@ def merge_dashboards(a, b):
     fresher, other = (a, b) if a_time >= b_time else (b, a)
     fresher_tag = 'a' if a_time >= b_time else 'b'
 
-    result = dict(fresher)  # position / current_balance / daily_loss_guard / last_updated: 최신 쪽 신뢰
+    result = dict(fresher)  # current_balance / daily_loss_guard / last_updated: 최신 쪽 신뢰
+
+    # [2026-07-29] position만은 last_updated(벽시계) 대신 position_version(포지션이 실제로
+    # 바뀔 때만 log_buy/log_sell이 증가시키는 카운터)으로 승자를 가린다. GH Actions가 매매
+    # 없이 잔고만 갱신해도 last_updated는 "지금"으로 찍히는데, 그 사이클이 매수 이전에
+    # position=None을 읽어놓고도 매수 직후에야 저장을 마치면(느린 사이클) last_updated만
+    # 더 늦다는 이유로 낡은 position=None이 이겨서 방금 산 포지션을 지워버리는 사고가
+    # 있었음(096770, 2026-07-23 — 봇이 자기가 방금 산 종목을 "정체불명 보유종목"으로
+    # 오인해 신규매수를 5시간 넘게 스스로 막음).
+    a_pv = a.get('position_version', 0) or 0
+    b_pv = b.get('position_version', 0) or 0
+    pos_source = fresher if a_pv == b_pv else (a if a_pv > b_pv else b)
+    result['position'] = pos_source.get('position')
+    result['position_version'] = pos_source.get('position_version', 0) or 0
+
     result['initial_balance'] = a.get('initial_balance', b.get('initial_balance', 500000))
     result['trades'] = merge_trades(a.get('trades'), b.get('trades'))
     result['balance_history'] = merge_balance_history(
