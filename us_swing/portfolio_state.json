@@ -1,27 +1,18 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 905.39,
+  "current_balance": 1336.31,
   "_last_raw_cash": 547.88,
   "pending_cash_deltas": [
     {
       "date": "2026-07-29",
       "delta": 357.51
+    },
+    {
+      "date": "2026-07-30",
+      "delta": 430.91999999999996
     }
   ],
   "positions": {
-    "FTNT": {
-      "stop_price": 145.33,
-      "tp_price": 210.98,
-      "partial_tp_price": 186.63,
-      "partial_taken": false,
-      "entry_price": 162.29,
-      "entry_date": "20260709",
-      "qty": 3,
-      "sector": "Information Technology",
-      "current_price": 145.86,
-      "pnl_pct": -9.68,
-      "price_updated_at": "01:00"
-    },
     "DOC": {
       "stop_price": 20.25,
       "tp_price": 29.39,
@@ -31,9 +22,9 @@
       "entry_date": "20260717",
       "qty": 22,
       "sector": "Real Estate",
-      "current_price": 22.74,
-      "pnl_pct": 1.02,
-      "price_updated_at": "01:00"
+      "current_price": 22.665,
+      "pnl_pct": 0.69,
+      "price_updated_at": "01:15"
     }
   },
   "trade_history": [
@@ -84,6 +75,14 @@
       "qty": 1,
       "price": 357.51,
       "reason": "하드손절 (기준 362.46)"
+    },
+    {
+      "action": "sell",
+      "date": "2026-07-30 01:15",
+      "symbol": "FTNT",
+      "qty": 3,
+      "price": 143.64,
+      "reason": "하드손절 (기준 145.33)"
     }
   ],
   "balance_history": [
@@ -173,10 +172,10 @@
     },
     {
       "date": "07/30",
-      "balance": 905.39
+      "balance": 1336.31
     }
   ],
-  "total_assets": 1843.25,
+  "total_assets": 1834.94,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -244,8 +243,8 @@
     },
     {
       "date": "07/30",
-      "balance": 1843.25
+      "balance": 1834.94
     }
   ],
-  "last_updated": "2026-07-30T01:00:46.317160+09:00"
+  "last_updated": "2026-07-30T01:15:45.422561+09:00"
 }
