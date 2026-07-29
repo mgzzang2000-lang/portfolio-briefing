@@ -1,29 +1,86 @@
 [
   {
-    "time": "09:15:14",
+    "time": "10:09:21",
     "candidates": [
       {
-        "code": "356680",
-        "name": "356680",
-        "price": 11710.0,
-        "open": 11560.0,
-        "gap_from_open_pct": 1.3,
-        "approx_execution_strength": 316.2,
-        "market_cap": 3342.0
+        "code": "439960",
+        "name": "439960",
+        "price": 14740.0,
+        "gap_low": 14700.0,
+        "gap_high": 14750.0,
+        "stop_price": 14570.0,
+        "target_price": 14890.0,
+        "market_cap": 4783.0
       }
     ]
   },
   {
-    "time": "09:22:54",
+    "time": "11:24:55",
     "candidates": [
       {
-        "code": "356680",
-        "name": "356680",
-        "price": 11990.0,
-        "open": 11560.0,
-        "gap_from_open_pct": 3.72,
-        "approx_execution_strength": 256.7,
-        "market_cap": 3422.0
+        "code": "203650",
+        "name": "203650",
+        "price": 1727.0,
+        "gap_low": 1714.0,
+        "gap_high": 1727.0,
+        "stop_price": 1711.0,
+        "target_price": 1728.0,
+        "market_cap": 1756.0
+      }
+    ]
+  },
+  {
+    "time": "13:12:48",
+    "candidates": [
+      {
+        "code": "0219E0",
+        "name": "0219E0",
+        "price": 7765.0,
+        "gap_low": 7755.0,
+        "gap_high": 7765.0,
+        "stop_price": 7750.0,
+        "target_price": 7775.0,
+        "market_cap": 2508.0
+      }
+    ]
+  },
+  {
+    "time": "13:36:15",
+    "candidates": [
+      {
+        "code": "396500",
+        "name": "396500",
+        "price": 30380.0,
+        "gap_low": 30370.0,
+        "gap_high": 30380.0,
+        "stop_price": 30315.0,
+        "target_price": 30430.0,
+        "market_cap": 79322.0
+      },
+      {
+        "code": "006340",
+        "name": "006340",
+        "price": 13970.0,
+        "gap_low": 13960.0,
+        "gap_high": 13970.0,
+        "stop_price": 13920.0,
+        "target_price": 14000.0,
+        "market_cap": 10954.0
+      }
+    ]
+  },
+  {
+    "time": "13:57:58",
+    "candidates": [
+      {
+        "code": "333430",
+        "name": "333430",
+        "price": 4130.0,
+        "gap_low": 4120.0,
+        "gap_high": 4145.0,
+        "stop_price": 4090.0,
+        "target_price": 4185.0,
+        "market_cap": 1269.0
       }
     ]
   }

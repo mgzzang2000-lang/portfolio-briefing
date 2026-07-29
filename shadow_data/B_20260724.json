@@ -1,108 +1,96 @@
 [
   {
-    "time": "09:08:30",
+    "time": "11:14:40",
     "candidates": [
       {
-        "code": "008700",
-        "name": "008700",
-        "price": 1139.0,
-        "open": 1133.0,
-        "gap_from_open_pct": 0.53,
-        "approx_execution_strength": 244.5,
-        "market_cap": 878.0
+        "code": "0167A0",
+        "name": "0167A0",
+        "price": 17555.0,
+        "gap_low": 17540.0,
+        "gap_high": 17560.0,
+        "stop_price": 17515.0,
+        "target_price": 17600.0,
+        "market_cap": 56273.0
       },
       {
-        "code": "028050",
-        "name": "028050",
-        "price": 48350.0,
-        "open": 46750.0,
-        "gap_from_open_pct": 3.42,
-        "approx_execution_strength": 232.7,
-        "market_cap": 94766.0
+        "code": "396500",
+        "name": "396500",
+        "price": 35405.0,
+        "gap_low": 35400.0,
+        "gap_high": 35425.0,
+        "stop_price": 35360.0,
+        "target_price": 35490.0,
+        "market_cap": 92022.0
       }
     ]
   },
   {
-    "time": "14:47:53",
+    "time": "12:00:19",
     "candidates": [
       {
-        "code": "002700",
-        "name": "002700",
-        "price": 1126.0,
-        "open": 1017.0,
-        "gap_from_open_pct": 10.72,
-        "approx_execution_strength": 155.8,
-        "market_cap": 772.0
+        "code": "003280",
+        "name": "003280",
+        "price": 1985.0,
+        "gap_low": 1984.0,
+        "gap_high": 1985.0,
+        "stop_price": 1979.0,
+        "target_price": 1985.0,
+        "market_cap": 4772.0
       }
     ]
   },
   {
-    "time": "14:55:21",
+    "time": "12:07:41",
     "candidates": [
       {
-        "code": "002700",
-        "name": "002700",
-        "price": 1080.0,
-        "open": 1017.0,
-        "gap_from_open_pct": 6.19,
-        "approx_execution_strength": 220.8,
-        "market_cap": 740.0
+        "code": "0167A0",
+        "name": "0167A0",
+        "price": 17165.0,
+        "gap_low": 17155.0,
+        "gap_high": 17175.0,
+        "stop_price": 17110.0,
+        "target_price": 17225.0,
+        "market_cap": 55022.0
+      },
+      {
+        "code": "396500",
+        "name": "396500",
+        "price": 34635.0,
+        "gap_low": 34615.0,
+        "gap_high": 34655.0,
+        "stop_price": 34550.0,
+        "target_price": 34765.0,
+        "market_cap": 90073.0
       }
     ]
   },
   {
-    "time": "15:02:55",
+    "time": "13:46:41",
     "candidates": [
       {
-        "code": "002700",
-        "name": "002700",
-        "price": 1057.0,
-        "open": 1017.0,
-        "gap_from_open_pct": 3.93,
-        "approx_execution_strength": 267.4,
-        "market_cap": 725.0
+        "code": "396500",
+        "name": "396500",
+        "price": 34585.0,
+        "gap_low": 34580.0,
+        "gap_high": 34585.0,
+        "stop_price": 34535.0,
+        "target_price": 34660.0,
+        "market_cap": 89891.0
       }
     ]
   },
   {
-    "time": "15:10:47",
+    "time": "14:17:50",
     "candidates": [
       {
-        "code": "002700",
-        "name": "002700",
-        "price": 1052.0,
-        "open": 1017.0,
-        "gap_from_open_pct": 3.44,
-        "approx_execution_strength": 40.9,
-        "market_cap": 721.0
-      }
-    ]
-  },
-  {
-    "time": "15:18:17",
-    "candidates": [
-      {
-        "code": "002700",
-        "name": "002700",
-        "price": 1050.0,
-        "open": 1017.0,
-        "gap_from_open_pct": 3.24,
-        "approx_execution_strength": 115.6,
-        "market_cap": 720.0
-      }
-    ]
-  },
-  {
-    "time": "15:26:02",
-    "candidates": [
-      {
-        "code": "002700",
-        "name": "002700",
-        "price": 1051.0,
-        "open": 1017.0,
-        "gap_from_open_pct": 3.34,
-        "approx_execution_strength": 1044.9,
-        "market_cap": 720.0
+        "code": "100090",
+        "name": "100090",
+        "price": 18900.0,
+        "gap_low": 18800.0,
+        "gap_high": 18910.0,
+        "stop_price": 18610.0,
+        "target_price": 18990.0,
+        "market_cap": 11808.0
       }
     ]
   }
