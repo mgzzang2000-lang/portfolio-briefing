@@ -40,5 +40,37 @@
         "market_cap": 1266.0
       }
     ]
+  },
+  {
+    "time": "09:32:50",
+    "candidates": [
+      {
+        "code": "0039P0",
+        "name": "0039P0",
+        "price": 6440.0,
+        "open": 6370.0,
+        "gap_from_open_pct": 1.1,
+        "approx_execution_strength": 699.3,
+        "market_cap": 1211.0
+      },
+      {
+        "code": "002990",
+        "name": "002990",
+        "price": 9490.0,
+        "open": 8220.0,
+        "gap_from_open_pct": 15.45,
+        "approx_execution_strength": null,
+        "market_cap": 3536.0
+      },
+      {
+        "code": "073240",
+        "name": "073240",
+        "price": 6590.0,
+        "open": 6000.0,
+        "gap_from_open_pct": 9.83,
+        "approx_execution_strength": 12644.2,
+        "market_cap": 18930.0
+      }
+    ]
   }
 ]
