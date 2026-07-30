@@ -1,35 +1,18 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 547.88,
+  "current_balance": 1336.31,
   "_last_raw_cash": 547.88,
-  "pending_cash_deltas": [],
+  "pending_cash_deltas": [
+    {
+      "date": "2026-07-29",
+      "delta": 357.51
+    },
+    {
+      "date": "2026-07-30",
+      "delta": 430.91999999999996
+    }
+  ],
   "positions": {
-    "FTNT": {
-      "stop_price": 145.33,
-      "tp_price": 210.98,
-      "partial_tp_price": 186.63,
-      "partial_taken": false,
-      "entry_price": 162.29,
-      "entry_date": "20260709",
-      "qty": 3,
-      "sector": "Information Technology",
-      "current_price": 149.98,
-      "pnl_pct": -7.12,
-      "price_updated_at": "06:45"
-    },
-    "HUM": {
-      "stop_price": 362.46,
-      "tp_price": 526.18,
-      "partial_tp_price": 465.46,
-      "partial_taken": false,
-      "entry_price": 404.75,
-      "entry_date": "20260709",
-      "qty": 1,
-      "sector": "Health Care",
-      "current_price": 388.71,
-      "pnl_pct": -3.49,
-      "price_updated_at": "06:45"
-    },
     "DOC": {
       "stop_price": 20.25,
       "tp_price": 29.39,
@@ -39,9 +22,9 @@
       "entry_date": "20260717",
       "qty": 22,
       "sector": "Real Estate",
-      "current_price": 22.82,
-      "pnl_pct": 1.38,
-      "price_updated_at": "06:45"
+      "current_price": 22.48,
+      "pnl_pct": -0.13,
+      "price_updated_at": "07:06"
     }
   },
   "trade_history": [
@@ -84,6 +67,22 @@
       "qty": 22,
       "price": 22.61,
       "reason": "RS12w=33.6%"
+    },
+    {
+      "action": "sell",
+      "date": "2026-07-29 23:15",
+      "symbol": "HUM",
+      "qty": 1,
+      "price": 357.51,
+      "reason": "하드손절 (기준 362.46)"
+    },
+    {
+      "action": "sell",
+      "date": "2026-07-30 01:15",
+      "symbol": "FTNT",
+      "qty": 3,
+      "price": 143.64,
+      "reason": "하드손절 (기준 145.33)"
     }
   ],
   "balance_history": [
@@ -169,10 +168,14 @@
     },
     {
       "date": "07/29",
-      "balance": 547.88
+      "balance": 905.39
+    },
+    {
+      "date": "07/30",
+      "balance": 1336.31
     }
   ],
-  "total_assets": 1888.57,
+  "total_assets": 1830.87,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -236,8 +239,12 @@
     },
     {
       "date": "07/29",
-      "balance": 1888.57
+      "balance": 1843.08
+    },
+    {
+      "date": "07/30",
+      "balance": 1830.87
     }
   ],
-  "last_updated": "2026-07-29T06:45:28.101068+09:00"
+  "last_updated": "2026-07-30T07:06:18.927594+09:00"
 }
