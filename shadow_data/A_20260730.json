@@ -1158,5 +1158,28 @@
         "market_cap": 17322.0
       }
     ]
+  },
+  {
+    "time": "13:56:34",
+    "candidates": [
+      {
+        "code": "0039P0",
+        "name": "0039P0",
+        "price": 6620.0,
+        "open": 6370.0,
+        "gap_from_open_pct": 3.92,
+        "approx_execution_strength": 54.9,
+        "market_cap": 1245.0
+      },
+      {
+        "code": "073240",
+        "name": "073240",
+        "price": 6030.0,
+        "open": 6000.0,
+        "gap_from_open_pct": 0.5,
+        "approx_execution_strength": 1274.3,
+        "market_cap": 17322.0
+      }
+    ]
   }
 ]
