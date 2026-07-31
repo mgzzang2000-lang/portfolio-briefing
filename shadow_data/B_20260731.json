@@ -13,5 +13,30 @@
         "market_cap": 3625.0
       }
     ]
+  },
+  {
+    "time": "15:00:12",
+    "candidates": [
+      {
+        "code": "067290",
+        "name": "067290",
+        "price": 1863.0,
+        "gap_low": 1862.0,
+        "gap_high": 1863.0,
+        "stop_price": 1858.0,
+        "target_price": 1863.0,
+        "market_cap": 1044.0
+      },
+      {
+        "code": "365660",
+        "name": "365660",
+        "price": 5450.0,
+        "gap_low": 5450.0,
+        "gap_high": 5460.0,
+        "stop_price": 5420.0,
+        "target_price": 5490.0,
+        "market_cap": 728.0
+      }
+    ]
   }
 ]
