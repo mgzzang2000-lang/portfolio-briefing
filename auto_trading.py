@@ -435,8 +435,9 @@ def get_minute_ohlcv(token, code, market="J", n=30):
     스토캐스틱RSI·BB·ATR 계산용
     """
     now = datetime.now(KST)
+    # [2026-07-31] 위 두 함수와 같은 유형의 버그 — 실측 확인, market 인자는 무시하고 "J" 고정.
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice", {
-        "FID_COND_MRKT_DIV_CODE": market,
+        "FID_COND_MRKT_DIV_CODE": "J",
         "FID_INPUT_ISCD": code,
         "FID_INPUT_HOUR_1": now.strftime('%H%M%S'),
         "FID_PW_DATA_INCU_YN": "Y",
@@ -462,8 +463,13 @@ def get_minute_ohlcv(token, code, market="J", n=30):
         return None
     return {'closes': closes, 'highs': highs, 'lows': lows, 'volumes': volumes}
 def get_current_price(token, code, market="J"):
+    # [2026-07-31] get_daily_ohlcv와 같은 유형의 버그 — 이 TR(현재가 조회)도
+    # FID_COND_MRKT_DIV_CODE="Q"를 주면 실제 코스닥 종목(빛과전자/069540, 흥아해운/003280
+    # 등 과거 실거래 종목으로 직접 재현 확인)조차 전부 빈 결과(가격 0)를 반환하고,
+    # "J"는 코스피/코스닥 무관하게 항상 정상 동작함. market 인자는 호출부 호환을 위해
+    # 남겨두되 실제 조회엔 항상 "J"만 사용한다.
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-price", {
-        "FID_COND_MRKT_DIV_CODE": market,
+        "FID_COND_MRKT_DIV_CODE": "J",
         "FID_INPUT_ISCD": code
     }, "FHKST01010100")
     o = data.get('output', {})
