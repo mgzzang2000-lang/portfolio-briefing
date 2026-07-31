@@ -101,20 +101,18 @@ def kis_get(token, path, params, tr_id, retries=3):
     return {}
 
 def get_daily_raw(token, code, market, end_date):
-    """end_date('YYYYMMDD') 기준 과거 400일치 일봉 원본(최신이 index 0)."""
+    """end_date('YYYYMMDD') 기준 과거 400일치 일봉 원본(최신이 index 0).
+    [2026-07-31] market="Q"면 항상 빈 결과(같은 버그 계열) — "J" 고정, J/Q 폴백도 제거."""
     start = (datetime.strptime(end_date, '%Y%m%d') - timedelta(days=400)).strftime('%Y%m%d')
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice", {
-        "FID_COND_MRKT_DIV_CODE": market,
+        "FID_COND_MRKT_DIV_CODE": "J",
         "FID_INPUT_ISCD": code,
         "FID_INPUT_DATE_1": start,
         "FID_INPUT_DATE_2": end_date,
         "FID_PERIOD_DIV_CODE": "D",
         "FID_ORG_ADJ_PRC": "0",
     }, "FHKST03010100")
-    rows = data.get('output2', [])
-    if not rows and market == "J":
-        return get_daily_raw(token, code, "Q", end_date)
-    return rows
+    return data.get('output2', [])
 
 # ── 수집된 데이터 로딩 ────────────────────────────────────────────
 def find_collected_days():

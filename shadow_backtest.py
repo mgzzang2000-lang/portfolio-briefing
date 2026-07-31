@@ -93,18 +93,17 @@ def kis_get(token, path, params, tr_id, retries=3):
 
 
 def get_day_ohlc(token, code, ymd, market="J"):
-    """ymd 하루치 일봉(시/고/저/종). J로 없으면 Q로 재시도(코스피/코스닥 구분 미상 대응).
+    """ymd 하루치 일봉(시/고/저/종).
     [주의] 이건 하루 '전체' 고저가라 포착 시점 '이전'에 이미 찍힌 저가/고가까지
     섞여있음 — 포착 이후에도 그 가격을 다시 건드렸다는 보장이 없으므로 손절/익절
-    판정에 그대로 쓰면 안 됨(과거에 여기서 오판 발견, 아래 종가 전용으로만 사용)."""
+    판정에 그대로 쓰면 안 됨(과거에 여기서 오판 발견, 아래 종가 전용으로만 사용).
+    [2026-07-31] market="Q"면 항상 빈 결과(같은 버그 계열) — "J" 고정, 폴백 제거."""
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice", {
-        "FID_COND_MRKT_DIV_CODE": market, "FID_INPUT_ISCD": code,
+        "FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code,
         "FID_INPUT_DATE_1": ymd, "FID_INPUT_DATE_2": ymd,
         "FID_PERIOD_DIV_CODE": "D", "FID_ORG_ADJ_PRC": "0",
     }, "FHKST03010100")
     rows = data.get('output2', [])
-    if not rows and market == "J":
-        return get_day_ohlc(token, code, ymd, "Q")
     if not rows:
         return None
     r = rows[0]

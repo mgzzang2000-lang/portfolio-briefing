@@ -114,12 +114,17 @@ def kis_get(token, path, params, tr_id, retries=3):
     return {}
 
 
+INDEX_CODE = {"J": "0001", "Q": "1001"}  # 코스피종합/코스닥종합 지수코드 (거래량순위 조회용)
+
+
 def get_volume_rank(token, market="J"):
-    scr_code = "20172" if market == "Q" else "20171"
+    # [2026-07-31] auto_trading.py의 2026-07-20 수정과 동일 적용(이 파일엔 안 옮겨져
+    # 있었음) — FID_COND_MRKT_DIV_CODE="J"/FID_COND_SCR_DIV_CODE="20171" 고정만
+    # 유효하고, 코스피/코스닥 구분은 FID_INPUT_ISCD(업종코드)로 해야 함.
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/volume-rank", {
-        "FID_COND_MRKT_DIV_CODE": market,
-        "FID_COND_SCR_DIV_CODE": scr_code,
-        "FID_INPUT_ISCD": "0000",
+        "FID_COND_MRKT_DIV_CODE": "J",
+        "FID_COND_SCR_DIV_CODE": "20171",
+        "FID_INPUT_ISCD": INDEX_CODE[market],
         # [2026-07-17] auto_trading.py의 실거래 랭킹 기준(거래금액순)과 맞춤 —
         # 여기 워치리스트가 실거래 후보와 다른 기준을 쓰면 백테스트 비교가 어긋남.
         "FID_DIV_CLS_CODE": "0", "FID_BLNG_CLS_CODE": "3",
@@ -133,10 +138,11 @@ def get_volume_rank(token, market="J"):
 
 
 def get_daily_ohlcv(token, code, market="J"):
+    # [2026-07-31] 같은 버그 계열 — market="Q"면 항상 빈 결과라 "J" 고정.
     today = datetime.now(KST).strftime('%Y%m%d')
     start = (datetime.now(KST) - timedelta(days=280)).strftime('%Y%m%d')
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice", {
-        "FID_COND_MRKT_DIV_CODE": market,
+        "FID_COND_MRKT_DIV_CODE": "J",
         "FID_INPUT_ISCD": code,
         "FID_INPUT_DATE_1": start,
         "FID_INPUT_DATE_2": today,
@@ -154,10 +160,11 @@ def get_daily_ohlcv(token, code, market="J"):
 
 
 def get_minute_ohlcv_raw(token, code, market="J"):
-    """현재 시각 기준 최근 1분봉(최대 30개, 최신이 index 0)을 원본 필드 그대로 반환."""
+    """현재 시각 기준 최근 1분봉(최대 30개, 최신이 index 0)을 원본 필드 그대로 반환.
+    [2026-07-31] 같은 버그 계열 — "J" 고정."""
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice", {
         "FID_ETC_CLS_CODE": "",
-        "FID_COND_MRKT_DIV_CODE": market,
+        "FID_COND_MRKT_DIV_CODE": "J",
         "FID_INPUT_ISCD": code,
         "FID_INPUT_HOUR_1": datetime.now(KST).strftime('%H%M%S'),
         "FID_PW_DATA_INCU_YN": "Y",

@@ -119,11 +119,18 @@ def kis_get(token, path, params, tr_id, retries=3):
     return {}
 
 
+INDEX_CODE = {"J": "0001", "Q": "1001"}  # 코스피종합/코스닥종합 지수코드 (거래량순위 조회용)
+
+
 def get_volume_rank(token, market="J"):
-    scr_code = "20172" if market == "Q" else "20171"
+    # [2026-07-31] auto_trading.py의 2026-07-20 수정과 동일 적용 — 이 API는
+    # FID_COND_MRKT_DIV_CODE="J"/FID_COND_SCR_DIV_CODE="20171" 고정만 유효하고,
+    # 코스피/코스닥 구분은 FID_INPUT_ISCD(업종코드)로 해야 함(20172는 존재하지 않는
+    # 값이라 이전엔 코스닥 조회가 항상 빈 배열이었음 — shadow_scan.py엔 이 수정이
+    # 안 옮겨져 있었던 걸 뒤늦게 발견).
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/volume-rank", {
-        "FID_COND_MRKT_DIV_CODE": market, "FID_COND_SCR_DIV_CODE": scr_code,
-        "FID_INPUT_ISCD": "0000", "FID_DIV_CLS_CODE": "0", "FID_BLNG_CLS_CODE": "0",
+        "FID_COND_MRKT_DIV_CODE": "J", "FID_COND_SCR_DIV_CODE": "20171",
+        "FID_INPUT_ISCD": INDEX_CODE[market], "FID_DIV_CLS_CODE": "0", "FID_BLNG_CLS_CODE": "0",
         "FID_TRGT_CLS_CODE": "111111111", "FID_TRGT_EXLS_CLS_CODE": "000000",
         "FID_INPUT_PRICE_1": "", "FID_INPUT_PRICE_2": "",
         "FID_VOL_CNT": "", "FID_INPUT_DATE_1": ""
@@ -132,10 +139,13 @@ def get_volume_rank(token, market="J"):
 
 
 def get_daily_ohlcv(token, code, market="J"):
+    # [2026-07-31] inquire-daily-itemchartprice는 FID_COND_MRKT_DIV_CODE="Q"를 주면
+    # 코스닥 종목이어도 항상 빈 결과 — auto_trading.py와 동일하게 "J" 고정으로 수정
+    # (market 인자는 호출부 호환용으로만 남김).
     today = datetime.now(KST).strftime('%Y%m%d')
     start = (datetime.now(KST) - timedelta(days=250)).strftime('%Y%m%d')
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice", {
-        "FID_COND_MRKT_DIV_CODE": market, "FID_INPUT_ISCD": code,
+        "FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code,
         "FID_INPUT_DATE_1": start, "FID_INPUT_DATE_2": today,
         "FID_PERIOD_DIV_CODE": "D", "FID_ORG_ADJ_PRC": "0",
     }, "FHKST03010100")
@@ -150,8 +160,9 @@ def get_daily_ohlcv(token, code, market="J"):
 
 
 def get_current_price(token, code, market="J"):
+    # [2026-07-31] inquire-price도 같은 버그 — "J" 고정.
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-price", {
-        "FID_COND_MRKT_DIV_CODE": market, "FID_INPUT_ISCD": code
+        "FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code
     }, "FHKST01010100")
     o = data.get('output', {})
     return {
@@ -169,9 +180,10 @@ def get_current_price(token, code, market="J"):
 
 
 def get_recent_ticks(token, code, market="J"):
-    """체결강도 근사치 계산용 — 최근 체결틱(최신이 index 0)."""
+    """체결강도 근사치 계산용 — 최근 체결틱(최신이 index 0).
+    [2026-07-31] 같은 버그 계열 — "J" 고정."""
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-ccnl", {
-        "FID_COND_MRKT_DIV_CODE": market, "FID_INPUT_ISCD": code
+        "FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code
     }, "FHKST01010300")
     return data.get('output', [])
 
@@ -344,10 +356,11 @@ def scan_shadow_a(token, stocks, kospi_set):
 # 살짝 하회했다가 회복)을 결합 — 눌림목(A/B)과 달리 1분봉 패턴이라 일봉이 아닌
 # 실시간 1분봉을 직접 조회해서 판정.
 def get_minute_bars_raw(token, code, market="J"):
-    """현재 시각 기준 최근 1분봉(최대 30개, 최신이 index 0) 원본 반환."""
+    """현재 시각 기준 최근 1분봉(최대 30개, 최신이 index 0) 원본 반환.
+    [2026-07-31] 같은 버그 계열 — "J" 고정."""
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice", {
         "FID_ETC_CLS_CODE": "",
-        "FID_COND_MRKT_DIV_CODE": market,
+        "FID_COND_MRKT_DIV_CODE": "J",
         "FID_INPUT_ISCD": code,
         "FID_INPUT_HOUR_1": datetime.now(KST).strftime('%H%M%S'),
         "FID_PW_DATA_INCU_YN": "Y",

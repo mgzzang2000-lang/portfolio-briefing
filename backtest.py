@@ -79,12 +79,16 @@ def kis_get(token, path, params, tr_id, retries=3):
                 time.sleep(2)
     return {}
 # -- 데이터 수집 --
+INDEX_CODE = {"J": "0001", "Q": "1001"}  # 코스피종합/코스닥종합 지수코드 (거래량순위 조회용)
+
+
 def get_volume_rank(token, market="J"):
-    scr_code = "20172" if market == "Q" else "20171"
+    # [2026-07-31] auto_trading.py의 2026-07-20 수정과 동일 적용 — FID_COND_MRKT_DIV_CODE=
+    # "J"/FID_COND_SCR_DIV_CODE="20171" 고정만 유효, 코스피/코스닥 구분은 FID_INPUT_ISCD로.
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/volume-rank", {
-        "FID_COND_MRKT_DIV_CODE": market,
-        "FID_COND_SCR_DIV_CODE": scr_code,
-        "FID_INPUT_ISCD": "0000",
+        "FID_COND_MRKT_DIV_CODE": "J",
+        "FID_COND_SCR_DIV_CODE": "20171",
+        "FID_INPUT_ISCD": INDEX_CODE[market],
         "FID_DIV_CLS_CODE": "0", "FID_BLNG_CLS_CODE": "0",
         "FID_TRGT_CLS_CODE": "111111111",
         "FID_TRGT_EXLS_CLS_CODE": "000000",
@@ -93,9 +97,10 @@ def get_volume_rank(token, market="J"):
     }, "FHPST01710000")
     return [x['mksc_shrn_iscd'] for x in data.get('output', [])[:100]]
 def get_daily_raw(token, code, market="J"):
-    """일봉 원시 데이터 반환 (최신순). FHKST03010100 날짜범위 API 사용. KOSDAQ 폴백 포함."""
+    """일봉 원시 데이터 반환 (최신순). FHKST03010100 날짜범위 API 사용.
+    [2026-07-31] market="Q"면 항상 빈 결과(같은 버그 계열) — "J" 고정, 폴백 제거."""
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice", {
-        "FID_COND_MRKT_DIV_CODE": market,
+        "FID_COND_MRKT_DIV_CODE": "J",
         "FID_INPUT_ISCD": code,
         "FID_INPUT_DATE_1": DATA_START,
         "FID_INPUT_DATE_2": BACKTEST_END,
@@ -103,8 +108,6 @@ def get_daily_raw(token, code, market="J"):
         "FID_ORG_ADJ_PRC": "0",
     }, "FHKST03010100")
     rows = data.get('output2', [])
-    if not rows and market == "J":
-        return get_daily_raw(token, code, market="Q")
     return rows
 # -- 지표 계산 --
 def calc_ma(closes, period):
