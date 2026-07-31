@@ -20,15 +20,30 @@
    보류하고, 3개 캔들 구조로 숫자 기준이 딱 떨어지는 FVG만 우선 구현. 시가돌파형
    (A)과 달리 일봉이 아니라 1분봉을 직접 조회해서 판정(`find_fvg_with_sweep`).
 
-둘 다 시가총액 700억원 이상 필터를 공통 적용(기존 실거래 봇엔 없던
+[섀도우 C] "첫 급등 돌파"(2026-07-31 신설) — 눌림목 없이, 최근 10봉 이상 좁게
+   횡보(베이스)하다 그 상단을 거래량 동반해서(베이스 평균 대비 1.5배 이상) 처음
+   돌파하는 순간을 포착. 09:00~11:00 시간대만.
+   [탐색 경위] 실거래 봇이 쓰는 "눌림목 재상승" 패턴을 minute_data 18일치
+   (train 13일/test 5일 분할)로 그리디 다중조건 탐색했더니, train에서는 조건을
+   추가할수록 승률·기대값이 계속 좋아졌지만(최종 55%) 그 규칙을 test에 그대로
+   적용하면 1단계부터 이미 베이스라인보다 나빠짐 — 전형적 과최적화. 그래서 패턴
+   정의 자체를 이 "첫 급등 돌파"로 바꾸고, 조건도 그리디로 쌓지 말고 "각 후보
+   조건 단독으로 train/test 둘 다에서 베이스라인 대비 개선되는지"만 확인하는
+   보수적 방식으로 재탐색. 거래량비율(≥1.5배)과 시간대(09:00~11:00) 둘 다 단독
+   으로 이 기준을 통과했고, 둘을 조합하면 train +0.115R(n=65, 승률46.2%) / test
+   +0.315R(n=27, 승률51.9%) — 이 세션에서 시도한 유일한 "train/test 둘 다 베이스
+   라인보다 개선"된 조합. **다만 표본이 각각 65/27건뿐이라 "검증됐다"고 보기엔
+   이름 — 실거래 승격 전 최소 몇 주는 이 섀도우로 관찰 필요.**
+
+셋 다 시가총액 700억원 이상 필터를 공통 적용(기존 실거래 봇엔 없던
 조건 — 소형주 슬리피지 문제 방지 목적으로 검색식들에 공통으로 있던 조건).
 
 실행: auto-trading.yml의 5분 사이클에 얹혀서 돈다(GH 자체 schedule 트리거가
 그날 아예 발화 안 하는 사고를 이미 한 번 겪었기 때문 — collect_intraday_data.py와
-동일한 이유). shadow_data/A_YYYYMMDD.json, B_YYYYMMDD.json에 사이클별 스냅샷을
-누적 저장. [2026-07-10] collect_intraday_data.py가 이 스캔들을 직접 호출하도록
-통합되면서, 후보로 잡힌 종목의 1분봉도 같이 수집되기 시작함(이전엔 후보만
-기록되고 그 종목의 실제 가격 흐름은 안 쌓이는 공백이 있었음).
+동일한 이유). shadow_data/A_YYYYMMDD.json, B_YYYYMMDD.json, C_YYYYMMDD.json에
+사이클별 스냅샷을 누적 저장. [2026-07-10] collect_intraday_data.py가 이 스캔들을
+직접 호출하도록 통합되면서, 후보로 잡힌 종목의 1분봉도 같이 수집되기 시작함
+(이전엔 후보만 기록되고 그 종목의 실제 가격 흐름은 안 쌓이는 공백이 있었음).
 
 [섀도우 E] 아직 조건식이 아니라 순수 데이터 수집 단계. 사용자가 "프로그램매수
    급증을 급등 초입 신호로 못 쓸까"를 제안했고, 실시간 스냅샷 1회 확인 결과
@@ -44,7 +59,12 @@
 (프로그램매매 데이터 수집) 추가. [2026-07-29] 원래 섀도우A(신고가 기준 눌림목)와
 섀도우D(오프닝레인지 브레이크아웃)는 신설 이후 몇 주 내내 후보가 사실상 0건이라
 사용자 판단으로 폐기, 살아있던 섀도우B/C를 각각 A/B로 승격(과거 데이터 파일도
-동일하게 개명, 옛 A/D 데이터는 삭제).
+동일하게 개명, 옛 A/D 데이터는 삭제). [2026-07-31] 코스닥 종목이 여러 KIS API에서
+FID_COND_MRKT_DIV_CODE="Q" 버그로 통째로 조회 실패하던 것 발견·수정(이 파일의
+get_volume_rank/get_daily_ohlcv/get_current_price/get_recent_ticks/
+get_minute_bars_raw 전부 해당). 같은 날, 실거래 조건식을 검증 없이 새 규칙으로
+바꾸는 건 위험하다고 판단해 실거래는 기존 로직 그대로 유지하고, 새로 탐색한
+"첫 급등 돌파" 가설만 신규 섀도우C로 신설해 먼저 관찰하기로 함.
 """
 import os, json, time
 from datetime import datetime, timezone, timedelta
@@ -447,6 +467,57 @@ def scan_shadow_b(token, stocks, kospi_set):
     return candidates
 
 
+# ── 섀도우 C: "첫 급등 돌파" — 눌림목 없이, 좁은 베이스를 거래량 동반 돌파 ────────
+# [2026-07-31 신설] 파일 상단 [섀도우 C] 설명 참고 — train/test 분리 탐색에서
+# 유일하게 양쪽 다 베이스라인보다 개선된 조합(거래량비율≥1.5배 + 09:00~11:00).
+BASE_BARS = 10
+BREAKOUT_MARGIN_PCT = 0.3   # 베이스 상단 대비 최소 돌파폭
+BREAKOUT_VOL_RATIO_MIN = 1.5  # 돌파봉 거래량 / 베이스 평균거래량
+SHADOW_C_TIME_START = (9, 0)
+SHADOW_C_TIME_END = (11, 0)
+
+
+def scan_shadow_c(token, stocks, kospi_set):
+    now = datetime.now(KST)
+    if not (SHADOW_C_TIME_START <= (now.hour, now.minute) < SHADOW_C_TIME_END):
+        return []
+    candidates = []
+    for code in stocks:
+        try:
+            market = "J" if code in kospi_set else "Q"
+            cur = get_current_price(token, code, market)
+            if cur['price'] == 0 or cur['market_cap'] < MARKET_CAP_MIN:
+                continue
+            if any(kw in cur['name'] for kw in DERIVATIVE_ETF_KEYWORDS):
+                continue
+            if is_derivative_etf(token, code, cur['bstp_name'], cur['mrkt_name']):
+                continue
+            raw = get_minute_bars_raw(token, code, market)  # 최신이 index0
+            if len(raw) < BASE_BARS + 2:
+                continue
+            bars_asc = list(reversed(raw))  # 오래된 -> 최신
+            cur_bar = bars_asc[-1]
+            base = bars_asc[-(BASE_BARS + 1):-1]  # 최신봉 직전 BASE_BARS개
+            base_high = max(float(b['stck_hgpr']) for b in base)
+            base_avg_vol = sum(int(b.get('cntg_vol', 0)) for b in base) / len(base)
+            cur_close = float(cur_bar['stck_prpr'])
+            cur_vol = int(cur_bar.get('cntg_vol', 0))
+            if cur_close < base_high * (1 + BREAKOUT_MARGIN_PCT / 100):
+                continue
+            if not base_avg_vol or cur_vol < base_avg_vol * BREAKOUT_VOL_RATIO_MIN:
+                continue
+            candidates.append({
+                'code': code, 'name': cur['name'], 'price': cur_close,
+                'base_high': base_high,
+                'breakout_vol_ratio': round(cur_vol / base_avg_vol, 2),
+                'market_cap': cur['market_cap'],
+            })
+            time.sleep(0.06)
+        except Exception as e:
+            print(f"  [섀도우C 오류] {code}: {e}")
+    return candidates
+
+
 def append_snapshot(path, candidates):
     if not candidates:
         return
@@ -477,6 +548,10 @@ def main():
     b_candidates = scan_shadow_b(token, stocks, kospi_set)
     append_snapshot(f"{DATA_DIR}/B_{today_str}.json", b_candidates)
     print(f"[섀도우B] 후보 {len(b_candidates)}종목: {[c['name'] for c in b_candidates]}")
+
+    c_candidates = scan_shadow_c(token, stocks, kospi_set)
+    append_snapshot(f"{DATA_DIR}/C_{today_str}.json", c_candidates)
+    print(f"[섀도우C] 후보 {len(c_candidates)}종목: {[c['name'] for c in c_candidates]}")
 
 
 if __name__ == '__main__':

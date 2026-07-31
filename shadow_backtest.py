@@ -215,9 +215,10 @@ def main():
     token = get_kis_token()
     a_trades = run_model('A', '섀도우A (시가돌파형)', token)
     b_trades = run_model('B', '섀도우B (FVG+유동성스윕)', token)
+    c_trades = run_model('C', '섀도우C (첫 급등 돌파)', token)
 
     print(f"\n{'='*60}\n[요약 비교]\n{'='*60}")
-    for label, trades in [('섀도우A', a_trades), ('섀도우B', b_trades)]:
+    for label, trades in [('섀도우A', a_trades), ('섀도우B', b_trades), ('섀도우C', c_trades)]:
         if trades:
             avg = sum(t['pnl_pct'] for t in trades) / len(trades)
             wins = len([t for t in trades if t['pnl_pct'] > 0])
