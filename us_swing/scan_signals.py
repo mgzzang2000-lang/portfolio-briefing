@@ -108,6 +108,26 @@ def is_stage2(closes, highs, lows):
     return aligned and ma_long_rising and above_52w_low and near_52w_high
 
 
+def is_market_healthy(closes, ma_period=MA_LONG_PERIOD):
+    """
+    [2026-08-01 신설] SPY(시장 전체) 건강도 판정 전용 — 개별종목용 is_stage2()와
+    분리. 기존엔 is_stage2()를 SPY에도 그대로 적용했는데, 그 8개 조건(정배열·52주
+    최저가 대비 +30%·52주 최고가 대비 25%이내 등)은 개별 성장주의 "막 급등 시작"을
+    잡기 위한 기준이라 지수처럼 원래 완만하게 움직이는 대상엔 너무 빡빡함 — 실측
+    결과 SPY가 52주 최고가 대비 -2.4%(사실상 신고가권)인데도 "52주 최저가 대비
+    +30% 이상"(실제 +18.6%뿐)을 못 넘어 7/20부터 13거래일 연속 "악화"로 판정,
+    개별 후보가 매일 28~51개씩 나와도 신규매수가 전혀 안 나가고 있었음.
+    Weinstein 방법론 본래의 시장 타이밍 기준(지수가 장기이평선 위 + 그 이평선이
+    상승 중)만 확인 — 개별종목 선별의 정교함은 필요 없고 "국면이 하락(Stage3/4)만
+    아니면 됨"이 목적이라 단순한 기준이 원래 취지에 더 맞음.
+    """
+    ma = calc_ma(closes, ma_period)
+    ma_prev = calc_ma(closes[4:], ma_period)
+    if ma is None or ma_prev is None:
+        return False
+    return closes[0] > ma and ma > ma_prev
+
+
 def main():
     token = get_kis_token()
     excd_cache = load_json(EXCD_CACHE_FILE, {})
@@ -119,15 +139,17 @@ def main():
     spy_closes = spy_ohlcv["closes"]
     excd_cache["SPY"] = spy_excd
 
-    # [2026-07-18 신규] 시장 전체 건강도(레짐) 필터 — Weinstein 방법론의 핵심인
-    # "지수 먼저, 섹터 다음, 개별종목 마지막" 위계 구조에서 지금까지 빠져있던
+    # [2026-07-18 신규, 2026-08-01 수정] 시장 전체 건강도(레짐) 필터 — Weinstein
+    # 방법론의 핵심인 "지수 먼저, 섹터 다음, 개별종목 마지막" 위계 구조에서
     # 최상위 단계. 섹터RS/개별RS/Stage2는 전부 "다른 종목·섹터 대비 상대적으로"
     # 판단할 뿐, SPY 자체가 하락 국면(Stage3/4)일 때도 그 안에서 "그나마 덜 빠지는"
-    # 종목을 신규매수할 위험을 못 막는다. SPY 자체가 Stage2(30주선 위 + 30주선
-    # 상승 중)일 때만 신규매수를 허용 — 매도(추세이탈/하드손절)는 이 필터와 무관하게
-    # 항상 실행됨(trade_execution.py/position_monitor.py 참고).
-    spy_market_healthy = is_stage2(spy_closes, spy_ohlcv["highs"], spy_ohlcv["lows"])
-    print(f"SPY 시장 건강도(Stage2): {'양호 — 신규매수 허용' if spy_market_healthy else '악화 — 이번 사이클 신규매수 보류'}")
+    # 종목을 신규매수할 위험을 못 막는다. 매도(추세이탈/하드손절)는 이 필터와 무관
+    # 하게 항상 실행됨(trade_execution.py/position_monitor.py 참고).
+    # [2026-08-01] 개별종목용 is_stage2() 대신 is_market_healthy() 사용 — 자세한
+    # 이유는 그 함수 docstring 참고(is_stage2를 SPY에 그대로 쓰다가 신고가권인데도
+    # "악화"로 오판해 13거래일 연속 신규매수가 막혀있던 것 발견·수정).
+    spy_market_healthy = is_market_healthy(spy_closes)
+    print(f"SPY 시장 건강도: {'양호 — 신규매수 허용' if spy_market_healthy else '악화 — 이번 사이클 신규매수 보류'}")
 
     universe = get_universe()
     print(f"S&P500 {len(universe)}종목 스캔 시작")
