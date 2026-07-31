@@ -22,9 +22,9 @@
       "entry_date": "20260717",
       "qty": 22,
       "sector": "Real Estate",
-      "current_price": 22.48,
-      "pnl_pct": -0.13,
-      "price_updated_at": "07:06"
+      "current_price": 22.06,
+      "pnl_pct": -2.0,
+      "price_updated_at": "06:45"
     }
   },
   "trade_history": [
@@ -173,9 +173,13 @@
     {
       "date": "07/30",
       "balance": 1336.31
+    },
+    {
+      "date": "07/31",
+      "balance": 1336.31
     }
   ],
-  "total_assets": 1830.87,
+  "total_assets": 1821.63,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -243,8 +247,12 @@
     },
     {
       "date": "07/30",
-      "balance": 1830.87
+      "balance": 1820.31
+    },
+    {
+      "date": "07/31",
+      "balance": 1821.63
     }
   ],
-  "last_updated": "2026-07-30T07:06:18.927594+09:00"
+  "last_updated": "2026-07-31T06:45:32.496032+09:00"
 }
