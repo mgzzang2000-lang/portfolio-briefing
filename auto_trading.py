@@ -401,11 +401,20 @@ def get_volume_rank(token, market="J"):
         print(f"[경고] 거래량 순위 빈 결과 (market={market}): {data}")
     return [item['mksc_shrn_iscd'] for item in output[:100]]
 def get_daily_ohlcv(token, code, market="J"):
-    """일봉 OHLCV — FHKST03010100 날짜범위 API (충분한 데이터 확보)"""
+    """일봉 OHLCV — FHKST03010100 날짜범위 API (충분한 데이터 확보)
+    [2026-07-31] market 인자는 더 이상 실제 조회에 안 쓴다 — 실측 결과 이 TR(일봉 차트조회)은
+    FID_COND_MRKT_DIV_CODE="Q"를 주면 코스닥 종목이든 뭐든 무조건 빈 결과(에러 응답, len=79)를
+    반환하고, "J"는 코스피/코스닥 구분 없이 항상 정상 동작함(get_volume_rank의 FID_COND_MRKT_
+    DIV_CODE 버그와 같은 유형이지만 다른 함수). 기존엔 코스닥 종목을 market="Q"로 호출해서
+    scan_signals()의 일봉필터가 코스닥 종목에서 100% 실패했었음 — 2026-07-02 도입 이후
+    2026-07-19까지는 get_volume_rank의 코스닥 조회 자체가 빈 배열이라 코스닥 코드가 애초에
+    스캔 대상에 안 들어와 이 버그가 안 드러났고, 2026-07-20 그 버그가 고쳐지며 코스닥 종목이
+    스캔 대상에 들어오자마자 이 버그가 코스닥 전체를 조용히 걸러내기 시작함(실거래 빈도 급감
+    시점과 일치, 2026-07-29 세션에서 발견)."""
     today = datetime.now(KST).strftime('%Y%m%d')
     start = (datetime.now(KST) - timedelta(days=500)).strftime('%Y%m%d')
     data = kis_get(token, "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice", {
-        "FID_COND_MRKT_DIV_CODE": market,
+        "FID_COND_MRKT_DIV_CODE": "J",
         "FID_INPUT_ISCD": code,
         "FID_INPUT_DATE_1": start,
         "FID_INPUT_DATE_2": today,
@@ -413,9 +422,6 @@ def get_daily_ohlcv(token, code, market="J"):
         "FID_ORG_ADJ_PRC": "0",
     }, "FHKST03010100")
     output = data.get('output2', [])
-    # KOSPI로 조회했는데 빈 결과면 KOSDAQ으로 재시도
-    if not output and market == "J":
-        return get_daily_ohlcv(token, code, market="Q")
     if len(output) < 42:
         return None
     closes  = [float(x['stck_clpr']) for x in output]
