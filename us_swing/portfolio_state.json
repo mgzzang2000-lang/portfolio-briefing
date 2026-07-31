@@ -1,8 +1,17 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 1337.91,
+  "current_balance": 529.97,
   "_last_raw_cash": 1337.91,
-  "pending_cash_deltas": [],
+  "pending_cash_deltas": [
+    {
+      "date": "2026-08-01",
+      "delta": -499.51
+    },
+    {
+      "date": "2026-08-01",
+      "delta": -308.43
+    }
+  ],
   "positions": {
     "DOC": {
       "stop_price": 20.25,
@@ -16,6 +25,26 @@
       "current_price": 21.865,
       "pnl_pct": -2.87,
       "price_updated_at": "01:00"
+    },
+    "BAX": {
+      "stop_price": 24.33,
+      "tp_price": 34.18,
+      "partial_tp_price": 30.23,
+      "partial_taken": false,
+      "entry_price": 26.29,
+      "entry_date": "20260801",
+      "qty": 19,
+      "sector": "Health Care"
+    },
+    "VLO": {
+      "stop_price": 285.42,
+      "tp_price": 400.96,
+      "partial_tp_price": 354.69,
+      "partial_taken": false,
+      "entry_price": 308.43,
+      "entry_date": "20260801",
+      "qty": 1,
+      "sector": "Energy"
     }
   },
   "trade_history": [
@@ -74,6 +103,22 @@
       "qty": 3,
       "price": 143.64,
       "reason": "하드손절 (기준 145.33)"
+    },
+    {
+      "action": "buy",
+      "date": "2026-08-01 01:15",
+      "symbol": "BAX",
+      "qty": 19,
+      "price": 26.29,
+      "reason": "RS12w=45.4%"
+    },
+    {
+      "action": "buy",
+      "date": "2026-08-01 01:15",
+      "symbol": "VLO",
+      "qty": 1,
+      "price": 308.43,
+      "reason": "RS12w=27.6%"
     }
   ],
   "balance_history": [
@@ -171,10 +216,10 @@
     },
     {
       "date": "08/01",
-      "balance": 1337.91
+      "balance": 529.97
     }
   ],
-  "total_assets": 1818.94,
+  "total_assets": 1818.28,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -250,8 +295,8 @@
     },
     {
       "date": "08/01",
-      "balance": 1818.94
+      "balance": 1818.28
     }
   ],
-  "last_updated": "2026-08-01T01:00:44.716510+09:00"
+  "last_updated": "2026-08-01T01:15:02.802869+09:00"
 }
