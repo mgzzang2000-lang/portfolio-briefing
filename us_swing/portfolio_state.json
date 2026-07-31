@@ -1,17 +1,8 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 1336.31,
-  "_last_raw_cash": 547.88,
-  "pending_cash_deltas": [
-    {
-      "date": "2026-07-29",
-      "delta": 357.51
-    },
-    {
-      "date": "2026-07-30",
-      "delta": 430.91999999999996
-    }
-  ],
+  "current_balance": 1337.91,
+  "_last_raw_cash": 1337.91,
+  "pending_cash_deltas": [],
   "positions": {
     "DOC": {
       "stop_price": 20.25,
@@ -22,9 +13,9 @@
       "entry_date": "20260717",
       "qty": 22,
       "sector": "Real Estate",
-      "current_price": 22.06,
-      "pnl_pct": -2.0,
-      "price_updated_at": "06:45"
+      "current_price": 22.1,
+      "pnl_pct": -1.82,
+      "price_updated_at": "22:01"
     }
   },
   "trade_history": [
@@ -176,10 +167,10 @@
     },
     {
       "date": "07/31",
-      "balance": 1336.31
+      "balance": 1337.91
     }
   ],
-  "total_assets": 1821.63,
+  "total_assets": 1824.11,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -251,8 +242,8 @@
     },
     {
       "date": "07/31",
-      "balance": 1821.63
+      "balance": 1824.11
     }
   ],
-  "last_updated": "2026-07-31T06:45:32.496032+09:00"
+  "last_updated": "2026-07-31T22:01:52.196377+09:00"
 }
