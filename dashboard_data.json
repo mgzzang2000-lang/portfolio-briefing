@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 471310,
+  "current_balance": 468716,
   "trades": [
     {
       "action": "buy",
@@ -506,25 +506,26 @@
       "qty": 3,
       "price": 78800,
       "amount": 236400
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "086520-20260803110330",
+      "date": "08/03 11:48",
+      "stock": "에코프로",
+      "qty": 3,
+      "price": 77500,
+      "avg_price": 78900,
+      "pnl_pct": -1.77,
+      "pnl_amt": -4200,
+      "reason": "손절 (-1.77%)"
     }
   ],
-  "position": {
-    "code": "086520",
-    "name": "086520",
-    "qty": 3,
-    "market": "Q",
-    "avg_price": 78800,
-    "current_price": 79000,
-    "stop_price": 77618,
-    "target_price": 81755,
-    "entry_time": "2026-08-03T11:03:30.664422+09:00",
-    "trailing_activated": false,
-    "trade_id": "086520-20260803110330"
-  },
-  "last_updated": "2026-08-03T11:45:10.745704+09:00",
+  "position": null,
+  "last_updated": "2026-08-03T11:50:41.958805+09:00",
   "daily_loss_guard": {
     "date": "08/03",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
@@ -606,8 +607,8 @@
     },
     {
       "date": "08/03",
-      "balance": 471310
+      "balance": 468716
     }
   ],
-  "position_version": 1
+  "position_version": 2
 }
