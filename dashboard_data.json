@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 473740,
+  "current_balance": 237340,
   "trades": [
     {
       "action": "buy",
@@ -496,10 +496,32 @@
       "pnl_pct": 5.63,
       "pnl_amt": 14000,
       "reason": "익절 (사용자 직접매도, +5.63%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "086520-20260803110330",
+      "date": "08/03 11:03",
+      "code": "086520",
+      "stock": "086520",
+      "qty": 3,
+      "price": 78800,
+      "amount": 236400
     }
   ],
-  "position": null,
-  "last_updated": "2026-08-03T11:02:46.678103+09:00",
+  "position": {
+    "code": "086520",
+    "name": "086520",
+    "qty": 3,
+    "market": "Q",
+    "avg_price": 78800,
+    "current_price": 78800,
+    "stop_price": 77618,
+    "target_price": 81755,
+    "entry_time": "2026-08-03T11:03:30.664422+09:00",
+    "trailing_activated": false,
+    "trade_id": "086520-20260803110330"
+  },
+  "last_updated": "2026-08-03T11:03:30.664788+09:00",
   "daily_loss_guard": {
     "date": "08/03",
     "consecutive_losses": 0,
@@ -584,8 +606,8 @@
     },
     {
       "date": "08/03",
-      "balance": 473740
+      "balance": 237340
     }
   ],
-  "position_version": 0
+  "position_version": 1
 }
