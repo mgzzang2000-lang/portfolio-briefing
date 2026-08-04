@@ -1,7 +1,7 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 1339.81,
-  "_last_raw_cash": 1339.81,
+  "current_balance": 533.88,
+  "_last_raw_cash": 533.88,
   "pending_cash_deltas": [],
   "positions": {
     "DOC": {
@@ -13,9 +13,9 @@
       "entry_date": "20260717",
       "qty": 22,
       "sector": "Real Estate",
-      "current_price": 21.64,
-      "pnl_pct": -3.86,
-      "price_updated_at": "06:45"
+      "current_price": 22.0,
+      "pnl_pct": -2.27,
+      "price_updated_at": "22:01"
     },
     "BAX": {
       "stop_price": 24.33,
@@ -26,9 +26,9 @@
       "entry_date": "20260801",
       "qty": 19,
       "sector": "Health Care",
-      "current_price": 28.1,
-      "pnl_pct": 7.42,
-      "price_updated_at": "06:45"
+      "current_price": 27.81,
+      "pnl_pct": 6.31,
+      "price_updated_at": "22:01"
     },
     "VLO": {
       "stop_price": 285.42,
@@ -39,9 +39,9 @@
       "entry_date": "20260801",
       "qty": 1,
       "sector": "Energy",
-      "current_price": 307.54,
-      "pnl_pct": 0.21,
-      "price_updated_at": "06:45"
+      "current_price": 302.0,
+      "pnl_pct": -1.6,
+      "price_updated_at": "22:01"
     }
   },
   "trade_history": [
@@ -225,10 +225,10 @@
     },
     {
       "date": "08/04",
-      "balance": 1339.81
+      "balance": 533.88
     }
   ],
-  "total_assets": 2657.33,
+  "total_assets": 1848.27,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -316,8 +316,8 @@
     },
     {
       "date": "08/04",
-      "balance": 2657.33
+      "balance": 1848.27
     }
   ],
-  "last_updated": "2026-08-04T06:45:33.003565+09:00"
+  "last_updated": "2026-08-04T22:01:52.515655+09:00"
 }
