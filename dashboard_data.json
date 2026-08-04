@@ -519,9 +519,31 @@
       "pnl_pct": -1.77,
       "pnl_amt": -4200,
       "reason": "손절 (-1.77%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "010170-20260804114016",
+      "date": "08/04 11:40",
+      "code": "010170",
+      "stock": "010170",
+      "qty": 29,
+      "price": 10170,
+      "amount": 294930
     }
   ],
-  "position": null,
+  "position": {
+    "code": "010170",
+    "name": "010170",
+    "qty": 29,
+    "market": "Q",
+    "avg_price": 10170,
+    "current_price": 10080,
+    "stop_price": 10059,
+    "target_price": 10655,
+    "entry_time": "2026-08-04T11:40:16.081628+09:00",
+    "trailing_activated": false,
+    "trade_id": "010170-20260804114016"
+  },
   "last_updated": "2026-08-04T11:43:20.840453+09:00",
   "daily_loss_guard": {
     "date": "08/04",
@@ -614,5 +636,5 @@
       "balance": 464326
     }
   ],
-  "position_version": 2
+  "position_version": 3
 }
