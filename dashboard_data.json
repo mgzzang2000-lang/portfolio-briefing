@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 463971,
+  "current_balance": 463610,
   "trades": [
     {
       "action": "buy",
@@ -565,22 +565,23 @@
       "pnl_pct": 0.51,
       "pnl_amt": 750,
       "reason": "2시간 부분청산 (+0.51%)"
+    },
+    {
+      "action": "sell",
+      "date": "08/05 12:14",
+      "partial": false,
+      "trade_id": "028050-20260805101156",
+      "stock": "028050",
+      "qty": 1,
+      "price": 48950,
+      "avg_price": 48750,
+      "pnl_pct": 0.41,
+      "pnl_amt": 200,
+      "reason": "익절 (복구, +0.41%)"
     }
   ],
-  "position": {
-    "code": "028050",
-    "name": "028050",
-    "qty": 6,
-    "market": "J",
-    "avg_price": 48750,
-    "current_price": 49050,
-    "stop_price": 48995.2,
-    "target_price": 50630,
-    "entry_time": "2026-08-05T10:11:56.069672+09:00",
-    "trailing_activated": false,
-    "trade_id": "028050-20260805101156"
-  },
-  "last_updated": "2026-08-05T12:10:04.158553+09:00",
+  "position": null,
+  "last_updated": "2026-08-05T12:15:12.726710+09:00",
   "daily_loss_guard": {
     "date": "08/05",
     "consecutive_losses": 0,
@@ -673,8 +674,8 @@
     },
     {
       "date": "08/05",
-      "balance": 463971
+      "balance": 463610
     }
   ],
-  "position_version": 5
+  "position_version": 6
 }
