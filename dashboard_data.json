@@ -568,16 +568,42 @@
     },
     {
       "action": "sell",
-      "date": "08/05 12:14",
-      "partial": false,
+      "partial": true,
       "trade_id": "028050-20260805101156",
-      "stock": "028050",
+      "date": "08/05 12:10",
+      "stock": "삼성E&A",
       "qty": 1,
-      "price": 48950,
-      "avg_price": 48750,
+      "price": 49050,
+      "avg_price": 48800,
+      "pnl_pct": 0.51,
+      "pnl_amt": 250,
+      "reason": "2시간 부분청산 (+0.51%)"
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "028050-20260805101156",
+      "date": "08/05 12:10",
+      "stock": "삼성E&A",
+      "qty": 1,
+      "price": 49000,
+      "avg_price": 48800,
       "pnl_pct": 0.41,
       "pnl_amt": 200,
-      "reason": "익절 (복구, +0.41%)"
+      "reason": "2시간 부분청산 (+0.41%)"
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "028050-20260805101156",
+      "date": "08/05 12:14",
+      "stock": "삼성E&A",
+      "qty": 1,
+      "price": 48950,
+      "avg_price": 48800,
+      "pnl_pct": 0.31,
+      "pnl_amt": 150,
+      "reason": "손절 (+0.31%)"
     }
   ],
   "position": null,
