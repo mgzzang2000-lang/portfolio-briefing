@@ -542,9 +542,31 @@
       "pnl_pct": -1.66,
       "pnl_amt": -4930,
       "reason": "손절 (-1.66%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "028050-20260805101156",
+      "date": "08/05 10:11",
+      "code": "028050",
+      "stock": "028050",
+      "qty": 6,
+      "price": 48750,
+      "amount": 292500
     }
   ],
-  "position": null,
+  "position": {
+    "code": "028050",
+    "name": "028050",
+    "qty": 6,
+    "market": "J",
+    "avg_price": 48750,
+    "current_price": 48750,
+    "stop_price": 48068,
+    "target_price": 50630,
+    "entry_time": "2026-08-05T10:11:56.069672+09:00",
+    "trailing_activated": false,
+    "trade_id": "028050-20260805101156"
+  },
   "last_updated": "2026-08-05T10:12:50.221454+09:00",
   "daily_loss_guard": {
     "date": "08/05",
@@ -641,5 +663,5 @@
       "balance": 462784
     }
   ],
-  "position_version": 4
+  "position_version": 5
 }
