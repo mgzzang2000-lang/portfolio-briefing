@@ -13,9 +13,9 @@
       "entry_date": "20260717",
       "qty": 22,
       "sector": "Real Estate",
-      "current_price": 22.11,
-      "pnl_pct": -1.78,
-      "price_updated_at": "22:15"
+      "current_price": 21.995,
+      "pnl_pct": -2.29,
+      "price_updated_at": "22:31"
     },
     "BAX": {
       "stop_price": 24.33,
@@ -26,9 +26,9 @@
       "entry_date": "20260801",
       "qty": 19,
       "sector": "Health Care",
-      "current_price": 28.3884,
-      "pnl_pct": 8.52,
-      "price_updated_at": "22:15"
+      "current_price": 28.03,
+      "pnl_pct": 7.15,
+      "price_updated_at": "22:31"
     },
     "VLO": {
       "stop_price": 285.42,
@@ -39,9 +39,9 @@
       "entry_date": "20260801",
       "qty": 1,
       "sector": "Energy",
-      "current_price": 307.3,
-      "pnl_pct": 0.13,
-      "price_updated_at": "22:15"
+      "current_price": 309.99,
+      "pnl_pct": 1.0,
+      "price_updated_at": "22:31"
     }
   },
   "trade_history": [
@@ -232,7 +232,7 @@
       "balance": 533.88
     }
   ],
-  "total_assets": 1866.98,
+  "total_assets": 1860.33,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -324,8 +324,8 @@
     },
     {
       "date": "08/05",
-      "balance": 1866.98
+      "balance": 1860.33
     }
   ],
-  "last_updated": "2026-08-05T22:15:31.902286+09:00"
+  "last_updated": "2026-08-05T22:31:06.699137+09:00"
 }
