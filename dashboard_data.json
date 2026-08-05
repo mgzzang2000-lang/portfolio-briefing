@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 464884,
+  "current_balance": 463971,
   "trades": [
     {
       "action": "buy",
@@ -552,6 +552,19 @@
       "qty": 6,
       "price": 48750,
       "amount": 292500
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "028050-20260805101156",
+      "date": "08/05 12:10",
+      "stock": "삼성E&A",
+      "qty": 3,
+      "price": 49050,
+      "avg_price": 48800,
+      "pnl_pct": 0.51,
+      "pnl_amt": 750,
+      "reason": "2시간 부분청산 (+0.51%)"
     }
   ],
   "position": {
@@ -560,14 +573,14 @@
     "qty": 6,
     "market": "J",
     "avg_price": 48750,
-    "current_price": 49000,
-    "stop_price": 48068,
+    "current_price": 49050,
+    "stop_price": 48995.2,
     "target_price": 50630,
     "entry_time": "2026-08-05T10:11:56.069672+09:00",
     "trailing_activated": false,
     "trade_id": "028050-20260805101156"
   },
-  "last_updated": "2026-08-05T12:09:22.543627+09:00",
+  "last_updated": "2026-08-05T12:10:04.158553+09:00",
   "daily_loss_guard": {
     "date": "08/05",
     "consecutive_losses": 0,
@@ -660,7 +673,7 @@
     },
     {
       "date": "08/05",
-      "balance": 464884
+      "balance": 463971
     }
   ],
   "position_version": 5
