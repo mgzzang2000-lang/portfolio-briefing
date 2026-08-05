@@ -223,5 +223,30 @@
         "market_cap": 709.0
       }
     ]
+  },
+  {
+    "time": "13:13:24",
+    "candidates": [
+      {
+        "code": "017900",
+        "name": "017900",
+        "price": 7190.0,
+        "gap_low": 7190.0,
+        "gap_high": 7220.0,
+        "stop_price": 7150.0,
+        "target_price": 7260.0,
+        "market_cap": 4166.0
+      },
+      {
+        "code": "0039P0",
+        "name": "0039P0",
+        "price": 7780.0,
+        "gap_low": 7750.0,
+        "gap_high": 7780.0,
+        "stop_price": 7730.0,
+        "target_price": 7810.0,
+        "market_cap": 1463.0
+      }
+    ]
   }
 ]
