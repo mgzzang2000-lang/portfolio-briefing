@@ -38,5 +38,30 @@
         "market_cap": 13530.0
       }
     ]
+  },
+  {
+    "time": "10:06:04",
+    "candidates": [
+      {
+        "code": "403870",
+        "name": "403870",
+        "price": 36850.0,
+        "gap_low": 36600.0,
+        "gap_high": 36850.0,
+        "stop_price": 36400.0,
+        "target_price": 36900.0,
+        "market_cap": 30328.0
+      },
+      {
+        "code": "046970",
+        "name": "046970",
+        "price": 4870.0,
+        "gap_low": 4850.0,
+        "gap_high": 4870.0,
+        "stop_price": 4800.0,
+        "target_price": 4885.0,
+        "market_cap": 2134.0
+      }
+    ]
   }
 ]
