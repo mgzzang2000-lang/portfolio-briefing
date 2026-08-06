@@ -604,9 +604,31 @@
       "pnl_pct": 0.31,
       "pnl_amt": 150,
       "reason": "손절 (+0.31%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "477850-20260806130543",
+      "date": "08/06 13:05",
+      "code": "477850",
+      "stock": "477850",
+      "qty": 9,
+      "price": 31250,
+      "amount": 281250
     }
   ],
-  "position": null,
+  "position": {
+    "code": "477850",
+    "name": "477850",
+    "qty": 9,
+    "market": "Q",
+    "avg_price": 31250,
+    "current_price": 30950,
+    "stop_price": 30732,
+    "target_price": 32370,
+    "entry_time": "2026-08-06T13:05:43.350693+09:00",
+    "trailing_activated": false,
+    "trade_id": "477850-20260806130543"
+  },
   "last_updated": "2026-08-06T13:09:01.895049+09:00",
   "daily_loss_guard": {
     "date": "08/06",
@@ -707,5 +729,5 @@
       "balance": 462230
     }
   ],
-  "position_version": 6
+  "position_version": 7
 }
