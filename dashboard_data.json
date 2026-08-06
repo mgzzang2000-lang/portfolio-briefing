@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 182360,
+  "current_balance": 469080,
   "trades": [
     {
       "action": "buy",
@@ -614,6 +614,19 @@
       "qty": 9,
       "price": 31250,
       "amount": 281250
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "477850-20260806130543",
+      "date": "08/06 13:28",
+      "stock": "마키나락스",
+      "qty": 3,
+      "price": 31850,
+      "avg_price": 31200,
+      "pnl_pct": 2.08,
+      "pnl_amt": 1950,
+      "reason": "+2% 부분익절 (+2.08%)"
     }
   ],
   "position": {
@@ -622,14 +635,14 @@
     "qty": 9,
     "market": "Q",
     "avg_price": 31250,
-    "current_price": 31800,
-    "stop_price": 30732,
+    "current_price": 31850,
+    "stop_price": 31324.8,
     "target_price": 32370,
     "entry_time": "2026-08-06T13:05:43.350693+09:00",
-    "trailing_activated": false,
+    "trailing_activated": true,
     "trade_id": "477850-20260806130543"
   },
-  "last_updated": "2026-08-06T13:28:33.644865+09:00",
+  "last_updated": "2026-08-06T13:28:45.548859+09:00",
   "daily_loss_guard": {
     "date": "08/06",
     "consecutive_losses": 0,
@@ -726,7 +739,7 @@
     },
     {
       "date": "08/06",
-      "balance": 182360
+      "balance": 469080
     }
   ],
   "position_version": 7
