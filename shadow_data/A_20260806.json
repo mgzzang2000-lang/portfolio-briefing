@@ -1526,5 +1526,55 @@
         "market_cap": 1227.0
       }
     ]
+  },
+  {
+    "time": "13:48:26",
+    "candidates": [
+      {
+        "code": "047040",
+        "name": "047040",
+        "price": 16930.0,
+        "open": 16240.0,
+        "gap_from_open_pct": 4.25,
+        "approx_execution_strength": 5313.2,
+        "market_cap": 69567.0
+      },
+      {
+        "code": "004310",
+        "name": "004310",
+        "price": 6530.0,
+        "open": 5870.0,
+        "gap_from_open_pct": 11.24,
+        "approx_execution_strength": 32.8,
+        "market_cap": 2090.0
+      },
+      {
+        "code": "088350",
+        "name": "088350",
+        "price": 4505.0,
+        "open": 4370.0,
+        "gap_from_open_pct": 3.09,
+        "approx_execution_strength": 1295.2,
+        "market_cap": 39127.0
+      },
+      {
+        "code": "153890",
+        "name": "153890",
+        "price": 10130.0,
+        "open": 8540.0,
+        "gap_from_open_pct": 18.62,
+        "approx_execution_strength": 115.8,
+        "market_cap": 1221.0
+      },
+      {
+        "code": "475040",
+        "name": "475040",
+        "price": 3175.0,
+        "open": 3150.0,
+        "gap_from_open_pct": 0.79,
+        "approx_execution_strength": 367.0,
+        "market_cap": 1691.0
+      }
+    ]
   }
 ]
