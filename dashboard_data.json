@@ -614,6 +614,19 @@
       "qty": 9,
       "price": 31250,
       "amount": 281250
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "477850-20260806130543",
+      "date": "08/06 13:28",
+      "stock": "마키나락스",
+      "qty": 3,
+      "price": 31850,
+      "avg_price": 31200,
+      "pnl_pct": 2.08,
+      "pnl_amt": 1950,
+      "reason": "+2% 부분익절 (+2.08%)"
     }
   ],
   "position": {
