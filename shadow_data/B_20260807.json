@@ -23,5 +23,40 @@
         "market_cap": 2452.0
       }
     ]
+  },
+  {
+    "time": "09:56:37",
+    "candidates": [
+      {
+        "code": "006340",
+        "name": "006340",
+        "price": 13920.0,
+        "gap_low": 13880.0,
+        "gap_high": 13940.0,
+        "stop_price": 13800.0,
+        "target_price": 14000.0,
+        "market_cap": 10915.0
+      },
+      {
+        "code": "018880",
+        "name": "018880",
+        "price": 3585.0,
+        "gap_low": 3575.0,
+        "gap_high": 3585.0,
+        "stop_price": 3565.0,
+        "target_price": 3590.0,
+        "market_cap": 36792.0
+      },
+      {
+        "code": "001510",
+        "name": "001510",
+        "price": 2235.0,
+        "gap_low": 2230.0,
+        "gap_high": 2240.0,
+        "stop_price": 2220.0,
+        "target_price": 2240.0,
+        "market_cap": 5169.0
+      }
+    ]
   }
 ]
