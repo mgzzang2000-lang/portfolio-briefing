@@ -653,9 +653,31 @@
       "pnl_pct": 3.84,
       "pnl_amt": 7200,
       "reason": "익절 (복구, +3.84%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "096770-20260807115443",
+      "date": "08/07 11:54",
+      "code": "096770",
+      "stock": "096770",
+      "qty": 2,
+      "price": 115200,
+      "amount": 230400
     }
   ],
-  "position": null,
+  "position": {
+    "code": "096770",
+    "name": "096770",
+    "qty": 2,
+    "market": "J",
+    "avg_price": 115200,
+    "current_price": 115200,
+    "stop_price": 113373,
+    "target_price": 119416,
+    "entry_time": "2026-08-07T11:54:43.241203+09:00",
+    "trailing_activated": false,
+    "trade_id": "096770-20260807115443"
+  },
   "last_updated": "2026-08-07T11:55:12.041176+09:00",
   "daily_loss_guard": {
     "date": "08/07",
@@ -760,5 +782,5 @@
       "balance": 472031
     }
   ],
-  "position_version": 8
+  "position_version": 9
 }
