@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 473231,
+  "current_balance": 472192,
   "trades": [
     {
       "action": "buy",
@@ -663,6 +663,19 @@
       "qty": 2,
       "price": 115200,
       "amount": 230400
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "096770-20260807115443",
+      "date": "08/07 13:52",
+      "stock": "SK이노베이션",
+      "qty": 1,
+      "price": 115400,
+      "avg_price": 115200,
+      "pnl_pct": 0.17,
+      "pnl_amt": 200,
+      "reason": "2시간 부분청산 (+0.17%)"
     }
   ],
   "position": {
@@ -672,13 +685,13 @@
     "market": "J",
     "avg_price": 115200,
     "current_price": 115400,
-    "stop_price": 113373,
+    "stop_price": 115660.8,
     "target_price": 119416,
     "entry_time": "2026-08-07T11:54:43.241203+09:00",
     "trailing_activated": false,
     "trade_id": "096770-20260807115443"
   },
-  "last_updated": "2026-08-07T13:52:17.282347+09:00",
+  "last_updated": "2026-08-07T13:52:45.853457+09:00",
   "daily_loss_guard": {
     "date": "08/07",
     "consecutive_losses": 0,
@@ -779,7 +792,7 @@
     },
     {
       "date": "08/07",
-      "balance": 473231
+      "balance": 472192
     }
   ],
   "position_version": 9
