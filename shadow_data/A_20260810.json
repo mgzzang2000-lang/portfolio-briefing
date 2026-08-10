@@ -192,5 +192,28 @@
         "market_cap": 200885.0
       }
     ]
+  },
+  {
+    "time": "11:06:26",
+    "candidates": [
+      {
+        "code": "093370",
+        "name": "093370",
+        "price": 10260.0,
+        "open": 10000.0,
+        "gap_from_open_pct": 2.6,
+        "approx_execution_strength": 817.7,
+        "market_cap": 11004.0
+      },
+      {
+        "code": "006800",
+        "name": "006800",
+        "price": 35750.0,
+        "open": 34300.0,
+        "gap_from_open_pct": 4.23,
+        "approx_execution_strength": 755.0,
+        "market_cap": 200045.0
+      }
+    ]
   }
 ]
