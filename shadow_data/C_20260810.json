@@ -58,5 +58,34 @@
         "market_cap": 14456.0
       }
     ]
+  },
+  {
+    "time": "10:59:22",
+    "candidates": [
+      {
+        "code": "002990",
+        "name": "002990",
+        "price": 9990.0,
+        "base_high": 9940.0,
+        "breakout_vol_ratio": 3.27,
+        "market_cap": 3722.0
+      },
+      {
+        "code": "162300",
+        "name": "162300",
+        "price": 1855.0,
+        "base_high": 1840.0,
+        "breakout_vol_ratio": 2.84,
+        "market_cap": 769.0
+      },
+      {
+        "code": "314130",
+        "name": "314130",
+        "price": 4050.0,
+        "base_high": 4030.0,
+        "breakout_vol_ratio": 3.13,
+        "market_cap": 2118.0
+      }
+    ]
   }
 ]
