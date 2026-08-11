@@ -702,23 +702,23 @@
     },
     {
       "action": "sell",
-      "date": "08/11 14:23",
       "partial": false,
       "trade_id": "006340-20260811131054",
-      "stock": "006340",
+      "date": "08/11 14:23",
+      "stock": "대원전선",
       "qty": 20,
       "price": 14570,
-      "avg_price": 14760,
-      "pnl_pct": -1.29,
-      "pnl_amt": -3800,
-      "reason": "손절 (복구, -1.29%)"
+      "avg_price": 14810,
+      "pnl_pct": -1.62,
+      "pnl_amt": -4800,
+      "reason": "손절 (-1.62%)"
     }
   ],
   "position": null,
   "last_updated": "2026-08-11T14:25:48.627182+09:00",
   "daily_loss_guard": {
     "date": "08/11",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
