@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 169980,
+  "current_balance": 459819,
   "trades": [
     {
       "action": "buy",
@@ -722,25 +722,26 @@
       "qty": 14,
       "price": 21200,
       "amount": 296800
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "126730-20260812131936",
+      "date": "08/12 13:29",
+      "stock": "코칩",
+      "qty": 14,
+      "price": 20750,
+      "avg_price": 21200,
+      "pnl_pct": -2.12,
+      "pnl_amt": -6300,
+      "reason": "손절 (-2.12%)"
     }
   ],
-  "position": {
-    "code": "126730",
-    "name": "126730",
-    "qty": 14,
-    "market": "Q",
-    "avg_price": 21200,
-    "current_price": 20850,
-    "stop_price": 20779,
-    "target_price": 22252,
-    "entry_time": "2026-08-12T13:19:36.164400+09:00",
-    "trailing_activated": false,
-    "trade_id": "126730-20260812131936"
-  },
-  "last_updated": "2026-08-12T13:28:39.645084+09:00",
+  "position": null,
+  "last_updated": "2026-08-12T13:29:18.851711+09:00",
   "daily_loss_guard": {
     "date": "08/12",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
@@ -850,8 +851,8 @@
     },
     {
       "date": "08/12",
-      "balance": 169980
+      "balance": 459819
     }
   ],
-  "position_version": 13
+  "position_version": 14
 }
