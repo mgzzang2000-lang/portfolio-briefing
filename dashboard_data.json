@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 459819,
+  "current_balance": 175599,
   "trades": [
     {
       "action": "buy",
@@ -735,10 +735,32 @@
       "pnl_pct": -2.12,
       "pnl_amt": -6300,
       "reason": "손절 (-2.12%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "006340-20260812132952",
+      "date": "08/12 13:29",
+      "code": "006340",
+      "stock": "006340",
+      "qty": 18,
+      "price": 15790,
+      "amount": 284220
     }
   ],
-  "position": null,
-  "last_updated": "2026-08-12T13:29:18.851711+09:00",
+  "position": {
+    "code": "006340",
+    "name": "006340",
+    "qty": 18,
+    "market": "J",
+    "avg_price": 15790,
+    "current_price": 15790,
+    "stop_price": 15523,
+    "target_price": 16351,
+    "entry_time": "2026-08-12T13:29:52.954705+09:00",
+    "trailing_activated": false,
+    "trade_id": "006340-20260812132952"
+  },
+  "last_updated": "2026-08-12T13:29:52.954987+09:00",
   "daily_loss_guard": {
     "date": "08/12",
     "consecutive_losses": 1,
@@ -851,8 +873,8 @@
     },
     {
       "date": "08/12",
-      "balance": 459819
+      "balance": 175599
     }
   ],
-  "position_version": 14
+  "position_version": 15
 }
