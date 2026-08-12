@@ -308,5 +308,28 @@
         "market_cap": 11107136.0
       }
     ]
+  },
+  {
+    "time": "13:11:11",
+    "candidates": [
+      {
+        "code": "005930",
+        "name": "005930",
+        "price": 258500.0,
+        "open": 243500.0,
+        "gap_from_open_pct": 6.16,
+        "approx_execution_strength": 300.0,
+        "market_cap": 15112630.0
+      },
+      {
+        "code": "000660",
+        "name": "000660",
+        "price": 1529000.0,
+        "open": 1456000.0,
+        "gap_from_open_pct": 5.01,
+        "approx_execution_strength": 12.5,
+        "market_cap": 11169228.0
+      }
+    ]
   }
 ]
