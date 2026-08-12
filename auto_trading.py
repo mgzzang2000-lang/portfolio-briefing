@@ -326,6 +326,15 @@ def log_sell(dash, name, qty, avg_price, sell_price, pnl_pct, pnl_amt, reason, n
         'avg_price': int(avg_price), 'pnl_pct': round(pnl_pct, 2),
         'pnl_amt': int(pnl_amt), 'reason': reason
     })
+    # [2026-08-12] 방금 판 종목코드/시각을 남겨둔다 — KIS 잔고조회가 매도 직후
+    # 몇 분간 체결 전 수량을 그대로 돌려주는 정산 지연 때문에, attempt_entry_scan의
+    # "모르는 보유종목" 체크가 방금 자기가 판 포지션을 정체불명 종목으로 오인해
+    # 신규매수를 막고 카톡 경고를 반복 발송한 사고(006340, 2026-08-12,
+    # 15:20~15:30 10분간 카톡 27회 스팸) 재발 방지용.
+    sold_code = (dash.get('position') or {}).get('code')
+    if sold_code:
+        dash['last_sold_code'] = sold_code
+        dash['last_sold_at'] = datetime.now(KST).isoformat()
     dash['position'] = None
     dash['position_version'] = dash.get('position_version', 0) + 1
     dash['current_balance'] = int(new_cash)
@@ -1131,12 +1140,36 @@ def attempt_entry_scan(kis_token, kakao_token, dash, guard, holdings, cash):
     # 003280 부분매도 뒤 포지션을 오판해 279570을 추가 매수하며 한때 두 종목을
     # 동시보유했던 사고(실손실 -16,770원)의 재발 방지용 최종 안전장치.
     stray = [h for h in holdings if int(h.get('hldg_qty', 0)) > 0]
+    # [2026-08-12] KIS 잔고조회는 매도 직후 최대 10분 이상 체결 전 수량을 그대로
+    # 돌려줄 수 있다(정산 지연) — 방금 log_sell()이 남긴 종목코드는 "모르는" 게
+    # 아니라 이미 아는 정산 지연이므로 그레이스 구간(30분) 안에서는 stray에서
+    # 제외한다. 006340 사고(15:20 강제청산 직후 10분간 카톡 27회 스팸) 재발 방지.
+    last_sold_code = dash.get('last_sold_code')
+    last_sold_at = dash.get('last_sold_at')
+    if last_sold_code and last_sold_at:
+        try:
+            elapsed = (datetime.now(KST) - datetime.fromisoformat(last_sold_at)).total_seconds()
+        except ValueError:
+            elapsed = None
+        if elapsed is not None and elapsed <= 1800:
+            settling = [h for h in stray if h.get('pdno') == last_sold_code]
+            if settling:
+                print(f"  [정보] {last_sold_code} 매도 정산 지연으로 잔고에 잔존 "
+                      f"({elapsed:.0f}초 경과) — 정체불명 종목에서 제외")
+            stray = [h for h in stray if h.get('pdno') != last_sold_code]
     if stray:
         names = ', '.join(f"{h.get('pdno')}({h.get('hldg_qty')}주)" for h in stray)
         print(f"[경고] 봇이 모르는 보유종목 존재 — 신규매수 보류: {names}")
-        send_kakao(kakao_token, f"⚠️ 계좌에 정체불명 보유종목 있음: {names}\n신규 매수를 보류합니다 — 확인 필요")
+        # [2026-08-12] 해소될 때까지 매 사이클 반복 발송하던 것을, 같은 종목이
+        # 계속 남아있는 동안은 최초 1회만 알리도록 변경(006340 사고 때 10분간
+        # 카톡 27통 스팸 발생).
+        if dash.get('stray_notified') != names:
+            send_kakao(kakao_token, f"⚠️ 계좌에 정체불명 보유종목 있음: {names}\n신규 매수를 보류합니다 — 확인 필요")
+            dash['stray_notified'] = names
         save_dashboard(dash)
         return
+    if dash.get('stray_notified'):
+        dash['stray_notified'] = None
     if guard.get('consecutive_losses', 0) >= DAILY_LOSS_LIMIT:
         if not guard.get('notified'):
             guard['notified'] = True
