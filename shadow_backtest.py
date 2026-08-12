@@ -155,10 +155,15 @@ def first_candidate_per_day(prefix, ymd):
     return None
 
 
-def simulate_from_minutes(entry_price, bars_after):
-    """포착 시점 '이후' 1분봉만 순서대로 재생 — 정확한 손절/익절 판정 가능."""
-    stop_price = entry_price * (1 - STOP_LOSS_PCT)
-    target_price = entry_price * (1 + TAKE_PROFIT_PCT)
+def simulate_from_minutes(entry_price, bars_after, stop_price=None, target_price=None):
+    """포착 시점 '이후' 1분봉만 순서대로 재생 — 정확한 손절/익절 판정 가능.
+    [2026-08-12] 후보가 자체 stop_price/target_price를 갖고 있으면(섀도우A의 베이스
+    저점 기반 손절+R배수 목표가) 그걸 쓰고, 없으면(다른 섀도우용 하위호환) 기존
+    고정폭(-1.5%/+4%)으로 폴백."""
+    if stop_price is None:
+        stop_price = entry_price * (1 - STOP_LOSS_PCT)
+    if target_price is None:
+        target_price = entry_price * (1 + TAKE_PROFIT_PCT)
     for b in bars_after:
         try:
             hi, lo = float(b['stck_hgpr']), float(b['stck_lwpr'])
@@ -191,7 +196,8 @@ def run_model(prefix, label, token):
         entry_hms = c['snapshot_time'].replace(':', '')
         bars_after = load_minute_bars_after(c['code'], ymd, entry_hms)
         if bars_after:
-            pnl_pct, reason = simulate_from_minutes(entry_price, bars_after)
+            pnl_pct, reason = simulate_from_minutes(
+                entry_price, bars_after, c.get('stop_price'), c.get('target_price'))
         else:
             ohlc = get_day_ohlc(token, c['code'], ymd)
             if ohlc is None:

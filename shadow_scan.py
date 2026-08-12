@@ -24,6 +24,14 @@
    이 섀도우C만 평균 +0.29%(승률 38%, 8거래일)로 유일하게 플러스라 A 자리로
    승격했지만, **표본 8건은 여전히 작아 실거래 승격 전 최소 몇 주는 계속 관찰
    필요**(위 탐색 당시 표본 크기 우려가 아직 해소되지 않음).
+   [2026-08-12 보완] 승격 직후 코드 재점검에서 발견한 4개 허점을 같은 날 보완:
+   ①5분 주기 스캔이 그 사이 지나간 봉을 놓치던 구조적 커버리지 공백(RECHECK_BARS
+   도입) ②VI(변동성완화장치) 필터 부재(실거래봇 7/13 사고와 동일 패턴인데 무방비
+   였음, get_current_price가 이미 갖고 있던 vi_cls_code 활용) ③시가대비 상한 없음
+   (실거래봇의 MAX_EXTENSION_FROM_OPEN_PCT와 동일 원칙 도입) ④손절/목표가가
+   종목 구조와 무관한 고정값(-1.5%/+4%)이었던 것을 베이스 저점 기반 손절+R배수
+   목표가(TARGET_R_MULTIPLE=2.5, 실거래봇과 동일)로 교체. 후보 여럿일 때 스캔
+   순서가 아닌 돌파강도(거래량비율) 순으로 정렬하도록도 변경.
 
 시가총액 700억원 이상 필터 적용(기존 실거래 봇엔 없던 조건 — 소형주 슬리피지
 문제 방지 목적으로 검색식들에 공통으로 있던 조건).
@@ -274,6 +282,30 @@ BREAKOUT_MARGIN_PCT = 0.3   # 베이스 상단 대비 최소 돌파폭
 BREAKOUT_VOL_RATIO_MIN = 1.5  # 돌파봉 거래량 / 베이스 평균거래량
 SHADOW_A_TIME_START = (9, 0)
 SHADOW_A_TIME_END = (11, 0)
+# [2026-08-12] 성과 점검 후 개선 4건 추가:
+# 1) RECHECK_BARS — 이 스캔은 5분 주기(GH Actions)로만 도는데 기존엔 "가장 최근
+#    1분봉"만 검사해서 그 사이 지나간 나머지 4개 봉의 돌파를 구조적으로 놓치고
+#    있었음. 최근 RECHECK_BARS개 봉을 각각 자기 직전 BASE_BARS개 대비 돌파인지
+#    확인해 그중 가장 이른 시점을 잡는다(5분 주기+스케줄 지연 여유 포함).
+RECHECK_BARS = 6
+# 2) VI(변동성완화장치) 필터 — 실거래봇이 7/13에 겪은 "VI로 얼어붙었다 풀리는
+#    순간의 가짜 급등"에 진입하는 사고와 동일 패턴에 이 섀도우도 무방비였음.
+#    get_current_price가 이미 vi_cls_code를 받아오고 있었는데 그동안 안 쓰고 있었음.
+# 3) MAX_EXTENSION_FROM_OPEN_PCT — 실거래봇이 "이미 많이 오른 상태에서 진입"
+#    문제로 도입한 것과 동일한 시가대비 상한(auto_trading.py 참고). 10봉 베이스만
+#    보면 하루 전체로는 이미 많이 오른 상태를 놓칠 수 있어서 추가.
+MAX_EXTENSION_FROM_OPEN_PCT = 5.0
+# 4) 손절/목표가 — 기존엔 스캔 단계에서 손절/목표가를 아예 계산 안 해서
+#    shadow_backtest.py가 이 종목의 구조와 무관하게 고정값(-1.5%/+4%)을 적용하고
+#    있었음. 베이스 저점을 손절 기준으로, 리스크의 R배수를 목표가로 계산해
+#    실거래봇과 동일한 손익비 산정 방식을 적용(auto_trading.py TARGET_R_MULTIPLE
+#    과 동일값 사용).
+TARGET_R_MULTIPLE = 2.5
+
+
+def _is_vi_frozen(bars):
+    """거래량0 캔들이 섞여있으면 VI로 얼어붙었던 구간으로 간주(실거래봇 check_1min_entry와 동일 원칙)."""
+    return any(int(b.get('cntg_vol', 0) or 0) == 0 for b in bars)
 
 
 def scan_shadow_a(token, stocks, kospi_set):
@@ -285,35 +317,59 @@ def scan_shadow_a(token, stocks, kospi_set):
         try:
             market = "J" if code in kospi_set else "Q"
             cur = get_current_price(token, code, market)
-            if cur['price'] == 0 or cur['market_cap'] < MARKET_CAP_MIN:
+            if cur['price'] == 0 or cur['open'] == 0 or cur['market_cap'] < MARKET_CAP_MIN:
                 continue
             if any(kw in cur['name'] for kw in DERIVATIVE_ETF_KEYWORDS):
                 continue
             if is_derivative_etf(token, code, cur['bstp_name'], cur['mrkt_name']):
                 continue
+            if cur['vi_cls_code'] != 'N' or cur['ovtm_vi_cls_code'] != 'N':
+                continue  # 지금 이 순간 VI 발동 중
             raw = get_minute_bars_raw(token, code, market)  # 최신이 index0
             if len(raw) < BASE_BARS + 2:
                 continue
             bars_asc = list(reversed(raw))  # 오래된 -> 최신
-            cur_bar = bars_asc[-1]
-            base = bars_asc[-(BASE_BARS + 1):-1]  # 최신봉 직전 BASE_BARS개
-            base_high = max(float(b['stck_hgpr']) for b in base)
-            base_avg_vol = sum(int(b.get('cntg_vol', 0)) for b in base) / len(base)
-            cur_close = float(cur_bar['stck_prpr'])
-            cur_vol = int(cur_bar.get('cntg_vol', 0))
-            if cur_close < base_high * (1 + BREAKOUT_MARGIN_PCT / 100):
+
+            found = None
+            start_i = max(BASE_BARS, len(bars_asc) - RECHECK_BARS)
+            for i in range(start_i, len(bars_asc)):
+                cur_bar = bars_asc[i]
+                base = bars_asc[i - BASE_BARS:i]
+                base_high = max(float(b['stck_hgpr']) for b in base)
+                base_low = min(float(b['stck_lwpr']) for b in base)
+                base_avg_vol = sum(int(b.get('cntg_vol', 0)) for b in base) / len(base)
+                cur_close = float(cur_bar['stck_prpr'])
+                cur_vol = int(cur_bar.get('cntg_vol', 0))
+                if cur_close < base_high * (1 + BREAKOUT_MARGIN_PCT / 100):
+                    continue
+                if not base_avg_vol or cur_vol < base_avg_vol * BREAKOUT_VOL_RATIO_MIN:
+                    continue
+                if _is_vi_frozen(base + [cur_bar]):
+                    continue
+                ext_from_open = (cur_close - cur['open']) / cur['open'] * 100
+                if ext_from_open > MAX_EXTENSION_FROM_OPEN_PCT:
+                    continue
+                found = (cur_close, base_high, base_low, cur_vol / base_avg_vol)
+                break  # 재확인 구간 중 가장 이른 돌파봉만 채택
+            if found is None:
                 continue
-            if not base_avg_vol or cur_vol < base_avg_vol * BREAKOUT_VOL_RATIO_MIN:
-                continue
+            cur_close, base_high, base_low, vol_ratio = found
+            stop_price = base_low * 0.999  # 베이스 저점(자연스러운 무효화 기준) 살짝 아래
+            risk = cur_close - stop_price
+            target_price = cur_close + risk * TARGET_R_MULTIPLE if risk > 0 else None
             candidates.append({
                 'code': code, 'name': cur['name'], 'price': cur_close,
-                'base_high': base_high,
-                'breakout_vol_ratio': round(cur_vol / base_avg_vol, 2),
+                'base_high': base_high, 'stop_price': round(stop_price, 1),
+                'target_price': round(target_price, 1) if target_price else None,
+                'breakout_vol_ratio': round(vol_ratio, 2),
                 'market_cap': cur['market_cap'],
             })
             time.sleep(0.06)
         except Exception as e:
             print(f"  [섀도우A 오류] {code}: {e}")
+    # [2026-08-12] 후보가 여럿이면 돌파강도(거래량비율) 큰 순으로 — 기존엔 스캔
+    # 순서(코스피→코스닥 거래량순위)상 먼저 걸린 종목이 우연히 채택됐음.
+    candidates.sort(key=lambda c: c['breakout_vol_ratio'], reverse=True)
     return candidates
 
 
