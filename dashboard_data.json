@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 466780,
+  "current_balance": 169980,
   "trades": [
     {
       "action": "buy",
@@ -712,10 +712,32 @@
       "pnl_pct": -1.62,
       "pnl_amt": -4800,
       "reason": "손절 (-1.62%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "126730-20260812131936",
+      "date": "08/12 13:19",
+      "code": "126730",
+      "stock": "126730",
+      "qty": 14,
+      "price": 21200,
+      "amount": 296800
     }
   ],
-  "position": null,
-  "last_updated": "2026-08-12T13:18:43.171259+09:00",
+  "position": {
+    "code": "126730",
+    "name": "126730",
+    "qty": 14,
+    "market": "Q",
+    "avg_price": 21200,
+    "current_price": 21200,
+    "stop_price": 20779,
+    "target_price": 22252,
+    "entry_time": "2026-08-12T13:19:36.164400+09:00",
+    "trailing_activated": false,
+    "trade_id": "126730-20260812131936"
+  },
+  "last_updated": "2026-08-12T13:19:36.164712+09:00",
   "daily_loss_guard": {
     "date": "08/12",
     "consecutive_losses": 0,
@@ -828,8 +850,8 @@
     },
     {
       "date": "08/12",
-      "balance": 466780
+      "balance": 169980
     }
   ],
-  "position_version": 12
+  "position_version": 13
 }
