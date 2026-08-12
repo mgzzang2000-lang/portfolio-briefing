@@ -46,6 +46,29 @@
    RSI 문헌상 표준값(14, 과매도 30) 위주로 보수적으로 잡았고, 섀도우A에서 나중에
    발견했던 허점(5분 주기 단일봉만 검사, VI 무방비)은 처음부터 반영해뒀음.
 
+[섀도우 C] "눌림목 분할매수"(2026-08-12 신설) — A/B와 또 다른 성격: 오늘 극초반
+   (09:00~09:05)에 전일종가 대비 3% 이상 강하게 붙은 종목이, 그 고점 대비 -5%
+   눌리면 1차(비중 60%), -7%까지 더 눌리면 2차(비중 40%) 분할매수. 단, 그냥
+   %만 보고 사는 게 아니라 직전 저점 갱신 없이 거래량 실린 양봉 반전이 확인될
+   때만 진입(섀도우B의 반전확인 로직과 동일 원칙 재사용).
+   [설계 근거] minute_data 142건(종목x일)을 직접 집계한 결과, 극초반 고점 대비
+   -7%까지 도달한 종목의 61%가 당일 종가까지도 그보다 더 나쁘게 마감했고, 최종
+   저점은 평균 -14.4%(중앙값 -12.3%)까지 밀렸음 — 즉 "-7% 눌림"은 저가매수
+   기회보다 추세이탈 신호일 확률이 더 높음. 그래서 ①진입에 반드시 반전확인
+   신호를 요구하고 ②손절을 극초반고점 대비 -12%(위 중앙값 근거)로 구조적으로
+   잡고 ③1차 비중을 2차보다 크게 둬서 더 위험한 2차 트랜치의 노출을 제한함.
+   목표가(블렌디드 평단 기준 +3.5%)는 [주의]에 적은 것처럼 스캔 단계가 아니라
+   shadow_backtest.py에서 계산 — 2차가 그 이후 사이클에야 체결될 수 있어
+   스캔 시점엔 최종 평단을 알 수 없기 때문.
+   [우선순위] 한 사이클에 여러 종목이 동시에 신호를 내면 ①1차 트랜치를 2차보다
+   우선(더 얕게 눌린 쪽이 위 통계상 더 안전) ②반전확인 캔들의 거래량배율이
+   큰 순으로 정렬 — 이 순서 자체가 아직 검증 전 가설이라, 실제로 "1순위가
+   2순위보다 잘됐는지"는 표본이 쌓인 뒤 확인 필요.
+   [주의] 아직 백테스트/실전 이력이 전혀 없는 완전 신규 가설. A/B에서 이미
+   확인된 함정(5분 주기 단일봉만 검사 → RECHECK_BARS, VI 무방비)은 처음부터
+   반영해뒀지만, 분할매수 자체가 A/B와 다른 새 리스크(추가매수가 손실을 키움)를
+   가지므로 특히 보수적으로 관찰 필요.
+
 시가총액 700억원 이상 필터 적용(기존 실거래 봇엔 없던 조건 — 소형주 슬리피지
 문제 방지 목적으로 검색식들에 공통으로 있던 조건).
 
@@ -65,6 +88,12 @@
    프로그램매매 시계열 원본만 minute_data와 같은 구조로 shadow_data/E_{code}_
    {date}.json에 쌓는다(collect_intraday_data.py 참고). 나중에 표본이 쌓이면
    그때 실제 급등 발생 시각과 대조해서 유의미한 임계값이 있는지 분석 예정.
+
+[2026-08-12, 같은 날 이어서] 사용자가 실거래 조건식(눌림목) 기반으로 "장 극초반
+고점 대비 얼마나 밀렸다가 얼마나 회복하는지"를 물어와 minute_data 142건을 집계
+(밀림폭/반등폭/재돌파비율을 30분·60분·120분·종가 기준 각각 산출). 이 결과를
+근거로 -5%/-7% 분할매수 아이디어를 구체화하고, 동시신호 우선순위까지 설계해
+신규 섀도우C("눌림목 분할매수")로 코드화 — 자세한 내용은 위 [섀도우 C] 항목 참고.
 
 [2026-07-07] 신설(섀도우A/B). [2026-07-10] 섀도우C(FVG) 추가. [2026-07-15] 섀도우E
 (프로그램매매 데이터 수집) 추가. [2026-07-29] 원래 섀도우A(신고가 기준 눌림목)와
@@ -500,6 +529,149 @@ def scan_shadow_b(token, stocks, kospi_set):
     return candidates
 
 
+# ── 섀도우 C: "눌림목 분할매수" ────────────────────────────────────────
+# [2026-08-12 신설] 파일 상단 [섀도우 C] 설명 참고. 극초반(09:00~09:05) 고점을
+# 하루 동안 기억해둬야 하는데, get_minute_bars_raw는 "호출 시점 기준 최근 30개
+# 봉"만 주므로(과거 조회 불가) 장 시작 직후 캐시해두지 않으면 나중엔 영영 알 수
+# 없다 — shadow_data/C_state_{date}.json에 종목별 극초반고점+트랜치 진행상태를
+# 사이클마다 누적 저장(auto_trading.py의 daily_filter_cache.json과 동일한 이유).
+EARLY_HIGH_WINDOW_END = "090500"   # 극초반 고점 산정 구간(09:00~09:05)
+EARLY_HIGH_MIN_GAIN_PCT = 3.0      # 극초반 고점이 전일종가 대비 이만큼은 올라야
+                                    # "이미 강하게 붙은 종목"만 추적(사용자 원 질문의 전제)
+DIP_TRANCHE1_PCT = -5.0
+DIP_TRANCHE2_PCT = -7.0
+TRANCHE1_WEIGHT, TRANCHE2_WEIGHT = 0.6, 0.4  # 2차(더 위험한 구간)의 비중을 더 작게
+# -12%: minute_data 142건 집계에서 -7% 도달 종목의 최종저점 중앙값이 -12.3%였던
+# 것에 근거한 구조적 손절선(단순 고정%가 아니라 "이 이상은 정상 눌림목이 아니라
+# 추세이탈"로 보는 경계). 익절폭(BLENDED_TARGET_PCT)은 shadow_backtest.py에서
+# 블렌디드 평단이 확정된 뒤 계산하므로 여기서는 정의하지 않음.
+STRUCTURAL_STOP_FROM_HIGH_PCT = -12.0
+
+
+def _load_c_state(today_str):
+    return load_json(f"{DATA_DIR}/C_state_{today_str}.json", {})
+
+
+def _save_c_state(today_str, state):
+    save_json(f"{DATA_DIR}/C_state_{today_str}.json", state)
+
+
+def _update_early_high(state, code, bars_asc, now_hms):
+    """오늘 09:00~09:05 구간이 이미 지났고 그 구간 1분봉을 실제로 확보했으면
+    그 구간 고가를 캐시. 그 구간을 이미 지나쳤는데 데이터가 없으면(장 시작 한참
+    후에야 유니버스에 처음 걸린 종목 — 최근 30봉으로는 09:05 이전을 못 봄)
+    unavailable로 표시해 오늘 하루는 더 이상 재시도하지 않는다."""
+    entry = state.setdefault(code, {
+        'early_high': None, 'unavailable': False,
+        'tranche1_done': False, 'tranche2_done': False,
+    })
+    if entry['early_high'] is not None or entry['unavailable']:
+        return entry
+    if now_hms < EARLY_HIGH_WINDOW_END:
+        return entry  # 아직 극초반 구간이 안 끝남 — 다음 사이클에 재시도
+    if not bars_asc or bars_asc[0]['stck_cntg_hour'] > EARLY_HIGH_WINDOW_END:
+        entry['unavailable'] = True
+        return entry
+    early_bars = [b for b in bars_asc if b['stck_cntg_hour'] <= EARLY_HIGH_WINDOW_END]
+    if early_bars:
+        entry['early_high'] = max(float(b['stck_hgpr']) for b in early_bars)
+    return entry
+
+
+def _reversal_signal(bars_asc, i):
+    """i번째 봉이 직전 3봉 저점 대비 신저가 갱신 없이 양봉 전환 + 거래량 증가
+    (섀도우B와 동일 원칙 — 순수 %트리거만으로 사는 건 위험하다는 설계 근거 참고).
+    조건 충족 시 거래량배율(우선순위 타이브레이커용)을, 아니면 None을 반환."""
+    cur_bar = bars_asc[i]
+    prev3 = bars_asc[max(0, i - 3):i]
+    if not prev3:
+        return None
+    prev3_low = min(float(b['stck_lwpr']) for b in prev3)
+    if float(cur_bar['stck_lwpr']) < prev3_low:
+        return None  # 신저가 갱신 중 — 아직 반전 확인 안 됨
+    if not (float(cur_bar['stck_prpr']) > float(cur_bar['stck_oprc'])):
+        return None  # 반전봉은 양봉이어야 함
+    prev3_avg_vol = sum(int(b.get('cntg_vol', 0)) for b in prev3) / len(prev3)
+    cur_vol = int(cur_bar.get('cntg_vol', 0))
+    if not prev3_avg_vol or cur_vol < prev3_avg_vol * REVERSAL_VOL_RATIO_MIN:
+        return None  # 반등에 거래가 안 붙음
+    return round(cur_vol / prev3_avg_vol, 2)
+
+
+def scan_shadow_c(token, stocks, kospi_set, today_str):
+    state = _load_c_state(today_str)
+    now_hms = datetime.now(KST).strftime('%H%M%S')
+    candidates = []
+    for code in stocks:
+        try:
+            market = "J" if code in kospi_set else "Q"
+            cur = get_current_price(token, code, market)
+            if cur['price'] == 0 or cur['market_cap'] < MARKET_CAP_MIN or not cur['prev_close']:
+                continue
+            if any(kw in cur['name'] for kw in DERIVATIVE_ETF_KEYWORDS):
+                continue
+            if is_derivative_etf(token, code, cur['bstp_name'], cur['mrkt_name']):
+                continue
+            if cur['vi_cls_code'] != 'N' or cur['ovtm_vi_cls_code'] != 'N':
+                continue
+            raw = get_minute_bars_raw(token, code, market)
+            if not raw:
+                continue
+            bars_asc = list(reversed(raw))
+
+            entry = _update_early_high(state, code, bars_asc, now_hms)
+            if entry['early_high'] is None or entry['tranche2_done']:
+                continue  # 극초반고점 미확정/불가 또는 오늘 두 트랜치 모두 소진
+            gain_pct = (entry['early_high'] - cur['prev_close']) / cur['prev_close'] * 100
+            if gain_pct < EARLY_HIGH_MIN_GAIN_PCT:
+                continue  # "강하게 붙은 종목"만 추적한다는 전제 미달
+
+            found = None
+            start_i = max(0, len(bars_asc) - RECHECK_BARS)
+            for i in range(start_i, len(bars_asc)):
+                cur_close = float(bars_asc[i]['stck_prpr'])
+                drop_pct = (cur_close - entry['early_high']) / entry['early_high'] * 100
+                tranche = None
+                if not entry['tranche1_done'] and drop_pct <= DIP_TRANCHE1_PCT:
+                    tranche = 1
+                elif entry['tranche1_done'] and not entry['tranche2_done'] and drop_pct <= DIP_TRANCHE2_PCT:
+                    tranche = 2
+                if tranche is None:
+                    continue
+                vol_ratio = _reversal_signal(bars_asc, i)
+                if vol_ratio is None:
+                    continue
+                if _is_vi_frozen(bars_asc[max(0, i - 3):i + 1]):
+                    continue
+                found = (tranche, cur_close, round(drop_pct, 2), vol_ratio)
+                break  # 재확인 구간 중 가장 이른 트리거만 채택
+            if found is None:
+                continue
+            tranche, cur_close, drop_pct, vol_ratio = found
+            stop_price = entry['early_high'] * (1 + STRUCTURAL_STOP_FROM_HIGH_PCT / 100)
+            candidates.append({
+                'code': code, 'name': cur['name'], 'tranche': tranche,
+                'price': cur_close, 'early_high': entry['early_high'],
+                'drop_pct': drop_pct,
+                'weight': TRANCHE1_WEIGHT if tranche == 1 else TRANCHE2_WEIGHT,
+                'stop_price': round(stop_price, 1),
+                'confirm_vol_ratio': vol_ratio,
+                'market_cap': cur['market_cap'],
+            })
+            if tranche == 1:
+                entry['tranche1_done'] = True
+            else:
+                entry['tranche2_done'] = True
+            time.sleep(0.06)
+        except Exception as e:
+            print(f"  [섀도우C 오류] {code}: {e}")
+    _save_c_state(today_str, state)
+    # [우선순위] 1차(얕은 눌림, 더 안전) > 2차, 같은 트랜치면 반전확인 거래량배율
+    # 큰 순 — 동시신호 시 실제 자금은 1종목만 살 수 있어 사용자와 논의해 정한 규칙.
+    candidates.sort(key=lambda c: (c['tranche'], -c['confirm_vol_ratio']))
+    return candidates
+
+
 def append_snapshot(path, candidates):
     if not candidates:
         return
@@ -526,6 +698,14 @@ def main():
     a_candidates = scan_shadow_a(token, stocks, kospi_set)
     append_snapshot(f"{DATA_DIR}/A_{today_str}.json", a_candidates)
     print(f"[섀도우A] 후보 {len(a_candidates)}종목: {[c['name'] for c in a_candidates]}")
+
+    b_candidates = scan_shadow_b(token, stocks, kospi_set)
+    append_snapshot(f"{DATA_DIR}/B_{today_str}.json", b_candidates)
+    print(f"[섀도우B] 후보 {len(b_candidates)}종목: {[c['name'] for c in b_candidates]}")
+
+    c_candidates = scan_shadow_c(token, stocks, kospi_set, today_str)
+    append_snapshot(f"{DATA_DIR}/C_{today_str}.json", c_candidates)
+    print(f"[섀도우C] 후보 {len(c_candidates)}종목: {[c['name'] for c in c_candidates]}")
 
 
 if __name__ == '__main__':
