@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 463209,
+  "current_balance": 464109,
   "trades": [
     {
       "action": "buy",
@@ -745,25 +745,26 @@
       "qty": 18,
       "price": 15790,
       "amount": 284220
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "006340-20260812132952",
+      "date": "08/12 15:20",
+      "stock": "대원전선",
+      "qty": 18,
+      "price": 16000,
+      "avg_price": 15760,
+      "pnl_pct": 1.52,
+      "pnl_amt": 4320,
+      "reason": "강제청산 (15:20)"
     }
   ],
-  "position": {
-    "code": "006340",
-    "name": "006340",
-    "qty": 18,
-    "market": "J",
-    "avg_price": 15790,
-    "current_price": 15990,
-    "stop_price": 15523,
-    "target_price": 16351,
-    "entry_time": "2026-08-12T13:29:52.954705+09:00",
-    "trailing_activated": false,
-    "trade_id": "006340-20260812132952"
-  },
-  "last_updated": "2026-08-12T15:19:47.198653+09:00",
+  "position": null,
+  "last_updated": "2026-08-12T15:20:14.023454+09:00",
   "daily_loss_guard": {
     "date": "08/12",
-    "consecutive_losses": 1,
+    "consecutive_losses": 0,
     "notified": false
   },
   "balance_history": [
@@ -873,8 +874,8 @@
     },
     {
       "date": "08/12",
-      "balance": 463209
+      "balance": 464109
     }
   ],
-  "position_version": 15
+  "position_version": 16
 }
