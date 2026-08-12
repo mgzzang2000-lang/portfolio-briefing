@@ -33,15 +33,28 @@
    목표가(TARGET_R_MULTIPLE=2.5, 실거래봇과 동일)로 교체. 후보 여럿일 때 스캔
    순서가 아닌 돌파강도(거래량비율) 순으로 정렬하도록도 변경.
 
+[섀도우 B] "낙폭과대 반등"(2026-08-12 신설) — A와 정반대 성격의 평균회귀형.
+   최근 15봉 고점 대비 2% 이상 빠진 뒤, 그 구간에 RSI(14)가 30 이하(과매도)를
+   찍었다가 최저치 대비 3 이상 반등하고, 직전 3봉 대비 거래량 1.2배 이상 실린
+   양봉으로(신저가 갱신 없이) 반전을 확인하는 시점을 포착.
+   [신설 배경] 지금까지 나온 조건식(실거래 눌림목, 폐기된 시가돌파형/FVG,
+   섀도우A 첫급등돌파)이 전부 "오르는 걸 사는" 추세추종 성격이라 성격이 다른
+   비교군이 전혀 없었음(사용자 지적). 프로그램매매(수급) 기반도 검토했으나
+   섀도우E 데이터 19일치를 원시증분/10분누적 두 방식으로 분석한 결과 상관계수
+   r=0.03~0.04 수준으로 노이즈에 가까워 조건식화를 보류하고, 대신 이 평균회귀
+   패턴을 채택. **아직 백테스트/실전 이력이 전혀 없는 완전 신규 가설** — 파라미터는
+   RSI 문헌상 표준값(14, 과매도 30) 위주로 보수적으로 잡았고, 섀도우A에서 나중에
+   발견했던 허점(5분 주기 단일봉만 검사, VI 무방비)은 처음부터 반영해뒀음.
+
 시가총액 700억원 이상 필터 적용(기존 실거래 봇엔 없던 조건 — 소형주 슬리피지
 문제 방지 목적으로 검색식들에 공통으로 있던 조건).
 
 실행: auto-trading.yml의 5분 사이클에 얹혀서 돈다(GH 자체 schedule 트리거가
 그날 아예 발화 안 하는 사고를 이미 한 번 겪었기 때문 — collect_intraday_data.py와
-동일한 이유). shadow_data/A_YYYYMMDD.json에 사이클별 스냅샷을 누적 저장.
-[2026-07-10] collect_intraday_data.py가 이 스캔들을 직접 호출하도록 통합되면서,
-후보로 잡힌 종목의 1분봉도 같이 수집되기 시작함(이전엔 후보만 기록되고 그
-종목의 실제 가격 흐름은 안 쌓이는 공백이 있었음).
+동일한 이유). shadow_data/A_YYYYMMDD.json, B_YYYYMMDD.json에 사이클별 스냅샷을
+누적 저장. [2026-07-10] collect_intraday_data.py가 이 스캔들을 직접 호출하도록
+통합되면서, 후보로 잡힌 종목의 1분봉도 같이 수집되기 시작함(이전엔 후보만
+기록되고 그 종목의 실제 가격 흐름은 안 쌓이는 공백이 있었음).
 
 [섀도우 E] 아직 조건식이 아니라 순수 데이터 수집 단계. 사용자가 "프로그램매수
    급증을 급등 초입 신호로 못 쓸까"를 제안했고, 실시간 스냅샷 1회 확인 결과
@@ -66,7 +79,9 @@ get_volume_rank/get_current_price/get_minute_bars_raw 전부 해당). 같은 날
 (둘 다 평균손익 마이너스, 실거래 승률에도 못 미침)으로 폐기하고 옛 섀도우C
 ("첫 급등 돌파")를 A로 승격 — 자세한 수치는 위 [섀도우 A] 항목 참고. 관련
 헬퍼(get_daily_ohlcv/get_recent_ticks/approx_execution_strength/
-find_fvg_with_sweep)도 옛 A/B 전용이라 함께 삭제.
+find_fvg_with_sweep)도 옛 A/B 전용이라 함께 삭제. 같은 날, A 보완(위 [섀도우 A]
+[2026-08-12 보완] 참고)에 이어 A와 성격이 다른 신규 섀도우B("낙폭과대 반등",
+평균회귀) 신설 — 자세한 설계 배경은 위 [섀도우 B] 항목 참고.
 """
 import os, json, time
 from datetime import datetime, timezone, timedelta
@@ -370,6 +385,118 @@ def scan_shadow_a(token, stocks, kospi_set):
     # [2026-08-12] 후보가 여럿이면 돌파강도(거래량비율) 큰 순으로 — 기존엔 스캔
     # 순서(코스피→코스닥 거래량순위)상 먼저 걸린 종목이 우연히 채택됐음.
     candidates.sort(key=lambda c: c['breakout_vol_ratio'], reverse=True)
+    return candidates
+
+
+# ── 섀도우 B: "낙폭과대 반등"(평균회귀) ────────────────────────────────
+# [2026-08-12 신설] 지금까지 만든 모든 조건식(실거래 눌림목, 폐기된 시가돌파형/
+# FVG, 섀도우A 첫급등돌파)이 전부 "추세추종"(오르는 걸 사는) 성격이라, 성격이
+# 완전히 다른 비교군이 없었음(사용자 지적). 이건 반대로 "단기간 많이 빠진 뒤
+# 매도세가 진정되고 반등 확인되는 지점"을 사는 평균회귀형. 프로그램매매(수급)
+# 기반도 검토했으나(섀도우E 데이터 19일치 재분석) 상관계수 r=0.03~0.04 수준으로
+# 노이즈에 가까워 조건식화 보류 — 대신 가격/거래량 구조가 명확한 이 패턴을 채택.
+# [주의] 아직 백테스트/관찰 이력이 전혀 없는 완전 신규 가설이라, 파라미터는
+# RSI 문헌상 표준값(14, 30) 위주로 보수적으로 잡음 — 데이터 쌓이기 전엔 손대지 않음.
+# 섀도우A에서 발견됐던 허점(5분 주기 단일봉만 검사, VI 무방비)은 처음부터 반영.
+DROP_LOOKBACK_BARS = 15
+MIN_DROP_PCT = 2.0        # 최근 15봉 고점 대비 최소 하락폭
+RSI_PERIOD = 14
+RSI_OVERSOLD = 30         # 이 아래로 한 번은 내려갔어야 "과매도"로 인정
+RSI_RECOVER_MARGIN = 3    # 과매도 최저치 대비 이만큼은 반등해야 "돌아서는 중"으로 인정
+REVERSAL_VOL_RATIO_MIN = 1.2  # 반전봉 거래량 / 직전 3봉 평균거래량
+
+
+def calc_rsi_series(closes_asc, period=RSI_PERIOD):
+    """closes_asc(오래된->최신) 각 시점의 RSI를 순서대로 반환(앞쪽 period개는 계산 불가라 None)."""
+    if len(closes_asc) < period + 1:
+        return [None] * len(closes_asc)
+    diffs = [closes_asc[i] - closes_asc[i-1] for i in range(1, len(closes_asc))]
+    out = [None] * (period)  # 인덱스 0..period-1은 계산 불가 (diffs[0]이 closes_asc[1] 시점)
+    for end in range(period, len(diffs) + 1):
+        window = diffs[end - period:end]
+        gains = [max(d, 0) for d in window]
+        losses = [max(-d, 0) for d in window]
+        avg_gain, avg_loss = sum(gains) / period, sum(losses) / period
+        rsi = 100.0 if avg_loss == 0 else 100 - (100 / (1 + avg_gain / avg_loss))
+        out.append(rsi)
+    return out  # len(out) == len(closes_asc)
+
+
+def scan_shadow_b(token, stocks, kospi_set):
+    candidates = []
+    for code in stocks:
+        try:
+            market = "J" if code in kospi_set else "Q"
+            cur = get_current_price(token, code, market)
+            if cur['price'] == 0 or cur['market_cap'] < MARKET_CAP_MIN:
+                continue
+            if any(kw in cur['name'] for kw in DERIVATIVE_ETF_KEYWORDS):
+                continue
+            if is_derivative_etf(token, code, cur['bstp_name'], cur['mrkt_name']):
+                continue
+            if cur['vi_cls_code'] != 'N' or cur['ovtm_vi_cls_code'] != 'N':
+                continue
+            raw = get_minute_bars_raw(token, code, market)
+            # [주의] get_minute_bars_raw는 최대 30개 봉만 준다 — DROP_LOOKBACK_BARS(15)+
+            # RSI_PERIOD(14)를 그냥 더하면 31이 되어 조건을 영원히 못 만족하는 실수를
+            # 할 뻔했음. 실제 필요한 건 인덱싱 가능한 최소치(둘 중 큰 값)+여유분뿐.
+            if len(raw) < max(DROP_LOOKBACK_BARS, RSI_PERIOD) + 2:
+                continue
+            bars_asc = list(reversed(raw))
+            closes_asc = [float(b['stck_prpr']) for b in bars_asc]
+            rsi_series = calc_rsi_series(closes_asc)
+
+            found = None
+            start_i = max(DROP_LOOKBACK_BARS, len(bars_asc) - RECHECK_BARS)
+            for i in range(start_i, len(bars_asc)):
+                cur_bar = bars_asc[i]
+                if rsi_series[i] is None:
+                    continue
+                window = bars_asc[i - DROP_LOOKBACK_BARS:i]
+                window_high = max(float(b['stck_hgpr']) for b in window)
+                cur_close = float(cur_bar['stck_prpr'])
+                drop_pct = (window_high - cur_close) / window_high * 100
+                if drop_pct < MIN_DROP_PCT:
+                    continue  # 아직 "많이 빠졌다"고 볼 만큼 하락하지 않음
+                rsi_window = [r for r in rsi_series[i - DROP_LOOKBACK_BARS:i + 1] if r is not None]
+                if not rsi_window or min(rsi_window) > RSI_OVERSOLD:
+                    continue  # 이 구간에 과매도(RSI<30) 구간 자체가 없었음
+                if rsi_series[i] < min(rsi_window) + RSI_RECOVER_MARGIN:
+                    continue  # 아직 과매도 최저치에서 반등 전
+                prev3 = bars_asc[max(0, i - 3):i]
+                if not prev3:
+                    continue
+                prev3_low = min(float(b['stck_lwpr']) for b in prev3)
+                if float(cur_bar['stck_lwpr']) < prev3_low:
+                    continue  # 신저가 갱신 중 — 아직 반전 확인 안 됨
+                if not (cur_close > float(cur_bar['stck_oprc'])):
+                    continue  # 반전봉은 양봉이어야 함
+                prev3_avg_vol = sum(int(b.get('cntg_vol', 0)) for b in prev3) / len(prev3)
+                cur_vol = int(cur_bar.get('cntg_vol', 0))
+                if not prev3_avg_vol or cur_vol < prev3_avg_vol * REVERSAL_VOL_RATIO_MIN:
+                    continue  # 반등에 거래가 안 붙음
+                if _is_vi_frozen(window + [cur_bar]):
+                    continue
+                swing_low = min(float(b['stck_lwpr']) for b in window + [cur_bar])
+                found = (cur_close, swing_low, round(drop_pct, 2), rsi_series[i])
+                break
+            if found is None:
+                continue
+            cur_close, swing_low, drop_pct, rsi_now = found
+            stop_price = swing_low * 0.999
+            risk = cur_close - stop_price
+            target_price = cur_close + risk * TARGET_R_MULTIPLE if risk > 0 else None
+            candidates.append({
+                'code': code, 'name': cur['name'], 'price': cur_close,
+                'drop_pct': drop_pct, 'rsi': round(rsi_now, 1),
+                'stop_price': round(stop_price, 1),
+                'target_price': round(target_price, 1) if target_price else None,
+                'market_cap': cur['market_cap'],
+            })
+            time.sleep(0.06)
+        except Exception as e:
+            print(f"  [섀도우B 오류] {code}: {e}")
+    candidates.sort(key=lambda c: c['drop_pct'], reverse=True)
     return candidates
 
 

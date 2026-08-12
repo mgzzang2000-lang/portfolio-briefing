@@ -330,13 +330,18 @@ def main():
     # 워치리스트에 합쳐서 1분봉을 같이 쌓고, 기존과 동일하게 shadow_data/에도 기록
     # [2026-07-29] 옛 섀도우A/D는 폐기, 옛 B/C가 새 A/B로 승격 [2026-07-31] 신규
     # 섀도우C("첫 급등 돌파") 추가 [2026-08-12] 옛 섀도우A/B 성과 부진으로 폐기,
-    # 옛 섀도우C만 A로 승격해 유일한 섀도우로 운영 ──
+    # 옛 섀도우C만 A로 승격 + 신규 섀도우B("낙폭과대 반등", 평균회귀 — A와 성격이
+    # 다른 비교군으로 신설) 추가 ──
     stocks, kospi_set = shadow_scan.get_universe(token)
     a_candidates = shadow_scan.scan_shadow_a(token, stocks, kospi_set)
     shadow_scan.append_snapshot(f"shadow_data/A_{today_str}.json", a_candidates)
     print(f"[섀도우A] 후보 {len(a_candidates)}종목: {[c['name'] for c in a_candidates]}")
 
-    shadow_codes = {c['code'] for c in a_candidates}
+    b_candidates = shadow_scan.scan_shadow_b(token, stocks, kospi_set)
+    shadow_scan.append_snapshot(f"shadow_data/B_{today_str}.json", b_candidates)
+    print(f"[섀도우B] 후보 {len(b_candidates)}종목: {[c['name'] for c in b_candidates]}")
+
+    shadow_codes = {c['code'] for c in a_candidates} | {c['code'] for c in b_candidates}
     live_trade_codes = get_live_trade_codes_today(today_str)
     watchlist = merge_into_watchlist(watchlist, shadow_codes | live_trade_codes, token)
     save_json(watchlist_path, watchlist)
