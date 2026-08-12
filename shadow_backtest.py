@@ -2,7 +2,7 @@
 """
 섀도우 스캐너(shadow_scan.py) 후보를 실제 손익으로 근사 환산하는 간이 백테스트.
 
-shadow_data/A_YYYYMMDD.json, B_YYYYMMDD.json 에는 그날 스캔 사이클마다 포착된
+shadow_data/A_YYYYMMDD.json 에는 그날 스캔 사이클마다 포착된
 후보 종목 스냅샷만 있고(진입가만 있고 그 뒤 가격은 안 담겨있음), 실제 체결/청산을
 시뮬레이션하는 로직은 없었음(shadow_scan.py는 "포착만" 목적). 이 스크립트는 그
 공백을 메우기 위해:
@@ -21,7 +21,8 @@ shadow_data/A_YYYYMMDD.json, B_YYYYMMDD.json 에는 그날 스캔 사이클마�
   - 표본 4일(2026-07-07~10)뿐이라 통계적으로 거의 의미 없음 — 방향성 참고용.
 
 [2026-07-10] 신설 — 사용자가 "국내주식 단타모델 3개(눌림목 실거래/섀도우A/섀도우B)
-비교"를 요청해서 만듦.
+비교"를 요청해서 만듦. [2026-08-12] 옛 섀도우A(시가돌파형)/B(FVG+유동성스윕) 폐기,
+옛 섀도우C("첫 급등 돌파")를 A로 승격해 유일한 섀도우로 운영.
 """
 import os, json, glob, re, time
 from datetime import datetime, timezone, timedelta
@@ -213,12 +214,10 @@ def run_model(prefix, label, token):
 
 def main():
     token = get_kis_token()
-    a_trades = run_model('A', '섀도우A (시가돌파형)', token)
-    b_trades = run_model('B', '섀도우B (FVG+유동성스윕)', token)
-    c_trades = run_model('C', '섀도우C (첫 급등 돌파)', token)
+    a_trades = run_model('A', '섀도우A (첫 급등 돌파)', token)
 
     print(f"\n{'='*60}\n[요약 비교]\n{'='*60}")
-    for label, trades in [('섀도우A', a_trades), ('섀도우B', b_trades), ('섀도우C', c_trades)]:
+    for label, trades in [('섀도우A', a_trades)]:
         if trades:
             avg = sum(t['pnl_pct'] for t in trades) / len(trades)
             wins = len([t for t in trades if t['pnl_pct'] > 0])

@@ -14,10 +14,11 @@
 2. [2026-07-10 추가] 매 사이클마다 아래 두 그룹도 워치리스트에 합침(중복 제거,
    한 번 들어오면 그날 계속 수집 — 나중에 여러 조건식을 실제 시세로 재생/비교
    하려면 "그 종목의 그 순간 진짜 가격"이 반드시 있어야 하기 때문):
-   ① 섀도우A/B/C(대안 조건식) 스캔이 그 사이클에 포착한 후보 — shadow_scan.py가
-      따로 돌 때는 후보 "기록"만 하고 1분봉은 안 쌓아서, 나중에 그 종목의 실제
-      가격 흐름을 재생할 수 없는 공백이 있었음(2026-07-10 사용자가 백테스트
-      돌려보다가 발견). 이제 이 스크립트 안에서 섀도우 스캔까지 실행해서 공백 해소.
+   ① 섀도우(대안 조건식, 2026-08-12 기준 A 하나만 운영) 스캔이 그 사이클에
+      포착한 후보 — shadow_scan.py가 따로 돌 때는 후보 "기록"만 하고 1분봉은
+      안 쌓아서, 나중에 그 종목의 실제 가격 흐름을 재생할 수 없는 공백이
+      있었음(2026-07-10 사용자가 백테스트 돌려보다가 발견). 이제 이 스크립트
+      안에서 섀도우 스캔까지 실행해서 공백 해소.
    ② 실거래 봇이 오늘 실제로 산/보유 중인 종목(dashboard_data.json) — 라이브
       필터와 섀도우 스캔이 각자 다른 순간에 API를 조회하다 보니(가격>볼린저밴드98%
       같은 경계선 조건이 몇 초 차이로 뒤집힐 수 있음), 실제 라이브가 산 종목인데도
@@ -27,8 +28,8 @@
       원천 차단.
 3. 이후 각 실행마다 워치리스트 종목의 최근 1분봉(최대 30개)을 조회해서
    아직 저장 안 된 새 봉만 minute_data/{code}_{YYYYMMDD}.json 에 append.
-   섀도우A/B가 그 사이클에 포착한 후보 스냅샷은 기존과 동일하게
-   shadow_data/A_YYYYMMDD.json / B_YYYYMMDD.json 에도 그대로 남김(백테스트가
+   섀도우A가 그 사이클에 포착한 후보 스냅샷은 기존과 동일하게
+   shadow_data/A_YYYYMMDD.json 에도 그대로 남김(백테스트가
    "그 모델이 그 순간 무엇을 포착했는지" + "그 이후 실제 가격이 어떻게 움직였는지"
    둘 다 필요하기 때문).
 4. GitHub Actions에서 09:00~15:30(KST) 사이 5분 간격으로 반복 실행.
@@ -325,23 +326,17 @@ def main():
         watchlist = build_watchlist(token)
         print(f"[라이브 필터] {len(watchlist)}종목: {[w['name'] for w in watchlist]}")
 
-    # ── [2026-07-10] 섀도우A/B/C 스캔을 여기서 함께 실행 — 후보 종목을
+    # ── [2026-07-10] 섀도우 스캔을 여기서 함께 실행 — 후보 종목을
     # 워치리스트에 합쳐서 1분봉을 같이 쌓고, 기존과 동일하게 shadow_data/에도 기록
     # [2026-07-29] 옛 섀도우A/D는 폐기, 옛 B/C가 새 A/B로 승격 [2026-07-31] 신규
-    # 섀도우C("첫 급등 돌파") 추가 ──
+    # 섀도우C("첫 급등 돌파") 추가 [2026-08-12] 옛 섀도우A/B 성과 부진으로 폐기,
+    # 옛 섀도우C만 A로 승격해 유일한 섀도우로 운영 ──
     stocks, kospi_set = shadow_scan.get_universe(token)
     a_candidates = shadow_scan.scan_shadow_a(token, stocks, kospi_set)
     shadow_scan.append_snapshot(f"shadow_data/A_{today_str}.json", a_candidates)
     print(f"[섀도우A] 후보 {len(a_candidates)}종목: {[c['name'] for c in a_candidates]}")
-    b_candidates = shadow_scan.scan_shadow_b(token, stocks, kospi_set)
-    shadow_scan.append_snapshot(f"shadow_data/B_{today_str}.json", b_candidates)
-    print(f"[섀도우B] 후보 {len(b_candidates)}종목: {[c['name'] for c in b_candidates]}")
-    c_candidates = shadow_scan.scan_shadow_c(token, stocks, kospi_set)
-    shadow_scan.append_snapshot(f"shadow_data/C_{today_str}.json", c_candidates)
-    print(f"[섀도우C] 후보 {len(c_candidates)}종목: {[c['name'] for c in c_candidates]}")
 
-    shadow_codes = ({c['code'] for c in a_candidates} | {c['code'] for c in b_candidates}
-                     | {c['code'] for c in c_candidates})
+    shadow_codes = {c['code'] for c in a_candidates}
     live_trade_codes = get_live_trade_codes_today(today_str)
     watchlist = merge_into_watchlist(watchlist, shadow_codes | live_trade_codes, token)
     save_json(watchlist_path, watchlist)
