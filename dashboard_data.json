@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 463240,
+  "current_balance": 175599,
   "trades": [
     {
       "action": "buy",
@@ -722,25 +722,48 @@
       "qty": 14,
       "price": 21200,
       "amount": 296800
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "126730-20260812131936",
+      "date": "08/12 13:29",
+      "stock": "코칩",
+      "qty": 14,
+      "price": 20750,
+      "avg_price": 21200,
+      "pnl_pct": -2.12,
+      "pnl_amt": -6300,
+      "reason": "손절 (-2.12%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "006340-20260812132952",
+      "date": "08/12 13:29",
+      "code": "006340",
+      "stock": "006340",
+      "qty": 18,
+      "price": 15790,
+      "amount": 284220
     }
   ],
   "position": {
-    "code": "126730",
-    "name": "126730",
-    "qty": 14,
-    "market": "Q",
-    "avg_price": 21200,
-    "current_price": 21200,
-    "stop_price": 20779,
-    "target_price": 22252,
-    "entry_time": "2026-08-12T13:19:36.164400+09:00",
+    "code": "006340",
+    "name": "006340",
+    "qty": 18,
+    "market": "J",
+    "avg_price": 15790,
+    "current_price": 15800,
+    "stop_price": 15523,
+    "target_price": 16351,
+    "entry_time": "2026-08-12T13:29:52.954705+09:00",
     "trailing_activated": false,
-    "trade_id": "126730-20260812131936"
+    "trade_id": "006340-20260812132952"
   },
-  "last_updated": "2026-08-12T13:28:26.152292+09:00",
+  "last_updated": "2026-08-12T13:31:00.054030+09:00",
   "daily_loss_guard": {
     "date": "08/12",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
@@ -850,8 +873,8 @@
     },
     {
       "date": "08/12",
-      "balance": 463240
+      "balance": 175599
     }
   ],
-  "position_version": 13
+  "position_version": 15
 }
