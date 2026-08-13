@@ -128,5 +128,40 @@
         "market_cap": 2525.0
       }
     ]
+  },
+  {
+    "time": "10:34:56",
+    "candidates": [
+      {
+        "code": "091590",
+        "name": "091590",
+        "price": 6900.0,
+        "drop_pct": 4.17,
+        "rsi": 32.7,
+        "stop_price": 6843.1,
+        "target_price": 7042.1,
+        "market_cap": 810.0
+      },
+      {
+        "code": "001820",
+        "name": "001820",
+        "price": 107600.0,
+        "drop_pct": 2.89,
+        "rsi": 30.8,
+        "stop_price": 105993.9,
+        "target_price": 111615.3,
+        "market_cap": 11164.0
+      },
+      {
+        "code": "126730",
+        "name": "126730",
+        "price": 22600.0,
+        "drop_pct": 2.8,
+        "rsi": 36.8,
+        "stop_price": 22077.9,
+        "target_price": 23905.2,
+        "market_cap": 1973.0
+      }
+    ]
   }
 ]
