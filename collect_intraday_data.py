@@ -331,7 +331,8 @@ def main():
     # [2026-07-29] 옛 섀도우A/D는 폐기, 옛 B/C가 새 A/B로 승격 [2026-07-31] 신규
     # 섀도우C("첫 급등 돌파") 추가 [2026-08-12] 옛 섀도우A/B 성과 부진으로 폐기,
     # 옛 섀도우C만 A로 승격 + 신규 섀도우B("낙폭과대 반등", 평균회귀 — A와 성격이
-    # 다른 비교군으로 신설) 추가 ──
+    # 다른 비교군으로 신설) 추가, 같은 날 이어서 신규 섀도우C("눌림목 분할매수")
+    # 추가(shadow_scan.py [섀도우 C] 설명 참고) ──
     stocks, kospi_set = shadow_scan.get_universe(token)
     a_candidates = shadow_scan.scan_shadow_a(token, stocks, kospi_set)
     shadow_scan.append_snapshot(f"shadow_data/A_{today_str}.json", a_candidates)
@@ -341,7 +342,12 @@ def main():
     shadow_scan.append_snapshot(f"shadow_data/B_{today_str}.json", b_candidates)
     print(f"[섀도우B] 후보 {len(b_candidates)}종목: {[c['name'] for c in b_candidates]}")
 
-    shadow_codes = {c['code'] for c in a_candidates} | {c['code'] for c in b_candidates}
+    c_candidates = shadow_scan.scan_shadow_c(token, stocks, kospi_set, today_str)
+    shadow_scan.append_snapshot(f"shadow_data/C_{today_str}.json", c_candidates)
+    print(f"[섀도우C] 후보 {len(c_candidates)}종목: {[c['name'] for c in c_candidates]}")
+
+    shadow_codes = ({c['code'] for c in a_candidates} | {c['code'] for c in b_candidates}
+                     | {c['code'] for c in c_candidates})
     live_trade_codes = get_live_trade_codes_today(today_str)
     watchlist = merge_into_watchlist(watchlist, shadow_codes | live_trade_codes, token)
     save_json(watchlist_path, watchlist)

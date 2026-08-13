@@ -22,7 +22,10 @@ shadow_data/A_YYYYMMDD.json 에는 그날 스캔 사이클마다 포착된
 
 [2026-07-10] 신설 — 사용자가 "국내주식 단타모델 3개(눌림목 실거래/섀도우A/섀도우B)
 비교"를 요청해서 만듦. [2026-08-12] 옛 섀도우A(시가돌파형)/B(FVG+유동성스윕) 폐기,
-옛 섀도우C("첫 급등 돌파")를 A로 승격해 유일한 섀도우로 운영.
+옛 섀도우C("첫 급등 돌파")를 A로 승격해 유일한 섀도우로 운영. 같은 날 이어서
+신규 섀도우B("낙폭과대 반등")와 섀도우C("눌림목 분할매수") 추가 — 섀도우C는
+분할매수(1차/2차) 구조라 기존 run_model()의 단일 진입가 가정이 안 맞아
+run_model_c()를 별도로 신설(블렌디드 평단 계산, 아래 함수 주석 참고).
 """
 import os, json, glob, re, time
 from datetime import datetime, timezone, timedelta
@@ -39,6 +42,12 @@ TOKEN_FILE = "kis_token.json"
 
 STOP_LOSS_PCT = 0.015
 TAKE_PROFIT_PCT = 0.04
+
+# [2026-08-12, 섀도우C "눌림목 분할매수" 전용] shadow_scan.py와 동일 값을 여기서도
+# 중복 정의(이 파일의 기존 관례 — get_kis_token 등도 각 파일에 중복 구현돼있음).
+# 목표가는 1차만/1+2차 블렌디드 평단이 확정된 뒤에야 계산 가능해서 스캐너가 아닌
+# 여기서 계산한다(shadow_scan.py [섀도우 C] 설명 참고).
+BLENDED_TARGET_PCT = 3.5
 
 
 def get_kis_token():
@@ -183,6 +192,79 @@ def simulate_close_only(entry_price, ohlc):
     return (ohlc['close'] - entry_price) / entry_price * 100, 'CLOSE(종가 근사, 저정밀)'
 
 
+def _tranche_events_for_code(prefix, ymd, code):
+    """그날 스냅샷 전체를 시간순으로 훑어, 특정 종목의 트랜치(1차/2차)별 '최초'
+    이벤트만 골라 반환. {1: {...}, 2: {...}} 형태 — 해당 트랜치가 그날 아예
+    안 일어났으면 키 자체가 없음."""
+    log = load_json(f"shadow_data/{prefix}_{ymd}.json", [])
+    seen = {}
+    for snap in sorted(log, key=lambda s: s['time']):
+        for c in snap['candidates']:
+            if c['code'] != code or c['tranche'] in seen:
+                continue
+            seen[c['tranche']] = {**c, 'snapshot_time': snap['time']}
+    return seen
+
+
+def run_model_c(token):
+    """섀도우C(눌림목 분할매수) 전용 — A/B와 달리 한 종목을 두 단계로 나눠 살 수
+    있어서 run_model()의 단일 진입가 가정이 안 맞음. 1차만 체결됐으면 1차가격
+    그대로, 2차까지 체결됐으면 비중가중 블렌디드 평단으로 계산.
+    [한계] 1차 체결 이후~2차 체결 시점 사이의 가격 흐름은 시뮬레이션에서 빠짐
+    (2차 체결 시점부터 블렌디드 평단·목표가로 일괄 재생) — 손절선(-12%)이 2차
+    트리거선(-7%)보다 항상 낮아 그 구간에서 먼저 손절될 일은 없지만, 정교한
+    분할 포지션 회계는 아니라는 점은 감안할 것."""
+    label = '섀도우C (눌림목 분할매수)'
+    print(f"\n{'='*60}\n[{label}]\n{'='*60}")
+    days = find_days('C')
+    trades = []
+    for ymd in days:
+        first = first_candidate_per_day('C', ymd)
+        if first is None:
+            print(f"  {ymd}: 후보 없음")
+            continue
+        code = first['code']
+        events = _tranche_events_for_code('C', ymd, code)
+        e1 = events.get(1)
+        if e1 is None:
+            print(f"  {ymd}: {code} 1차 이벤트 누락 — 스킵")
+            continue
+        e2 = events.get(2)
+        if e2:
+            blended_entry = (e1['price'] * e1['weight'] + e2['price'] * e2['weight']) / (e1['weight'] + e2['weight'])
+            entry_hms = e2['snapshot_time'].replace(':', '')
+        else:
+            blended_entry = e1['price']
+            entry_hms = e1['snapshot_time'].replace(':', '')
+        stop_price = e1['stop_price']  # 극초반고점 기반이라 1차/2차 동일값
+        target_price = blended_entry * (1 + BLENDED_TARGET_PCT / 100)
+        bars_after = load_minute_bars_after(code, ymd, entry_hms)
+        if bars_after:
+            pnl_pct, reason = simulate_from_minutes(blended_entry, bars_after, stop_price, target_price)
+        else:
+            ohlc = get_day_ohlc(token, code, ymd)
+            if ohlc is None:
+                print(f"  {ymd}: {code}({first.get('name')}) 데이터 조회 실패 — 스킵")
+                continue
+            pnl_pct, reason = simulate_close_only(blended_entry, ohlc)
+        trades.append({'date': ymd, 'code': code, 'name': first.get('name'),
+                        'entry': blended_entry, 'tranches': 2 if e2 else 1,
+                        'pnl_pct': pnl_pct, 'reason': reason})
+        stage = '1+2차 블렌디드' if e2 else '1차만'
+        print(f"  {ymd}: 매수 {code}({first.get('name')}) {stage} 평단 {blended_entry:,.0f} "
+              f"-> {pnl_pct:+.2f}% ({reason})")
+        time.sleep(0.1)
+    if trades:
+        avg = sum(t['pnl_pct'] for t in trades) / len(trades)
+        wins = [t for t in trades if t['pnl_pct'] > 0]
+        two_stage = len([t for t in trades if t['tranches'] == 2])
+        print(f"  거래일수: {len(trades)}일  평균손익: {avg:+.2f}%  승률: {len(wins)}/{len(trades)}  "
+              f"2차까지 간 날: {two_stage}/{len(trades)}")
+    else:
+        print("  거래 없음")
+    return trades
+
+
 def run_model(prefix, label, token):
     print(f"\n{'='*60}\n[{label}]\n{'='*60}")
     days = find_days(prefix)
@@ -222,9 +304,10 @@ def main():
     token = get_kis_token()
     a_trades = run_model('A', '섀도우A (첫 급등 돌파)', token)
     b_trades = run_model('B', '섀도우B (낙폭과대 반등)', token)
+    c_trades = run_model_c(token)
 
     print(f"\n{'='*60}\n[요약 비교]\n{'='*60}")
-    for label, trades in [('섀도우A', a_trades), ('섀도우B', b_trades)]:
+    for label, trades in [('섀도우A', a_trades), ('섀도우B', b_trades), ('섀도우C', c_trades)]:
         if trades:
             avg = sum(t['pnl_pct'] for t in trades) / len(trades)
             wins = len([t for t in trades if t['pnl_pct'] > 0])
