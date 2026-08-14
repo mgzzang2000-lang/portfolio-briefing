@@ -318,5 +318,30 @@
         "market_cap": 1014.0
       }
     ]
+  },
+  {
+    "time": "14:08:14",
+    "candidates": [
+      {
+        "code": "001210",
+        "name": "001210",
+        "price": 6600.0,
+        "drop_pct": 2.22,
+        "rsi": 49.1,
+        "stop_price": 6513.5,
+        "target_price": 6816.3,
+        "market_cap": 811.0
+      },
+      {
+        "code": "066430",
+        "name": "066430",
+        "price": 2520.0,
+        "drop_pct": 2.14,
+        "rsi": 34.5,
+        "stop_price": 2482.5,
+        "target_price": 2613.7,
+        "market_cap": 987.0
+      }
+    ]
   }
 ]
