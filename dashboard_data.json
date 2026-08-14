@@ -758,9 +758,31 @@
       "pnl_pct": 1.52,
       "pnl_amt": 4320,
       "reason": "강제청산 (15:20)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "388050-20260814125457",
+      "date": "08/14 12:54",
+      "code": "388050",
+      "stock": "388050",
+      "qty": 28,
+      "price": 10500,
+      "amount": 294000
     }
   ],
-  "position": null,
+  "position": {
+    "code": "388050",
+    "name": "388050",
+    "qty": 28,
+    "market": "Q",
+    "avg_price": 10500,
+    "current_price": 10500,
+    "stop_price": 10269,
+    "target_price": 10970,
+    "entry_time": "2026-08-14T12:54:57.762506+09:00",
+    "trailing_activated": false,
+    "trade_id": "388050-20260814125457"
+  },
   "last_updated": "2026-08-14T12:55:22.655850+09:00",
   "daily_loss_guard": {
     "date": "08/14",
@@ -885,5 +907,5 @@
       "balance": 468473
     }
   ],
-  "position_version": 16
+  "position_version": 17
 }
