@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 468473,
+  "current_balance": 469413,
   "trades": [
     {
       "action": "buy",
@@ -768,6 +768,19 @@
       "qty": 28,
       "price": 10500,
       "amount": 294000
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "388050-20260814125457",
+      "date": "08/14 13:46",
+      "stock": "지투파워",
+      "qty": 8,
+      "price": 10690,
+      "avg_price": 10480,
+      "pnl_pct": 2.0,
+      "pnl_amt": 1680,
+      "reason": "+2% 부분익절 (+2.00%)"
     }
   ],
   "position": {
@@ -776,14 +789,14 @@
     "qty": 28,
     "market": "Q",
     "avg_price": 10500,
-    "current_price": 10590,
-    "stop_price": 10269,
+    "current_price": 10690,
+    "stop_price": 10521.92,
     "target_price": 10970,
     "entry_time": "2026-08-14T12:54:57.762506+09:00",
-    "trailing_activated": false,
+    "trailing_activated": true,
     "trade_id": "388050-20260814125457"
   },
-  "last_updated": "2026-08-14T13:45:48.407453+09:00",
+  "last_updated": "2026-08-14T13:46:05.548037+09:00",
   "daily_loss_guard": {
     "date": "08/14",
     "consecutive_losses": 0,
@@ -904,7 +917,7 @@
     },
     {
       "date": "08/14",
-      "balance": 468473
+      "balance": 469413
     }
   ],
   "position_version": 17
