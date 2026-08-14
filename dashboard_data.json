@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 464109,
+  "current_balance": 464033,
   "trades": [
     {
       "action": "buy",
@@ -761,7 +761,7 @@
     }
   ],
   "position": null,
-  "last_updated": "2026-08-14T09:44:45.541589+09:00",
+  "last_updated": "2026-08-14T09:48:14.241502+09:00",
   "daily_loss_guard": {
     "date": "08/14",
     "consecutive_losses": 0,
@@ -882,7 +882,7 @@
     },
     {
       "date": "08/14",
-      "balance": 464109
+      "balance": 464033
     }
   ],
   "position_version": 16
