@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 465563,
+  "current_balance": 185163,
   "trades": [
     {
       "action": "buy",
@@ -794,10 +794,32 @@
       "pnl_pct": 0.29,
       "pnl_amt": 600,
       "reason": "손절 (+0.29%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "058470-20260818100759",
+      "date": "08/18 10:07",
+      "code": "058470",
+      "stock": "058470",
+      "qty": 4,
+      "price": 70100,
+      "amount": 280400
     }
   ],
-  "position": null,
-  "last_updated": "2026-08-18T10:07:13.553243+09:00",
+  "position": {
+    "code": "058470",
+    "name": "058470",
+    "qty": 4,
+    "market": "Q",
+    "avg_price": 70100,
+    "current_price": 70100,
+    "stop_price": 69048,
+    "target_price": 72728,
+    "entry_time": "2026-08-18T10:07:59.850973+09:00",
+    "trailing_activated": false,
+    "trade_id": "058470-20260818100759"
+  },
+  "last_updated": "2026-08-18T10:07:59.851249+09:00",
   "daily_loss_guard": {
     "date": "08/18",
     "consecutive_losses": 0,
@@ -922,10 +944,10 @@
     },
     {
       "date": "08/18",
-      "balance": 465563
+      "balance": 185163
     }
   ],
-  "position_version": 18,
+  "position_version": 19,
   "last_sold_code": "388050",
   "last_sold_at": "2026-08-14T13:53:44.355115+09:00"
 }
