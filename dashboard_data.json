@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 462333,
+  "current_balance": 460551,
   "trades": [
     {
       "action": "buy",
@@ -804,25 +804,26 @@
       "qty": 4,
       "price": 70100,
       "amount": 280400
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "058470-20260818100759",
+      "date": "08/18 11:18",
+      "stock": "리노공업",
+      "qty": 4,
+      "price": 69000,
+      "avg_price": 70100,
+      "pnl_pct": -1.57,
+      "pnl_amt": -4400,
+      "reason": "손절 (-1.57%)"
     }
   ],
-  "position": {
-    "code": "058470",
-    "name": "058470",
-    "qty": 4,
-    "market": "Q",
-    "avg_price": 70100,
-    "current_price": 69900,
-    "stop_price": 69048,
-    "target_price": 72728,
-    "entry_time": "2026-08-18T10:07:59.850973+09:00",
-    "trailing_activated": false,
-    "trade_id": "058470-20260818100759"
-  },
-  "last_updated": "2026-08-18T11:18:19.783482+09:00",
+  "position": null,
+  "last_updated": "2026-08-18T11:20:16.452652+09:00",
   "daily_loss_guard": {
     "date": "08/18",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
@@ -944,10 +945,10 @@
     },
     {
       "date": "08/18",
-      "balance": 462333
+      "balance": 460551
     }
   ],
-  "position_version": 19,
-  "last_sold_code": "388050",
-  "last_sold_at": "2026-08-14T13:53:44.355115+09:00"
+  "position_version": 20,
+  "last_sold_code": "058470",
+  "last_sold_at": "2026-08-18T11:18:55.369761+09:00"
 }
