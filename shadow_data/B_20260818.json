@@ -108,5 +108,30 @@
         "market_cap": 1319.0
       }
     ]
+  },
+  {
+    "time": "11:27:41",
+    "candidates": [
+      {
+        "code": "012200",
+        "name": "012200",
+        "price": 4630.0,
+        "drop_pct": 4.73,
+        "rsi": 21.7,
+        "stop_price": 4595.4,
+        "target_price": 4716.5,
+        "market_cap": 1256.0
+      },
+      {
+        "code": "093370",
+        "name": "093370",
+        "price": 12800.0,
+        "drop_pct": 2.96,
+        "rsi": 19.5,
+        "stop_price": 12737.2,
+        "target_price": 12956.9,
+        "market_cap": 13750.0
+      }
+    ]
   }
 ]
