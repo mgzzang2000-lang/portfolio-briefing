@@ -840,13 +840,26 @@
       "pnl_pct": -1.63,
       "pnl_amt": -4500,
       "reason": "손절 (복구, -1.63%)"
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "257720-20260819125258",
+      "date": "08/19 13:32",
+      "stock": "실리콘투",
+      "qty": 6,
+      "price": 45450,
+      "avg_price": 46150,
+      "pnl_pct": -1.52,
+      "pnl_amt": -4200,
+      "reason": "손절 (-1.52%)"
     }
   ],
   "position": null,
   "last_updated": "2026-08-19T13:32:09.031793+09:00",
   "daily_loss_guard": {
     "date": "08/19",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
