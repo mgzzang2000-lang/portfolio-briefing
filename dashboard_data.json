@@ -840,6 +840,19 @@
       "pnl_pct": -1.52,
       "pnl_amt": -4200,
       "reason": "손절 (-1.52%)"
+    },
+    {
+      "action": "sell",
+      "date": "08/19 13:32",
+      "partial": false,
+      "trade_id": "257720-20260819125258",
+      "stock": "257720",
+      "qty": 6,
+      "price": 45400,
+      "avg_price": 46150,
+      "pnl_pct": -1.63,
+      "pnl_amt": -4500,
+      "reason": "손절 (복구, -1.63%)"
     }
   ],
   "position": null,
