@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 458421,
+  "current_balance": 455447,
   "trades": [
     {
       "action": "buy",
@@ -827,25 +827,26 @@
       "qty": 6,
       "price": 46150,
       "amount": 276900
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "257720-20260819125258",
+      "date": "08/19 13:32",
+      "stock": "실리콘투",
+      "qty": 6,
+      "price": 45450,
+      "avg_price": 46150,
+      "pnl_pct": -1.52,
+      "pnl_amt": -4200,
+      "reason": "손절 (-1.52%)"
     }
   ],
-  "position": {
-    "code": "257720",
-    "name": "257720",
-    "qty": 6,
-    "market": "Q",
-    "avg_price": 46150,
-    "current_price": 45550,
-    "stop_price": 45457,
-    "target_price": 47880,
-    "entry_time": "2026-08-19T12:52:58.463867+09:00",
-    "trailing_activated": false,
-    "trade_id": "257720-20260819125258"
-  },
-  "last_updated": "2026-08-19T13:31:19.012434+09:00",
+  "position": null,
+  "last_updated": "2026-08-19T13:32:04.392587+09:00",
   "daily_loss_guard": {
     "date": "08/19",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
@@ -971,10 +972,10 @@
     },
     {
       "date": "08/19",
-      "balance": 458421
+      "balance": 455447
     }
   ],
-  "position_version": 21,
-  "last_sold_code": "058470",
-  "last_sold_at": "2026-08-18T11:18:55.369761+09:00"
+  "position_version": 22,
+  "last_sold_code": "257720",
+  "last_sold_at": "2026-08-19T13:32:04.392571+09:00"
 }
