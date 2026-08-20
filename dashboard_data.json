@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 449389,
+  "current_balance": 155429,
   "trades": [
     {
       "action": "buy",
@@ -894,14 +894,14 @@
     "qty": 1,
     "market": "J",
     "avg_price": 293500,
-    "current_price": 293500,
+    "current_price": 295000,
     "stop_price": 289097,
     "target_price": 304506,
     "entry_time": "2026-08-20T10:41:25.555543+09:00",
     "trailing_activated": false,
     "trade_id": "032830-20260820104125"
   },
-  "last_updated": "2026-08-20T10:50:45.527579+09:00",
+  "last_updated": "2026-08-20T10:53:56.120829+09:00",
   "daily_loss_guard": {
     "date": "08/20",
     "consecutive_losses": 1,
@@ -1034,11 +1034,10 @@
     },
     {
       "date": "08/20",
-      "balance": 449389
+      "balance": 155429
     }
   ],
   "position_version": 25,
   "last_sold_code": "067290",
-  "last_sold_at": "2026-08-20T10:14:49.697977+09:00",
-  "stray_notified": "032830(1주)"
+  "last_sold_at": "2026-08-20T10:14:49.697977+09:00"
 }
