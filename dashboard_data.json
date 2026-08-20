@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 458100,
+  "current_balance": 453953,
   "trades": [
     {
       "action": "buy",
@@ -922,25 +922,26 @@
       "qty": 64,
       "price": 4670,
       "amount": 298880
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "126640-20260820140336",
+      "date": "08/20 14:48",
+      "stock": "화신정공",
+      "qty": 64,
+      "price": 4590,
+      "avg_price": 4670,
+      "pnl_pct": -1.71,
+      "pnl_amt": -5120,
+      "reason": "손절 (-1.71%)"
     }
   ],
-  "position": {
-    "code": "126640",
-    "name": "126640",
-    "qty": 64,
-    "market": "Q",
-    "avg_price": 4670,
-    "current_price": 4620,
-    "stop_price": 4599,
-    "target_price": 4845,
-    "entry_time": "2026-08-20T14:03:36.902883+09:00",
-    "trailing_activated": false,
-    "trade_id": "126640-20260820140336"
-  },
-  "last_updated": "2026-08-20T14:47:39.302115+09:00",
+  "position": null,
+  "last_updated": "2026-08-20T14:48:13.970849+09:00",
   "daily_loss_guard": {
     "date": "08/20",
-    "consecutive_losses": 1,
+    "consecutive_losses": 2,
     "notified": false
   },
   "balance_history": [
@@ -1070,10 +1071,10 @@
     },
     {
       "date": "08/20",
-      "balance": 458100
+      "balance": 453953
     }
   ],
-  "position_version": 27,
-  "last_sold_code": "032830",
-  "last_sold_at": "2026-08-20T11:11:01.162675+09:00"
+  "position_version": 28,
+  "last_sold_code": "126640",
+  "last_sold_at": "2026-08-20T14:48:13.970834+09:00"
 }
