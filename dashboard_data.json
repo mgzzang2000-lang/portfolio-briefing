@@ -912,9 +912,31 @@
       "pnl_pct": 4.26,
       "pnl_amt": 12500,
       "reason": "익절 (+4.26%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "126640-20260820140336",
+      "date": "08/20 14:03",
+      "code": "126640",
+      "stock": "126640",
+      "qty": 64,
+      "price": 4670,
+      "amount": 298880
     }
   ],
-  "position": null,
+  "position": {
+    "code": "126640",
+    "name": "126640",
+    "qty": 64,
+    "market": "Q",
+    "avg_price": 4670,
+    "current_price": 4670,
+    "stop_price": 4599,
+    "target_price": 4845,
+    "entry_time": "2026-08-20T14:03:36.902883+09:00",
+    "trailing_activated": false,
+    "trade_id": "126640-20260820140336"
+  },
   "last_updated": "2026-08-20T14:04:54.913370+09:00",
   "daily_loss_guard": {
     "date": "08/20",
@@ -1051,7 +1073,7 @@
       "balance": 459700
     }
   ],
-  "position_version": 26,
+  "position_version": 27,
   "last_sold_code": "032830",
   "last_sold_at": "2026-08-20T11:11:01.162675+09:00"
 }
