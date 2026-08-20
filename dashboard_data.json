@@ -876,9 +876,31 @@
       "pnl_pct": -1.73,
       "pnl_amt": -5200,
       "reason": "손절 (-1.73%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "032830-20260820104125",
+      "date": "08/20 10:41",
+      "code": "032830",
+      "stock": "032830",
+      "qty": 1,
+      "price": 293500,
+      "amount": 293500
     }
   ],
-  "position": null,
+  "position": {
+    "code": "032830",
+    "name": "032830",
+    "qty": 1,
+    "market": "J",
+    "avg_price": 293500,
+    "current_price": 293500,
+    "stop_price": 289097,
+    "target_price": 304506,
+    "entry_time": "2026-08-20T10:41:25.555543+09:00",
+    "trailing_activated": false,
+    "trade_id": "032830-20260820104125"
+  },
   "last_updated": "2026-08-20T10:46:17.699900+09:00",
   "daily_loss_guard": {
     "date": "08/20",
@@ -1015,7 +1037,7 @@
       "balance": 449389
     }
   ],
-  "position_version": 24,
+  "position_version": 25,
   "last_sold_code": "067290",
   "last_sold_at": "2026-08-20T10:14:49.697977+09:00",
   "stray_notified": "032830(1주)"
