@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 455447,
+  "current_balance": 155797,
   "trades": [
     {
       "action": "buy",
@@ -853,10 +853,32 @@
       "pnl_pct": -1.63,
       "pnl_amt": -4500,
       "reason": "손절 (복구, -1.63%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "067290-20260820094246",
+      "date": "08/20 09:42",
+      "code": "067290",
+      "stock": "067290",
+      "qty": 130,
+      "price": 2305,
+      "amount": 299650
     }
   ],
-  "position": null,
-  "last_updated": "2026-08-20T09:41:56.367560+09:00",
+  "position": {
+    "code": "067290",
+    "name": "067290",
+    "qty": 130,
+    "market": "Q",
+    "avg_price": 2305,
+    "current_price": 2305,
+    "stop_price": 2270,
+    "target_price": 2391,
+    "entry_time": "2026-08-20T09:42:46.859503+09:00",
+    "trailing_activated": false,
+    "trade_id": "067290-20260820094246"
+  },
+  "last_updated": "2026-08-20T09:42:46.859817+09:00",
   "daily_loss_guard": {
     "date": "08/20",
     "consecutive_losses": 0,
@@ -989,10 +1011,10 @@
     },
     {
       "date": "08/20",
-      "balance": 455447
+      "balance": 155797
     }
   ],
-  "position_version": 22,
+  "position_version": 23,
   "last_sold_code": "257720",
   "last_sold_at": "2026-08-19T13:32:04.392571+09:00"
 }
