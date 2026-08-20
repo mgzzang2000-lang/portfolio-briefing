@@ -899,6 +899,19 @@
       "pnl_pct": 3.92,
       "pnl_amt": 11500,
       "reason": "익절 (복구, +3.92%)"
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "032830-20260820104125",
+      "date": "08/20 11:11",
+      "stock": "삼성생명",
+      "qty": 1,
+      "price": 306000,
+      "avg_price": 293500,
+      "pnl_pct": 4.26,
+      "pnl_amt": 12500,
+      "reason": "익절 (+4.26%)"
     }
   ],
   "position": null,
