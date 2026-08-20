@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 155429,
+  "current_balance": 459740,
   "trades": [
     {
       "action": "buy",
@@ -886,22 +886,23 @@
       "qty": 1,
       "price": 293500,
       "amount": 293500
+    },
+    {
+      "action": "sell",
+      "date": "08/20 11:10",
+      "partial": false,
+      "trade_id": "032830-20260820104125",
+      "stock": "032830",
+      "qty": 1,
+      "price": 305000,
+      "avg_price": 293500,
+      "pnl_pct": 3.92,
+      "pnl_amt": 11500,
+      "reason": "익절 (복구, +3.92%)"
     }
   ],
-  "position": {
-    "code": "032830",
-    "name": "032830",
-    "qty": 1,
-    "market": "J",
-    "avg_price": 293500,
-    "current_price": 302500,
-    "stop_price": 294674.0,
-    "target_price": 304506,
-    "entry_time": "2026-08-20T10:41:25.555543+09:00",
-    "trailing_activated": true,
-    "trade_id": "032830-20260820104125"
-  },
-  "last_updated": "2026-08-20T11:10:06.567262+09:00",
+  "position": null,
+  "last_updated": "2026-08-20T11:12:50.161231+09:00",
   "daily_loss_guard": {
     "date": "08/20",
     "consecutive_losses": 1,
@@ -1034,10 +1035,10 @@
     },
     {
       "date": "08/20",
-      "balance": 155429
+      "balance": 459740
     }
   ],
-  "position_version": 25,
+  "position_version": 26,
   "last_sold_code": "067290",
   "last_sold_at": "2026-08-20T10:14:49.697977+09:00"
 }
