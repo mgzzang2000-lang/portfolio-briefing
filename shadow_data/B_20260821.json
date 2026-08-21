@@ -273,5 +273,30 @@
         "market_cap": 1196.0
       }
     ]
+  },
+  {
+    "time": "14:15:34",
+    "candidates": [
+      {
+        "code": "094480",
+        "name": "094480",
+        "price": 6480.0,
+        "drop_pct": 4.57,
+        "rsi": 39.1,
+        "stop_price": 6303.7,
+        "target_price": 6920.8,
+        "market_cap": 2558.0
+      },
+      {
+        "code": "041190",
+        "name": "041190",
+        "price": 6010.0,
+        "drop_pct": 3.06,
+        "rsi": 25.0,
+        "stop_price": 5954.0,
+        "target_price": 6149.9,
+        "market_cap": 5057.0
+      }
+    ]
   }
 ]
