@@ -108,5 +108,30 @@
         "market_cap": 1459.0
       }
     ]
+  },
+  {
+    "time": "10:12:34",
+    "candidates": [
+      {
+        "code": "001510",
+        "name": "001510",
+        "price": 3135.0,
+        "drop_pct": 4.57,
+        "rsi": 23.9,
+        "stop_price": 3116.9,
+        "target_price": 3180.3,
+        "market_cap": 7286.0
+      },
+      {
+        "code": "0039P0",
+        "name": "0039P0",
+        "price": 8130.0,
+        "drop_pct": 2.28,
+        "rsi": 34.9,
+        "stop_price": 8081.9,
+        "target_price": 8250.2,
+        "market_cap": 1523.0
+      }
+    ]
   }
 ]
