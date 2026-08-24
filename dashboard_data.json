@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 166353,
+  "current_balance": 448517,
   "trades": [
     {
       "action": "buy",
@@ -945,25 +945,26 @@
       "qty": 8,
       "price": 35950,
       "amount": 287600
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "067310-20260824100556",
+      "date": "08/24 10:35",
+      "stock": "하나마이크론",
+      "qty": 8,
+      "price": 35400,
+      "avg_price": 36000,
+      "pnl_pct": -1.67,
+      "pnl_amt": -4800,
+      "reason": "손절 (-1.67%)"
     }
   ],
-  "position": {
-    "code": "067310",
-    "name": "067310",
-    "qty": 8,
-    "market": "Q",
-    "avg_price": 35950,
-    "current_price": 35500,
-    "stop_price": 35414,
-    "target_price": 37463,
-    "entry_time": "2026-08-24T10:05:56.068725+09:00",
-    "trailing_activated": false,
-    "trade_id": "067310-20260824100556"
-  },
-  "last_updated": "2026-08-24T10:34:40.638019+09:00",
+  "position": null,
+  "last_updated": "2026-08-24T10:35:05.082237+09:00",
   "daily_loss_guard": {
     "date": "08/24",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
@@ -1101,10 +1102,10 @@
     },
     {
       "date": "08/24",
-      "balance": 166353
+      "balance": 448517
     }
   ],
-  "position_version": 29,
-  "last_sold_code": "126640",
-  "last_sold_at": "2026-08-20T14:48:13.970834+09:00"
+  "position_version": 30,
+  "last_sold_code": "067310",
+  "last_sold_at": "2026-08-24T10:35:05.082223+09:00"
 }
