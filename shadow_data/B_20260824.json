@@ -43,5 +43,30 @@
         "market_cap": 768.0
       }
     ]
+  },
+  {
+    "time": "10:09:03",
+    "candidates": [
+      {
+        "code": "100790",
+        "name": "100790",
+        "price": 16790.0,
+        "drop_pct": 3.51,
+        "rsi": 33.9,
+        "stop_price": 16483.5,
+        "target_price": 17556.2,
+        "market_cap": 8972.0
+      },
+      {
+        "code": "020120",
+        "name": "020120",
+        "price": 5020.0,
+        "drop_pct": 2.33,
+        "rsi": 40.6,
+        "stop_price": 4920.1,
+        "target_price": 5269.8,
+        "market_cap": 1868.0
+      }
+    ]
   }
 ]
