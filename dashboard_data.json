@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 448517,
+  "current_balance": 150037,
   "trades": [
     {
       "action": "buy",
@@ -958,10 +958,32 @@
       "pnl_pct": -1.67,
       "pnl_amt": -4800,
       "reason": "손절 (-1.67%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "064260-20260824131046",
+      "date": "08/24 13:10",
+      "code": "064260",
+      "stock": "064260",
+      "qty": 56,
+      "price": 5330,
+      "amount": 298480
     }
   ],
-  "position": null,
-  "last_updated": "2026-08-24T13:09:40.282167+09:00",
+  "position": {
+    "code": "064260",
+    "name": "064260",
+    "qty": 56,
+    "market": "Q",
+    "avg_price": 5330,
+    "current_price": 5330,
+    "stop_price": 5250,
+    "target_price": 5529,
+    "entry_time": "2026-08-24T13:10:46.078515+09:00",
+    "trailing_activated": false,
+    "trade_id": "064260-20260824131046"
+  },
+  "last_updated": "2026-08-24T13:10:46.078828+09:00",
   "daily_loss_guard": {
     "date": "08/24",
     "consecutive_losses": 1,
@@ -1102,10 +1124,10 @@
     },
     {
       "date": "08/24",
-      "balance": 448517
+      "balance": 150037
     }
   ],
-  "position_version": 30,
+  "position_version": 31,
   "last_sold_code": "067310",
   "last_sold_at": "2026-08-24T10:35:05.082223+09:00"
 }
