@@ -935,9 +935,31 @@
       "pnl_pct": -1.71,
       "pnl_amt": -5120,
       "reason": "손절 (-1.71%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "067310-20260824100556",
+      "date": "08/24 10:05",
+      "code": "067310",
+      "stock": "067310",
+      "qty": 8,
+      "price": 35950,
+      "amount": 287600
     }
   ],
-  "position": null,
+  "position": {
+    "code": "067310",
+    "name": "067310",
+    "qty": 8,
+    "market": "Q",
+    "avg_price": 35950,
+    "current_price": 35950,
+    "stop_price": 35414,
+    "target_price": 37463,
+    "entry_time": "2026-08-24T10:05:56.068725+09:00",
+    "trailing_activated": false,
+    "trade_id": "067310-20260824100556"
+  },
   "last_updated": "2026-08-24T10:06:19.988605+09:00",
   "daily_loss_guard": {
     "date": "08/24",
@@ -1082,7 +1104,7 @@
       "balance": 453913
     }
   ],
-  "position_version": 28,
+  "position_version": 29,
   "last_sold_code": "126640",
   "last_sold_at": "2026-08-20T14:48:13.970834+09:00"
 }
