@@ -298,5 +298,30 @@
         "market_cap": 4938.0
       }
     ]
+  },
+  {
+    "time": "10:18:57",
+    "candidates": [
+      {
+        "code": "094480",
+        "name": "094480",
+        "price": 6130.0,
+        "base_high": 6060.0,
+        "stop_price": 5964.0,
+        "target_price": 6544.9,
+        "breakout_vol_ratio": 6.67,
+        "market_cap": 2385.0
+      },
+      {
+        "code": "0155E0",
+        "name": "0155E0",
+        "price": 18100.0,
+        "base_high": 17880.0,
+        "stop_price": 17172.8,
+        "target_price": 20418.0,
+        "breakout_vol_ratio": 2.98,
+        "market_cap": 992.0
+      }
+    ]
   }
 ]
