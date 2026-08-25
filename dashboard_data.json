@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 443329,
+  "current_balance": 443254,
   "trades": [
     {
       "action": "buy",
@@ -1017,6 +1017,19 @@
       "pnl_pct": 0.16,
       "pnl_amt": 120,
       "reason": "2시간 부분청산 (+0.16%)"
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "094480-20260825131740",
+      "date": "08/25 15:16",
+      "stock": "갤럭시아머니트리",
+      "qty": 6,
+      "price": 6300,
+      "avg_price": 6290,
+      "pnl_pct": 0.16,
+      "pnl_amt": 60,
+      "reason": "2시간 부분청산 (+0.16%)"
     }
   ],
   "position": {
@@ -1032,7 +1045,7 @@
     "trailing_activated": false,
     "trade_id": "094480-20260825131740"
   },
-  "last_updated": "2026-08-25T15:15:58.696341+09:00",
+  "last_updated": "2026-08-25T15:16:10.752169+09:00",
   "daily_loss_guard": {
     "date": "08/25",
     "consecutive_losses": 0,
@@ -1177,7 +1190,7 @@
     },
     {
       "date": "08/25",
-      "balance": 443329
+      "balance": 443254
     }
   ],
   "position_version": 33,
