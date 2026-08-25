@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 443247,
+  "current_balance": 443171,
   "trades": [
     {
       "action": "buy",
@@ -1045,20 +1045,8 @@
       "reason": "2시간 부분청산 (+0.32%)"
     }
   ],
-  "position": {
-    "code": "094480",
-    "name": "094480",
-    "qty": 47,
-    "market": "Q",
-    "avg_price": 6290,
-    "current_price": 6280,
-    "stop_price": 6195,
-    "target_price": 6525,
-    "entry_time": "2026-08-25T13:17:40.155382+09:00",
-    "trailing_activated": false,
-    "trade_id": "094480-20260825131740"
-  },
-  "last_updated": "2026-08-25T15:16:24.870942+09:00",
+  "position": null,
+  "last_updated": "2026-08-25T15:17:35.235537+09:00",
   "daily_loss_guard": {
     "date": "08/25",
     "consecutive_losses": 0,
@@ -1203,10 +1191,10 @@
     },
     {
       "date": "08/25",
-      "balance": 443247
+      "balance": 443171
     }
   ],
-  "position_version": 33,
+  "position_version": 34,
   "last_sold_code": "064260",
   "last_sold_at": "2026-08-24T15:09:02.664102+09:00"
 }
