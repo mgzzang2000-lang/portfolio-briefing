@@ -991,6 +991,58 @@
       "qty": 47,
       "price": 6290,
       "amount": 295630
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "094480-20260825131740",
+      "date": "08/25 15:15",
+      "stock": "갤럭시아머니트리",
+      "qty": 23,
+      "price": 6300,
+      "avg_price": 6290,
+      "pnl_pct": 0.16,
+      "pnl_amt": 230,
+      "reason": "2시간 부분청산 (+0.16%)"
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "094480-20260825131740",
+      "date": "08/25 15:15",
+      "stock": "갤럭시아머니트리",
+      "qty": 12,
+      "price": 6300,
+      "avg_price": 6290,
+      "pnl_pct": 0.16,
+      "pnl_amt": 120,
+      "reason": "2시간 부분청산 (+0.16%)"
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "094480-20260825131740",
+      "date": "08/25 15:16",
+      "stock": "갤럭시아머니트리",
+      "qty": 6,
+      "price": 6300,
+      "avg_price": 6290,
+      "pnl_pct": 0.16,
+      "pnl_amt": 60,
+      "reason": "2시간 부분청산 (+0.16%)"
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "094480-20260825131740",
+      "date": "08/25 15:16",
+      "stock": "갤럭시아머니트리",
+      "qty": 3,
+      "price": 6310,
+      "avg_price": 6290,
+      "pnl_pct": 0.32,
+      "pnl_amt": 60,
+      "reason": "2시간 부분청산 (+0.32%)"
     }
   ],
   "position": {
