@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 447739,
+  "current_balance": 448339,
   "trades": [
     {
       "action": "buy",
@@ -1092,22 +1092,23 @@
       "pnl_pct": 2.0,
       "pnl_amt": 1900,
       "reason": "+2% 부분익절 (+2.00%)"
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "028050-20260826101147",
+      "date": "08/26 15:20",
+      "stock": "삼성E&A",
+      "qty": 4,
+      "price": 48300,
+      "avg_price": 47400,
+      "pnl_pct": 1.9,
+      "pnl_amt": 3600,
+      "reason": "강제청산 (15:20)"
     }
   ],
-  "position": {
-    "code": "028050",
-    "name": "028050",
-    "qty": 6,
-    "market": "J",
-    "avg_price": 47400,
-    "current_price": 48250,
-    "stop_price": 47589.6,
-    "target_price": 49177,
-    "entry_time": "2026-08-26T10:11:47.941508+09:00",
-    "trailing_activated": true,
-    "trade_id": "028050-20260826101147"
-  },
-  "last_updated": "2026-08-26T15:19:43.386436+09:00",
+  "position": null,
+  "last_updated": "2026-08-26T15:20:12.839272+09:00",
   "daily_loss_guard": {
     "date": "08/26",
     "consecutive_losses": 0,
@@ -1256,10 +1257,10 @@
     },
     {
       "date": "08/26",
-      "balance": 447739
+      "balance": 448339
     }
   ],
-  "position_version": 35,
-  "last_sold_code": "094480",
-  "last_sold_at": "2026-08-25T15:16:57.069897+09:00"
+  "position_version": 36,
+  "last_sold_code": "028050",
+  "last_sold_at": "2026-08-26T15:20:06.294428+09:00"
 }
