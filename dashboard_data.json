@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 443171,
+  "current_balance": 158771,
   "trades": [
     {
       "action": "buy",
@@ -1069,10 +1069,32 @@
       "pnl_pct": 0.32,
       "pnl_amt": 20,
       "reason": "손절 (+0.32%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "028050-20260826101147",
+      "date": "08/26 10:11",
+      "code": "028050",
+      "stock": "028050",
+      "qty": 6,
+      "price": 47400,
+      "amount": 284400
     }
   ],
-  "position": null,
-  "last_updated": "2026-08-26T10:10:58.176642+09:00",
+  "position": {
+    "code": "028050",
+    "name": "028050",
+    "qty": 6,
+    "market": "J",
+    "avg_price": 47400,
+    "current_price": 47400,
+    "stop_price": 46689,
+    "target_price": 49177,
+    "entry_time": "2026-08-26T10:11:47.941508+09:00",
+    "trailing_activated": false,
+    "trade_id": "028050-20260826101147"
+  },
+  "last_updated": "2026-08-26T10:11:47.941825+09:00",
   "daily_loss_guard": {
     "date": "08/26",
     "consecutive_losses": 0,
@@ -1221,10 +1243,10 @@
     },
     {
       "date": "08/26",
-      "balance": 443171
+      "balance": 158771
     }
   ],
-  "position_version": 34,
+  "position_version": 35,
   "last_sold_code": "094480",
   "last_sold_at": "2026-08-25T15:16:57.069897+09:00"
 }
