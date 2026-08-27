@@ -118,5 +118,30 @@
         "market_cap": 13739.0
       }
     ]
+  },
+  {
+    "time": "09:58:12",
+    "candidates": [
+      {
+        "code": "088350",
+        "name": "088350",
+        "price": 5570.0,
+        "base_high": 5540.0,
+        "stop_price": 5464.5,
+        "target_price": 5833.7,
+        "breakout_vol_ratio": 9.24,
+        "market_cap": 47856.0
+      },
+      {
+        "code": "084680",
+        "name": "084680",
+        "price": 569.0,
+        "base_high": 565.0,
+        "stop_price": 552.4,
+        "target_price": 610.4,
+        "breakout_vol_ratio": 1.54,
+        "market_cap": 810.0
+      }
+    ]
   }
 ]
