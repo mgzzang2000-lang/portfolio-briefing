@@ -13,5 +13,40 @@
         "market_cap": 31936.0
       }
     ]
+  },
+  {
+    "time": "09:28:58",
+    "candidates": [
+      {
+        "code": "058730",
+        "name": "058730",
+        "price": 3635.0,
+        "drop_pct": 2.28,
+        "rsi": 36.6,
+        "stop_price": 3606.4,
+        "target_price": 3706.5,
+        "market_cap": 735.0
+      },
+      {
+        "code": "084680",
+        "name": "084680",
+        "price": 576.0,
+        "drop_pct": 2.21,
+        "rsi": 66.7,
+        "stop_price": 541.5,
+        "target_price": 662.4,
+        "market_cap": 807.0
+      },
+      {
+        "code": "215600",
+        "name": "215600",
+        "price": 2840.0,
+        "drop_pct": 2.07,
+        "rsi": 45.0,
+        "stop_price": 2777.2,
+        "target_price": 2997.0,
+        "market_cap": 3935.0
+      }
+    ]
   }
 ]
