@@ -158,5 +158,30 @@
         "market_cap": 1525.0
       }
     ]
+  },
+  {
+    "time": "13:40:48",
+    "candidates": [
+      {
+        "code": "478560",
+        "name": "478560",
+        "price": 3175.0,
+        "drop_pct": 3.35,
+        "rsi": 30.0,
+        "stop_price": 3151.8,
+        "target_price": 3232.9,
+        "market_cap": 821.0
+      },
+      {
+        "code": "351320",
+        "name": "351320",
+        "price": 2475.0,
+        "drop_pct": 2.94,
+        "rsi": 38.5,
+        "stop_price": 2382.6,
+        "target_price": 2706.0,
+        "market_cap": 726.0
+      }
+    ]
   }
 ]
