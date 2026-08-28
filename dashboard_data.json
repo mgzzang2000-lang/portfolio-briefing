@@ -1118,23 +1118,23 @@
     },
     {
       "action": "sell",
-      "date": "08/28 11:15",
       "partial": false,
       "trade_id": "064260-20260828110938",
-      "stock": "064260",
+      "date": "08/28 11:15",
+      "stock": "다날",
       "qty": 52,
       "price": 5580,
-      "avg_price": 5670,
-      "pnl_pct": -1.59,
-      "pnl_amt": -4680,
-      "reason": "손절 (복구, -1.59%)"
+      "avg_price": 5680,
+      "pnl_pct": -1.76,
+      "pnl_amt": -5200,
+      "reason": "손절 (-1.76%)"
     }
   ],
   "position": null,
   "last_updated": "2026-08-28T11:16:07.423862+09:00",
   "daily_loss_guard": {
     "date": "08/28",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
