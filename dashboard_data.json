@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 448339,
+  "current_balance": 152884,
   "trades": [
     {
       "action": "buy",
@@ -1105,10 +1105,32 @@
       "pnl_pct": 1.9,
       "pnl_amt": 3600,
       "reason": "강제청산 (15:20)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "064260-20260828110938",
+      "date": "08/28 11:09",
+      "code": "064260",
+      "stock": "064260",
+      "qty": 52,
+      "price": 5670,
+      "amount": 294840
     }
   ],
-  "position": null,
-  "last_updated": "2026-08-28T11:08:48.863402+09:00",
+  "position": {
+    "code": "064260",
+    "name": "064260",
+    "qty": 52,
+    "market": "Q",
+    "avg_price": 5670,
+    "current_price": 5670,
+    "stop_price": 5584,
+    "target_price": 5882,
+    "entry_time": "2026-08-28T11:09:38.541771+09:00",
+    "trailing_activated": false,
+    "trade_id": "064260-20260828110938"
+  },
+  "last_updated": "2026-08-28T11:09:38.542068+09:00",
   "daily_loss_guard": {
     "date": "08/28",
     "consecutive_losses": 0,
@@ -1265,10 +1287,10 @@
     },
     {
       "date": "08/28",
-      "balance": 448339
+      "balance": 152884
     }
   ],
-  "position_version": 36,
+  "position_version": 37,
   "last_sold_code": "028050",
   "last_sold_at": "2026-08-26T15:20:06.294428+09:00"
 }
