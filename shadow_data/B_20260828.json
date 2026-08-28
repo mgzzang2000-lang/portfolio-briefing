@@ -23,5 +23,30 @@
         "market_cap": 1697.0
       }
     ]
+  },
+  {
+    "time": "09:40:09",
+    "candidates": [
+      {
+        "code": "032820",
+        "name": "032820",
+        "price": 12660.0,
+        "drop_pct": 3.65,
+        "rsi": 31.8,
+        "stop_price": 12547.4,
+        "target_price": 12941.4,
+        "market_cap": 21512.0
+      },
+      {
+        "code": "046970",
+        "name": "046970",
+        "price": 4795.0,
+        "drop_pct": 2.14,
+        "rsi": 55.7,
+        "stop_price": 4695.3,
+        "target_price": 5044.2,
+        "market_cap": 2088.0
+      }
+    ]
   }
 ]
