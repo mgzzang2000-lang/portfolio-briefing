@@ -919,11 +919,16 @@ def check_pullback_support_hold(closes, highs, lows, volumes, lookback=15):
     # 최근 PULLBACK_CONFIRM_WINDOW봉 이내에서 나온 저점만 인정.
     trough_recent = trough_idx >= (lookback - 1) - PULLBACK_CONFIRM_WINDOW
 
-    # [2026-09-01] 실거래 37건 + 1분봉 1,147종목-일 재생 검증(리브원아웃) 결과,
-    # "거래량급증"과 "반전봉" 조건은 빼는 쪽이 평균손익이 더 좋았음(각각 -0.12%->
-    # -0.08%/-0.09%)에다 신호량도 26~28% 늘어남 — 표본만 깎아먹고 있었다고 판단해
-    # 게이트에서 제외(계산 자체는 info 표시용으로 계속 유지, 아래 info 문자열 참고).
-    ok = (healthy_pullback and healthy_retracement_ratio
+    # [2026-09-01] 1,147종목-일 리브원아웃 검증: "거래량급증"·"반전봉" 각각
+    # 단독 제거는 평균손익 개선(-0.12%->-0.08%/-0.09%)이었지만, 둘을 동시에
+    # 빼보니(876건) 평균손익이 원래 기준선(-0.12%)으로 되돌아가고 승률만
+    # 36%->33%로 하락 — 두 조건이 서로 다른 취약점을 걸러내고 있어 단순 합산이
+    # 안 됨. "거래량급증"(1.5배 임계값, 과거 실측상 8개 조건 중 압도적 1위
+    # 병목이었던 조건)만 게이트에서 빼고, "반전봉"(저점 캔들이 매수세에 받아쳐
+    # 마감했는지 확인하는 품질조건)은 되살림 — 세 조합(둘다제거/이것만제거/원복)
+    # 중 평균손익 최선(-0.08%)이면서 승률도 원복 대비 1%p 차이(35% vs 36%)로
+    # 근소, 신호량은 원복 대비 +26%로 "신호가 너무 드묾" 문제도 완화.
+    ok = (healthy_pullback and healthy_retracement_ratio and strong_reversal_candle
           and confirm_break and trough_recent)
     ratio_str = f"{retracement_ratio*100:.0f}%" if retracement_ratio is not None else "N/A"
     info = (f"눌림{pullback_pct:.1f}%({'✓' if healthy_pullback else '✗'}) "
