@@ -919,8 +919,12 @@ def check_pullback_support_hold(closes, highs, lows, volumes, lookback=15):
     # 최근 PULLBACK_CONFIRM_WINDOW봉 이내에서 나온 저점만 인정.
     trough_recent = trough_idx >= (lookback - 1) - PULLBACK_CONFIRM_WINDOW
 
-    ok = (healthy_pullback and healthy_retracement_ratio and strong_reversal_candle
-          and confirm_break and volume_surge and trough_recent)
+    # [2026-09-01] 실거래 37건 + 1분봉 1,147종목-일 재생 검증(리브원아웃) 결과,
+    # "거래량급증"과 "반전봉" 조건은 빼는 쪽이 평균손익이 더 좋았음(각각 -0.12%->
+    # -0.08%/-0.09%)에다 신호량도 26~28% 늘어남 — 표본만 깎아먹고 있었다고 판단해
+    # 게이트에서 제외(계산 자체는 info 표시용으로 계속 유지, 아래 info 문자열 참고).
+    ok = (healthy_pullback and healthy_retracement_ratio
+          and confirm_break and trough_recent)
     ratio_str = f"{retracement_ratio*100:.0f}%" if retracement_ratio is not None else "N/A"
     info = (f"눌림{pullback_pct:.1f}%({'✓' if healthy_pullback else '✗'}) "
             f"되돌림비율{ratio_str}({'✓' if healthy_retracement_ratio else '✗'}) "

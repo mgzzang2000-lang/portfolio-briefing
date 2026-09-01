@@ -305,9 +305,10 @@ def main():
     a_trades = run_model('A', '섀도우A (첫 급등 돌파)', token)
     b_trades = run_model('B', '섀도우B (낙폭과대 반등)', token)
     c_trades = run_model_c(token)
+    d_trades = run_model('D', '섀도우D (눌림목 재상승, 완화판)', token)
 
     print(f"\n{'='*60}\n[요약 비교]\n{'='*60}")
-    for label, trades in [('섀도우A', a_trades), ('섀도우B', b_trades), ('섀도우C', c_trades)]:
+    for label, trades in [('섀도우A', a_trades), ('섀도우B', b_trades), ('섀도우C', c_trades), ('섀도우D', d_trades)]:
         if trades:
             avg = sum(t['pnl_pct'] for t in trades) / len(trades)
             wins = len([t for t in trades if t['pnl_pct'] > 0])

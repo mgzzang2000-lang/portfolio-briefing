@@ -115,6 +115,7 @@ find_fvg_with_sweep)도 옛 A/B 전용이라 함께 삭제. 같은 날, A 보완
 import os, json, time
 from datetime import datetime, timezone, timedelta
 import market_calendar
+import auto_trading as bot  # 섀도우D가 실거래봇의 조건식 함수를 그대로 재사용
 
 KST = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
@@ -682,6 +683,75 @@ def scan_shadow_c(token, stocks, kospi_set, today_str):
     return candidates
 
 
+# ── 섀도우 D: "눌림목 재상승(완화판)" ─────────────────────────────
+# [2026-09-01 신설] 실거래봇과 똑같은 진입조건(StochRSI+눌림목지지+5분모멘텀)을
+# 쓰되, 리브원아웃 검증(1,147종목-일 재생)에서 "거래량급증"·"반전봉" 두 조건이
+# 표본만 26~28% 깎아먹고 평균손익은 오히려 더 나쁘게 만드는 것으로 확인돼 그 두
+# 조건을 뺀 버전. 실거래 auto_trading.py도 같은 날 동일하게 반영했지만, 실거래는
+# 계좌당 동시 1포지션이라 신호가 드물어(하루 최대 1건) 검증 표본이 계속 작게
+# 쌓임 — 섀도우로 같은 조건식을 병행 관찰해 더 큰 표본으로 이 완화가 실전에서도
+# 유효한지 계속 확인한다. calc_stoch_rsi/check_pullback_support_hold(완화판)/
+# check_5min_momentum/calc_atr을 auto_trading.py에서 그대로 가져다 써서, 실거래
+# 로직이 바뀌면 섀도우D도 자동으로 같이 바뀐다(로직 두 곳에 따로 유지 안 함).
+def scan_shadow_d(token, stocks, kospi_set):
+    candidates = []
+    for code in stocks:
+        try:
+            market = "J" if code in kospi_set else "Q"
+            cur = get_current_price(token, code, market)
+            if cur['price'] == 0 or cur['open'] == 0 or cur['market_cap'] < MARKET_CAP_MIN:
+                continue
+            if any(kw in cur['name'] for kw in DERIVATIVE_ETF_KEYWORDS):
+                continue
+            if is_derivative_etf(token, code, cur['bstp_name'], cur['mrkt_name']):
+                continue
+            if cur['vi_cls_code'] != 'N' or cur['ovtm_vi_cls_code'] != 'N':
+                continue  # 지금 이 순간 VI 발동 중
+            raw = get_minute_bars_raw(token, code, market)  # 최신이 index0
+            if len(raw) < 30:
+                continue
+            result = raw[:30]
+            closes = [float(x.get('stck_prpr', 0)) for x in result]
+            highs = [float(x.get('stck_hgpr', 0)) for x in result]
+            lows = [float(x.get('stck_lwpr', 0)) for x in result]
+            volumes = [int(x.get('cntg_vol', 0)) for x in result]
+            if any(c == 0 for c in closes[:3]):
+                continue
+            if any(v == 0 for v in volumes[:5]):
+                continue  # 최근 거래정지(VI 추정) 캔들 포함 — 실거래봇과 동일 원칙
+            stoch_k, stoch_d = bot.calc_stoch_rsi(closes)
+            if stoch_k is None:
+                continue
+            stoch_ok = stoch_k > stoch_d and stoch_k > 20
+            pullback_ok, pullback_info, support_price = bot.check_pullback_support_hold(closes, highs, lows, volumes)
+            if not pullback_ok:
+                continue
+            momentum_ok, momentum_info = bot.check_5min_momentum(closes)
+            if not (stoch_ok and momentum_ok):
+                continue
+            price = closes[0]
+            atr_1m = bot.calc_atr(highs, lows, closes, period=14)
+            if support_price:
+                stop_price = support_price * 0.999
+            elif atr_1m:
+                stop_price = price - atr_1m * 1.5
+            else:
+                stop_price = price * 0.98
+            stop_price = min(stop_price, price * 0.985)
+            stop_price = max(stop_price, price * 0.975)
+            risk = price - stop_price
+            target_price = price + risk * TARGET_R_MULTIPLE
+            candidates.append({
+                'code': code, 'name': cur['name'], 'price': price,
+                'stop_price': round(stop_price, 1), 'target_price': round(target_price, 1),
+                'stoch_k': round(stoch_k, 1), 'stoch_d': round(stoch_d, 1),
+                'market_cap': cur['market_cap'],
+            })
+        except Exception as e:
+            print(f"  [섀도우D 오류] {code}: {e}")
+    return candidates
+
+
 def append_snapshot(path, candidates):
     if not candidates:
         return
@@ -716,6 +786,10 @@ def main():
     c_candidates = scan_shadow_c(token, stocks, kospi_set, today_str)
     append_snapshot(f"{DATA_DIR}/C_{today_str}.json", c_candidates)
     print(f"[섀도우C] 후보 {len(c_candidates)}종목: {[c['name'] for c in c_candidates]}")
+
+    d_candidates = scan_shadow_d(token, stocks, kospi_set)
+    append_snapshot(f"{DATA_DIR}/D_{today_str}.json", d_candidates)
+    print(f"[섀도우D] 후보 {len(d_candidates)}종목: {[c['name'] for c in d_candidates]}")
 
 
 if __name__ == '__main__':
