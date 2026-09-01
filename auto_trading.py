@@ -1022,6 +1022,49 @@ def check_1min_entry(token, code, name, market="J"):
     if stoch_ok and pullback_ok and momentum_ok:
         return True, stop_price, target_price, info
     return False, 0, 0, info
+# [2026-09-01] 실거래 37건(트레이드 단위) 사후분석 결과: 진 거래(23건) 21건 중
+# 71%는 진입 후 최고가가 +1.5%도 못 넘기고 그대로 손절까지 흘러간 반면, 이긴
+# 거래(14건)는 진입 후 평균 +5.28%까지 유리하게 움직였음 — "초반 반응이 없으면
+# 조기 청산"이 손실을 줄일 수 있다는 가설. 다만 이 가설을 만든 바로 그 37건으로
+# 검증하면 과최적화 위험이 큼(섀도우A가 train/test 분리 없이 조건을 그리디하게
+# 쌓다가 실패했던 것과 같은 함정). 그래서 실거래 매매 로직은 전혀 건드리지 않고,
+# 앞으로 나올 새 거래에 한해서만 진입 후 여러 시점(10/20/30/45/60분)의 "그때까지
+# 최대 유리폭"을 페이퍼로 기록한다. 특정 (N분, X%) 조합 하나를 미리 확정하지 않고
+# 여러 체크포인트를 다 남겨서, 나중에 새 데이터로 여러 조합을 자유롭게 검증할 수
+# 있게 함 — 실제로 효과가 확인되면 그때 조기청산 규칙을 실거래에 반영할지 판단.
+EARLY_EXIT_TEST_CHECKPOINTS_MIN = [10, 20, 30, 45, 60]
+EARLY_EXIT_TEST_FILE = "early_exit_paper_test.json"
+def _load_early_exit_log():
+    try:
+        with open(EARLY_EXIT_TEST_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return []
+def log_early_exit_checkpoints(pos, name, pnl, now):
+    # 실거래 포지션 보유 중 매 사이클 호출 — 매매 판단에는 전혀 관여하지 않고
+    # 체크포인트 도달 시점의 (그때까지 최대유리%, 그 시점 손익%)만 기록한다.
+    if not pos.get('entry_time'):
+        return
+    entry_dt = datetime.fromisoformat(pos['entry_time'])
+    elapsed_min = (now - entry_dt).total_seconds() / 60
+    pos['peak_pnl_pct'] = max(pos.get('peak_pnl_pct', pnl), pnl)
+    logged = pos.setdefault('early_exit_logged_checkpoints', [])
+    for cp in EARLY_EXIT_TEST_CHECKPOINTS_MIN:
+        if elapsed_min >= cp and cp not in logged:
+            logged.append(cp)
+            rows = _load_early_exit_log()
+            rows.append({
+                'trade_id': pos.get('trade_id'), 'code': pos.get('code'), 'name': name,
+                'checkpoint_min': cp,
+                'peak_pnl_pct_by_then': round(pos['peak_pnl_pct'], 2),
+                'pnl_pct_now': round(pnl, 2),
+                'logged_at': now.isoformat(),
+            })
+            try:
+                with open(EARLY_EXIT_TEST_FILE, 'w', encoding='utf-8') as f:
+                    json.dump(rows, f, ensure_ascii=False, indent=2)
+            except Exception as e:
+                print(f"  [경고] 조기청산 페이퍼 로그 저장 실패: {e}")
 # ── 보유 포지션 관리 (GitHub Actions·로컬 감시 스크립트 공용) ──────
 def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
     code      = h['pdno']
@@ -1037,6 +1080,7 @@ def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
     print(f"보유: {name} {qty}주 | 평균가:{avg_price:,.0f} 현재:{cur_price:,.0f} ({pnl:+.2f}%)")
     print(f"  손절:{stop_price:,.0f} | 익절:{target_price:,.0f}")
     update_position_price(dash, cur_price)
+    log_early_exit_checkpoints(pos, name, pnl, now)
     sell, reason = False, ""
 
     # [2026-07-06 추가] 상한가 익절 — 당일 상한가에 도달하면 다른 조건보다 우선 즉시 전량 익절
