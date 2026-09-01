@@ -370,9 +370,19 @@ def scan_shadow_a(token, stocks, kospi_set):
             if cur['vi_cls_code'] != 'N' or cur['ovtm_vi_cls_code'] != 'N':
                 continue  # 지금 이 순간 VI 발동 중
             raw = get_minute_bars_raw(token, code, market)  # 최신이 index0
-            if len(raw) < BASE_BARS + 2:
-                continue
             bars_asc = list(reversed(raw))  # 오래된 -> 최신
+            # [2026-09-01] BASE_BARS=10이 09:00 장시작 직후엔 그 이전(08:5x대)
+            # 프리마켓 구간까지 걸치는데, 이 구간 봉 중 저가/고가/종가가 0으로
+            # 찍히는 결측 틱이 섞여 들어올 때가 있음. 이게 base_low로 잡히면
+            # 손절가가 0원이 되어 손절이 사실상 무력화됨(2026-08-21 282620 건,
+            # 실제 -37%대 급락을 그대로 다 맞은 걸로 섀도우 시뮬레이션에 기록됨).
+            # base/현재봉 계산 전에 0원 이상틱을 미리 걸러낸다.
+            bars_asc = [b for b in bars_asc
+                        if float(b.get('stck_lwpr', 0) or 0) > 0
+                        and float(b.get('stck_hgpr', 0) or 0) > 0
+                        and float(b.get('stck_prpr', 0) or 0) > 0]
+            if len(bars_asc) < BASE_BARS + 2:
+                continue
 
             found = None
             start_i = max(BASE_BARS, len(bars_asc) - RECHECK_BARS)
