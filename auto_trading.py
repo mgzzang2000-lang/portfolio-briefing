@@ -181,7 +181,26 @@ def kis_post(token, path, body, tr_id):
         print(f"[오류] JSON 파싱 실패 {tr_id}: {e}")
         return {}
 # ── 카카오톡 ──────────────────────────────────────────────────
+def _save_kakao_refresh_token(new_token):
+    # [2026-09-01] 카카오 리프레시 토큰은 60일 만료 전 갱신 요청하면 새 리프레시
+    # 토큰을 같이 내려주는데(만료기간이 다시 60일로 연장됨), 이걸 저장 안 하고
+    # 기존 값만 계속 재사용하다가 원래 토큰 수명이 다한 시점(약 30일 뒤)부터 카톡
+    # 알림이 통째로 끊긴 사고가 있었음(2026-08-19~09-01, 13일간 무응답). 새
+    # 토큰이 오면 .env에 즉시 반영해 재발급 없이 계속 자동 연장되게 함.
+    try:
+        with open('.env', encoding='utf-8') as f:
+            lines = f.readlines()
+        with open('.env', 'w', encoding='utf-8') as f:
+            for line in lines:
+                if line.startswith('KAKAO_REFRESH_TOKEN='):
+                    f.write(f'KAKAO_REFRESH_TOKEN={new_token}\n')
+                else:
+                    f.write(line)
+        print("[카카오] 리프레시 토큰 자동 갱신·저장 완료")
+    except Exception as e:
+        print(f"[경고] 카카오 리프레시 토큰 저장 실패: {e}")
 def get_kakao_token():
+    global KAKAO_REFRESH_TOKEN
     r = requests.post('https://kauth.kakao.com/oauth/token', data={
         'grant_type': 'refresh_token',
         'client_id': KAKAO_CLIENT_ID,
@@ -195,6 +214,10 @@ def get_kakao_token():
         # 실제로 뭐라고 거절했는지(예: invalid_grant, KOE006 client 불일치 등) 알 방법이
         # 없었음. 카카오 응답 본문은 에러코드/설명뿐 우리 비밀값은 포함 안 하므로 그대로 로그.
         raise Exception(f"카카오 토큰 오류: HTTP {r.status_code} {data}")
+    new_refresh = data.get('refresh_token')
+    if new_refresh and new_refresh != KAKAO_REFRESH_TOKEN:
+        _save_kakao_refresh_token(new_refresh)
+        KAKAO_REFRESH_TOKEN = new_refresh
     return data['access_token']
 def send_kakao(kakao_token, msg):
     obj = json.dumps({
