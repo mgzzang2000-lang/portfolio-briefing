@@ -1164,23 +1164,23 @@
     },
     {
       "action": "sell",
-      "date": "09/02 09:38",
       "partial": false,
       "trade_id": "222800-20260902092852",
-      "stock": "222800",
+      "date": "09/02 09:38",
+      "stock": "심텍",
       "qty": 2,
       "price": 124600,
-      "avg_price": 126800,
-      "pnl_pct": -1.74,
-      "pnl_amt": -4400,
-      "reason": "손절 (복구, -1.74%)"
+      "avg_price": 126500,
+      "pnl_pct": -1.5,
+      "pnl_amt": -3800,
+      "reason": "손절 (-1.50%)"
     }
   ],
   "position": null,
   "last_updated": "2026-09-02T09:40:03.880819+09:00",
   "daily_loss_guard": {
     "date": "09/02",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
