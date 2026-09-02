@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 434577,
+  "current_balance": 432249,
   "trades": [
     {
       "action": "buy",
@@ -1161,22 +1161,23 @@
       "qty": 2,
       "price": 126800,
       "amount": 253600
+    },
+    {
+      "action": "sell",
+      "date": "09/02 09:38",
+      "partial": false,
+      "trade_id": "222800-20260902092852",
+      "stock": "222800",
+      "qty": 2,
+      "price": 124600,
+      "avg_price": 126800,
+      "pnl_pct": -1.74,
+      "pnl_amt": -4400,
+      "reason": "손절 (복구, -1.74%)"
     }
   ],
-  "position": {
-    "code": "222800",
-    "name": "222800",
-    "qty": 2,
-    "market": "Q",
-    "avg_price": 126800,
-    "current_price": 126800,
-    "stop_price": 124602,
-    "target_price": 131243,
-    "entry_time": "2026-09-02T09:28:52.871763+09:00",
-    "trailing_activated": false,
-    "trade_id": "222800-20260902092852"
-  },
-  "last_updated": "2026-09-02T09:35:04.654344+09:00",
+  "position": null,
+  "last_updated": "2026-09-02T09:40:03.880819+09:00",
   "daily_loss_guard": {
     "date": "09/02",
     "consecutive_losses": 0,
@@ -1345,10 +1346,10 @@
     },
     {
       "date": "09/02",
-      "balance": 434577
+      "balance": 432249
     }
   ],
-  "position_version": 41,
+  "position_version": 42,
   "last_sold_code": "032820",
   "last_sold_at": "2026-08-28T14:12:40.553365+09:00"
 }
