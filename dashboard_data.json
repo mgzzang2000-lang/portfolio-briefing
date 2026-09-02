@@ -1213,16 +1213,16 @@
     },
     {
       "action": "sell",
-      "date": "09/02 12:35",
       "partial": false,
       "trade_id": "047770-20260902112719",
-      "stock": "047770",
+      "date": "09/02 12:35",
+      "stock": "코데즈컴바인",
       "qty": 36,
       "price": 4060,
-      "avg_price": 4045,
-      "pnl_pct": 0.37,
-      "pnl_amt": 540,
-      "reason": "익절 (복구, +0.37%)"
+      "avg_price": 4050,
+      "pnl_pct": 0.25,
+      "pnl_amt": 360,
+      "reason": "손절 (+0.25%)"
     }
   ],
   "position": null,
