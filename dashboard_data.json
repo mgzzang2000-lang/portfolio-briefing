@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 436266,
+  "current_balance": 435234,
   "trades": [
     {
       "action": "buy",
@@ -1210,30 +1210,23 @@
       "pnl_pct": 2.35,
       "pnl_amt": 1520,
       "reason": "+2% 부분익절 (+2.35%)"
+    },
+    {
+      "action": "sell",
+      "date": "09/02 12:35",
+      "partial": false,
+      "trade_id": "047770-20260902112719",
+      "stock": "047770",
+      "qty": 36,
+      "price": 4060,
+      "avg_price": 4045,
+      "pnl_pct": 0.37,
+      "pnl_amt": 540,
+      "reason": "익절 (복구, +0.37%)"
     }
   ],
-  "position": {
-    "code": "047770",
-    "name": "047770",
-    "qty": 74,
-    "market": "Q",
-    "avg_price": 4045,
-    "current_price": 4085,
-    "stop_price": 4066.2,
-    "target_price": 4204,
-    "entry_time": "2026-09-02T11:27:19.055945+09:00",
-    "trailing_activated": true,
-    "trade_id": "047770-20260902112719",
-    "peak_pnl_pct": 2.345679012345679,
-    "early_exit_logged_checkpoints": [
-      10,
-      20,
-      30,
-      45,
-      60
-    ]
-  },
-  "last_updated": "2026-09-02T12:30:11.181358+09:00",
+  "position": null,
+  "last_updated": "2026-09-02T12:35:48.127450+09:00",
   "daily_loss_guard": {
     "date": "09/02",
     "consecutive_losses": 1,
@@ -1402,10 +1395,10 @@
     },
     {
       "date": "09/02",
-      "balance": 436266
+      "balance": 435234
     }
   ],
-  "position_version": 43,
+  "position_version": 44,
   "last_sold_code": "222800",
   "last_sold_at": "2026-09-02T09:38:47.252943+09:00"
 }
