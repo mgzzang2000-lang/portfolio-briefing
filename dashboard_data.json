@@ -1151,9 +1151,31 @@
       "pnl_pct": -1.57,
       "pnl_amt": -4600,
       "reason": "손절 (-1.57%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "222800-20260902092852",
+      "date": "09/02 09:28",
+      "code": "222800",
+      "stock": "222800",
+      "qty": 2,
+      "price": 126800,
+      "amount": 253600
     }
   ],
-  "position": null,
+  "position": {
+    "code": "222800",
+    "name": "222800",
+    "qty": 2,
+    "market": "Q",
+    "avg_price": 126800,
+    "current_price": 126800,
+    "stop_price": 124602,
+    "target_price": 131243,
+    "entry_time": "2026-09-02T09:28:52.871763+09:00",
+    "trailing_activated": false,
+    "trade_id": "222800-20260902092852"
+  },
   "last_updated": "2026-09-02T09:28:58.770617+09:00",
   "daily_loss_guard": {
     "date": "09/02",
@@ -1326,7 +1348,7 @@
       "balance": 436777
     }
   ],
-  "position_version": 40,
+  "position_version": 41,
   "last_sold_code": "032820",
   "last_sold_at": "2026-08-28T14:12:40.553365+09:00"
 }
