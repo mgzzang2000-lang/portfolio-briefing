@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 430729,
+  "current_balance": 429989,
   "trades": [
     {
       "action": "buy",
@@ -1201,7 +1201,7 @@
     "peak_pnl_pct": -0.24691358024691357,
     "early_exit_logged_checkpoints": []
   },
-  "last_updated": "2026-09-02T11:34:23.208634+09:00",
+  "last_updated": "2026-09-02T11:35:29.787179+09:00",
   "daily_loss_guard": {
     "date": "09/02",
     "consecutive_losses": 1,
@@ -1370,7 +1370,7 @@
     },
     {
       "date": "09/02",
-      "balance": 430729
+      "balance": 429989
     }
   ],
   "position_version": 43,
