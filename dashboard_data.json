@@ -1228,10 +1228,11 @@
     "early_exit_logged_checkpoints": [
       10,
       20,
-      30
+      30,
+      45
     ]
   },
-  "last_updated": "2026-09-02T12:12:09.135852+09:00",
+  "last_updated": "2026-09-02T12:12:53.576476+09:00",
   "daily_loss_guard": {
     "date": "09/02",
     "consecutive_losses": 1,
