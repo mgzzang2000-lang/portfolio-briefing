@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 132919,
+  "current_balance": 438568,
   "trades": [
     {
       "action": "buy",
@@ -1184,6 +1184,19 @@
       "qty": 74,
       "price": 4045,
       "amount": 299330
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "047770-20260902112719",
+      "date": "09/02 12:11",
+      "stock": "코데즈컴바인",
+      "qty": 22,
+      "price": 4140,
+      "avg_price": 4050,
+      "pnl_pct": 2.22,
+      "pnl_amt": 1980,
+      "reason": "+2% 부분익절 (+2.22%)"
     }
   ],
   "position": {
@@ -1192,20 +1205,20 @@
     "qty": 74,
     "market": "Q",
     "avg_price": 4045,
-    "current_price": 4120,
-    "stop_price": 3981,
+    "current_price": 4140,
+    "stop_price": 4066.2,
     "target_price": 4204,
     "entry_time": "2026-09-02T11:27:19.055945+09:00",
-    "trailing_activated": false,
+    "trailing_activated": true,
     "trade_id": "047770-20260902112719",
-    "peak_pnl_pct": 1.8518518518518516,
+    "peak_pnl_pct": 2.2222222222222223,
     "early_exit_logged_checkpoints": [
       10,
       20,
       30
     ]
   },
-  "last_updated": "2026-09-02T12:10:41.601879+09:00",
+  "last_updated": "2026-09-02T12:11:15.460509+09:00",
   "daily_loss_guard": {
     "date": "09/02",
     "consecutive_losses": 1,
@@ -1374,7 +1387,7 @@
     },
     {
       "date": "09/02",
-      "balance": 132919
+      "balance": 438568
     }
   ],
   "position_version": 43,
