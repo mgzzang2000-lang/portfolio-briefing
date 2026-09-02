@@ -1197,6 +1197,19 @@
       "pnl_pct": 2.35,
       "pnl_amt": 1520,
       "reason": "+2% 부분익절 (+2.35%)"
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "047770-20260902112719",
+      "date": "09/02 12:11",
+      "stock": "코데즈컴바인",
+      "qty": 22,
+      "price": 4140,
+      "avg_price": 4050,
+      "pnl_pct": 2.22,
+      "pnl_amt": 1980,
+      "reason": "+2% 부분익절 (+2.22%)"
     }
   ],
   "position": {
