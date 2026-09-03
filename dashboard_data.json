@@ -1246,13 +1246,26 @@
       "pnl_pct": -2.03,
       "pnl_amt": -6000,
       "reason": "손절 (복구, -2.03%)"
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "014950-20260903101416",
+      "date": "09/03 10:37",
+      "stock": "삼익제약",
+      "qty": 48,
+      "price": 6060,
+      "avg_price": 6160,
+      "pnl_pct": -1.62,
+      "pnl_amt": -4800,
+      "reason": "손절 (-1.62%)"
     }
   ],
   "position": null,
   "last_updated": "2026-09-03T10:38:02.476579+09:00",
   "daily_loss_guard": {
     "date": "09/03",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
