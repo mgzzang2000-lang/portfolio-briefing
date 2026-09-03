@@ -1223,9 +1223,33 @@
       "pnl_pct": 0.25,
       "pnl_amt": 360,
       "reason": "손절 (+0.25%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "014950-20260903101416",
+      "date": "09/03 10:14",
+      "code": "014950",
+      "stock": "014950",
+      "qty": 48,
+      "price": 6155,
+      "amount": 295440
     }
   ],
-  "position": null,
+  "position": {
+    "code": "014950",
+    "name": "014950",
+    "qty": 48,
+    "market": "Q",
+    "avg_price": 6155,
+    "current_price": 6180,
+    "stop_price": 6067,
+    "target_price": 6390,
+    "entry_time": "2026-09-03T10:14:16.669511+09:00",
+    "trailing_activated": false,
+    "trade_id": "014950-20260903101416",
+    "peak_pnl_pct": 0.3246753246753247,
+    "early_exit_logged_checkpoints": []
+  },
   "last_updated": "2026-09-03T10:15:30.941738+09:00",
   "daily_loss_guard": {
     "date": "09/03",
@@ -1402,7 +1426,7 @@
       "balance": 436154
     }
   ],
-  "position_version": 44,
+  "position_version": 45,
   "last_sold_code": "047770",
   "last_sold_at": "2026-09-02T12:35:42.550136+09:00"
 }
