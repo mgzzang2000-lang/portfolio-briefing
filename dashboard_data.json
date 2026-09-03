@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 426776,
+  "current_balance": 422016,
   "trades": [
     {
       "action": "buy",
@@ -1269,30 +1269,23 @@
       "qty": 19,
       "price": 15300,
       "amount": 290700
+    },
+    {
+      "action": "sell",
+      "date": "09/03 14:03",
+      "partial": false,
+      "trade_id": "417840-20260903121056",
+      "stock": "417840",
+      "qty": 19,
+      "price": 15001,
+      "avg_price": 15300,
+      "pnl_pct": -1.95,
+      "pnl_amt": -5681,
+      "reason": "손절 (복구, -1.95%)"
     }
   ],
-  "position": {
-    "code": "417840",
-    "name": "417840",
-    "qty": 19,
-    "market": "Q",
-    "avg_price": 15300,
-    "current_price": 15180,
-    "stop_price": 15070,
-    "target_price": 15873,
-    "entry_time": "2026-09-03T12:10:56.460407+09:00",
-    "trailing_activated": false,
-    "trade_id": "417840-20260903121056",
-    "peak_pnl_pct": 1.6339869281045754,
-    "early_exit_logged_checkpoints": [
-      10,
-      20,
-      30,
-      45,
-      60
-    ]
-  },
-  "last_updated": "2026-09-03T13:59:47.349968+09:00",
+  "position": null,
+  "last_updated": "2026-09-03T14:05:31.301889+09:00",
   "daily_loss_guard": {
     "date": "09/03",
     "consecutive_losses": 1,
@@ -1465,10 +1458,10 @@
     },
     {
       "date": "09/03",
-      "balance": 426776
+      "balance": 422016
     }
   ],
-  "position_version": 47,
+  "position_version": 48,
   "last_sold_code": "014950",
   "last_sold_at": "2026-09-03T10:37:55.256646+09:00"
 }
