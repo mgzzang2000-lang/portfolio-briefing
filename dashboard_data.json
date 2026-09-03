@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 139794,
+  "current_balance": 428336,
   "trades": [
     {
       "action": "buy",
@@ -1233,30 +1233,26 @@
       "qty": 48,
       "price": 6155,
       "amount": 295440
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "014950-20260903101416",
+      "date": "09/03 10:37",
+      "stock": "삼익제약",
+      "qty": 48,
+      "price": 6060,
+      "avg_price": 6160,
+      "pnl_pct": -1.62,
+      "pnl_amt": -4800,
+      "reason": "손절 (-1.62%)"
     }
   ],
-  "position": {
-    "code": "014950",
-    "name": "014950",
-    "qty": 48,
-    "market": "Q",
-    "avg_price": 6155,
-    "current_price": 6090,
-    "stop_price": 6067,
-    "target_price": 6390,
-    "entry_time": "2026-09-03T10:14:16.669511+09:00",
-    "trailing_activated": false,
-    "trade_id": "014950-20260903101416",
-    "peak_pnl_pct": 0.487012987012987,
-    "early_exit_logged_checkpoints": [
-      10,
-      20
-    ]
-  },
-  "last_updated": "2026-09-03T10:37:27.741382+09:00",
+  "position": null,
+  "last_updated": "2026-09-03T10:37:55.256662+09:00",
   "daily_loss_guard": {
     "date": "09/03",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
@@ -1426,10 +1422,10 @@
     },
     {
       "date": "09/03",
-      "balance": 139794
+      "balance": 428336
     }
   ],
-  "position_version": 45,
-  "last_sold_code": "047770",
-  "last_sold_at": "2026-09-02T12:35:42.550136+09:00"
+  "position_version": 46,
+  "last_sold_code": "014950",
+  "last_sold_at": "2026-09-03T10:37:55.256646+09:00"
 }
