@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 428336,
+  "current_balance": 428486,
   "trades": [
     {
       "action": "buy",
@@ -1262,7 +1262,7 @@
     }
   ],
   "position": null,
-  "last_updated": "2026-09-03T12:10:02.593732+09:00",
+  "last_updated": "2026-09-03T12:13:21.723120+09:00",
   "daily_loss_guard": {
     "date": "09/03",
     "consecutive_losses": 1,
@@ -1435,10 +1435,11 @@
     },
     {
       "date": "09/03",
-      "balance": 428336
+      "balance": 428486
     }
   ],
   "position_version": 46,
   "last_sold_code": "014950",
-  "last_sold_at": "2026-09-03T10:37:55.256646+09:00"
+  "last_sold_at": "2026-09-03T10:37:55.256646+09:00",
+  "stray_notified": "417840(19주)"
 }
