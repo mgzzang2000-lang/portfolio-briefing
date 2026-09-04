@@ -1334,6 +1334,32 @@
     },
     {
       "action": "sell",
+      "date": "09/04 13:53",
+      "partial": false,
+      "trade_id": "356860-20260904115534",
+      "stock": "356860",
+      "qty": 4,
+      "price": 37350,
+      "avg_price": 37450,
+      "pnl_pct": -0.27,
+      "pnl_amt": -400,
+      "reason": "손절 (복구, -0.27%)"
+    },
+    {
+      "action": "sell",
+      "date": "09/04 13:53",
+      "partial": false,
+      "trade_id": "356860-20260904115534",
+      "stock": "356860",
+      "qty": 2,
+      "price": 37350,
+      "avg_price": 37450,
+      "pnl_pct": -0.27,
+      "pnl_amt": -200,
+      "reason": "손절 (복구, -0.27%)"
+    },
+    {
+      "action": "sell",
       "partial": true,
       "trade_id": "356860-20260904115534",
       "date": "09/04 13:54",
