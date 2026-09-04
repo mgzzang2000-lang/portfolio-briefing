@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 420376,
+  "current_balance": 421258,
   "trades": [
     {
       "action": "buy",
@@ -1305,6 +1305,19 @@
       "qty": 8,
       "price": 37450,
       "amount": 299600
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "356860-20260904115534",
+      "date": "09/04 13:53",
+      "stock": "티엘비",
+      "qty": 4,
+      "price": 37400,
+      "avg_price": 37400,
+      "pnl_pct": 0.0,
+      "pnl_amt": 0,
+      "reason": "2시간 부분청산 (+0.00%)"
     }
   ],
   "position": {
@@ -1314,7 +1327,7 @@
     "market": "Q",
     "avg_price": 37450,
     "current_price": 37400,
-    "stop_price": 36888,
+    "stop_price": 37549.6,
     "target_price": 38854,
     "entry_time": "2026-09-04T11:55:34.901054+09:00",
     "trailing_activated": false,
@@ -1328,7 +1341,7 @@
       60
     ]
   },
-  "last_updated": "2026-09-04T13:53:10.290316+09:00",
+  "last_updated": "2026-09-04T13:53:46.168113+09:00",
   "daily_loss_guard": {
     "date": "09/04",
     "consecutive_losses": 0,
@@ -1505,7 +1518,7 @@
     },
     {
       "date": "09/04",
-      "balance": 420376
+      "balance": 421258
     }
   ],
   "position_version": 49,
