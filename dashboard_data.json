@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 419971,
+  "current_balance": 419571,
   "trades": [
     {
       "action": "buy",
@@ -1393,32 +1393,27 @@
       "qty": 1,
       "price": 157900,
       "amount": 157900
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "010950-20260904143935",
+      "date": "09/04 15:20",
+      "stock": "S-Oil",
+      "qty": 1,
+      "price": 156600,
+      "avg_price": 157950,
+      "pnl_pct": -0.85,
+      "pnl_amt": -1350,
+      "reason": "강제청산 (15:20)"
     }
   ],
-  "position": {
-    "code": "010950",
-    "name": "010950",
-    "qty": 1,
-    "market": "J",
-    "avg_price": 157900,
-    "current_price": 156600,
-    "stop_price": 155630,
-    "target_price": 163925,
-    "entry_time": "2026-09-04T14:39:35.656268+09:00",
-    "trailing_activated": false,
-    "trade_id": "010950-20260904143935",
-    "peak_pnl_pct": 0.2849002849002849,
-    "early_exit_logged_checkpoints": [
-      10,
-      20,
-      30
-    ]
-  },
-  "last_updated": "2026-09-04T15:19:37.241111+09:00",
+  "position": null,
+  "last_updated": "2026-09-04T15:20:11.824508+09:00",
   "daily_loss_guard": {
     "date": "09/04",
-    "consecutive_losses": 1,
-    "notified": false
+    "consecutive_losses": 2,
+    "notified": true
   },
   "balance_history": [
     {
@@ -1591,11 +1586,11 @@
     },
     {
       "date": "09/04",
-      "balance": 419971
+      "balance": 419571
     }
   ],
-  "position_version": 51,
-  "last_sold_code": "356860",
-  "last_sold_at": "2026-09-04T13:54:21.737036+09:00",
-  "stray_notified": "010950(1주)"
+  "position_version": 52,
+  "last_sold_code": "010950",
+  "last_sold_at": "2026-09-04T15:20:04.960855+09:00",
+  "stray_notified": null
 }
