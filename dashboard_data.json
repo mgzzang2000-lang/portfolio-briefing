@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 421976,
+  "current_balance": 420941,
   "trades": [
     {
       "action": "buy",
@@ -1305,30 +1305,62 @@
       "qty": 8,
       "price": 37450,
       "amount": 299600
+    },
+    {
+      "action": "sell",
+      "date": "09/04 13:53",
+      "partial": false,
+      "trade_id": "356860-20260904115534",
+      "stock": "356860",
+      "qty": 4,
+      "price": 37350,
+      "avg_price": 37450,
+      "pnl_pct": -0.27,
+      "pnl_amt": -400,
+      "reason": "손절 (복구, -0.27%)"
+    },
+    {
+      "action": "sell",
+      "date": "09/04 13:53",
+      "partial": false,
+      "trade_id": "356860-20260904115534",
+      "stock": "356860",
+      "qty": 2,
+      "price": 37350,
+      "avg_price": 37450,
+      "pnl_pct": -0.27,
+      "pnl_amt": -200,
+      "reason": "손절 (복구, -0.27%)"
+    },
+    {
+      "action": "sell",
+      "date": "09/04 13:54",
+      "partial": false,
+      "trade_id": "356860-20260904115534",
+      "stock": "356860",
+      "qty": 1,
+      "price": 37350,
+      "avg_price": 37450,
+      "pnl_pct": -0.27,
+      "pnl_amt": -100,
+      "reason": "손절 (복구, -0.27%)"
+    },
+    {
+      "action": "sell",
+      "date": "09/04 13:54",
+      "partial": false,
+      "trade_id": "356860-20260904115534",
+      "stock": "356860",
+      "qty": 1,
+      "price": 37350,
+      "avg_price": 37450,
+      "pnl_pct": -0.27,
+      "pnl_amt": -100,
+      "reason": "손절 (복구, -0.27%)"
     }
   ],
-  "position": {
-    "code": "356860",
-    "name": "356860",
-    "qty": 8,
-    "market": "Q",
-    "avg_price": 37450,
-    "current_price": 37300,
-    "stop_price": 36888,
-    "target_price": 38854,
-    "entry_time": "2026-09-04T11:55:34.901054+09:00",
-    "trailing_activated": false,
-    "trade_id": "356860-20260904115534",
-    "peak_pnl_pct": 0.53475935828877,
-    "early_exit_logged_checkpoints": [
-      10,
-      20,
-      30,
-      45,
-      60
-    ]
-  },
-  "last_updated": "2026-09-04T13:53:22.784977+09:00",
+  "position": null,
+  "last_updated": "2026-09-04T13:54:32.038407+09:00",
   "daily_loss_guard": {
     "date": "09/04",
     "consecutive_losses": 0,
@@ -1505,10 +1537,10 @@
     },
     {
       "date": "09/04",
-      "balance": 421976
+      "balance": 420941
     }
   ],
-  "position_version": 49,
+  "position_version": 50,
   "last_sold_code": "417840",
   "last_sold_at": "2026-09-03T14:03:31.543721+09:00"
 }
