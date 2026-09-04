@@ -1323,10 +1323,11 @@
     "early_exit_logged_checkpoints": [
       10,
       20,
-      30
+      30,
+      45
     ]
   },
-  "last_updated": "2026-09-04T12:40:27.552152+09:00",
+  "last_updated": "2026-09-04T12:41:05.379087+09:00",
   "daily_loss_guard": {
     "date": "09/04",
     "consecutive_losses": 0,
