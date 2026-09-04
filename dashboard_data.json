@@ -1383,9 +1383,31 @@
       "pnl_pct": -0.13,
       "pnl_amt": -50,
       "reason": "손절 (-0.13%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "010950-20260904143935",
+      "date": "09/04 14:39",
+      "code": "010950",
+      "stock": "010950",
+      "qty": 1,
+      "price": 157900,
+      "amount": 157900
     }
   ],
-  "position": null,
+  "position": {
+    "code": "010950",
+    "name": "010950",
+    "qty": 1,
+    "market": "J",
+    "avg_price": 157900,
+    "current_price": 157900,
+    "stop_price": 155630,
+    "target_price": 163925,
+    "entry_time": "2026-09-04T14:39:35.656268+09:00",
+    "trailing_activated": false,
+    "trade_id": "010950-20260904143935"
+  },
   "last_updated": "2026-09-04T14:40:22.854248+09:00",
   "daily_loss_guard": {
     "date": "09/04",
@@ -1566,7 +1588,7 @@
       "balance": 420871
     }
   ],
-  "position_version": 50,
+  "position_version": 51,
   "last_sold_code": "356860",
   "last_sold_at": "2026-09-04T13:54:21.737036+09:00",
   "stray_notified": "010950(1주)"
