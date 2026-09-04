@@ -1295,9 +1295,33 @@
       "pnl_pct": -1.95,
       "pnl_amt": -5681,
       "reason": "손절 (복구, -1.95%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "356860-20260904115534",
+      "date": "09/04 11:55",
+      "code": "356860",
+      "stock": "356860",
+      "qty": 8,
+      "price": 37450,
+      "amount": 299600
     }
   ],
-  "position": null,
+  "position": {
+    "code": "356860",
+    "name": "356860",
+    "qty": 8,
+    "market": "Q",
+    "avg_price": 37450,
+    "current_price": 37350,
+    "stop_price": 36888,
+    "target_price": 38854,
+    "entry_time": "2026-09-04T11:55:34.901054+09:00",
+    "trailing_activated": false,
+    "trade_id": "356860-20260904115534",
+    "peak_pnl_pct": -0.1336898395721925,
+    "early_exit_logged_checkpoints": []
+  },
   "last_updated": "2026-09-04T11:56:46.197836+09:00",
   "daily_loss_guard": {
     "date": "09/04",
@@ -1478,7 +1502,7 @@
       "balance": 421576
     }
   ],
-  "position_version": 48,
+  "position_version": 49,
   "last_sold_code": "417840",
   "last_sold_at": "2026-09-03T14:03:31.543721+09:00"
 }
