@@ -1334,36 +1334,62 @@
     },
     {
       "action": "sell",
-      "date": "09/04 13:54",
-      "partial": false,
+      "partial": true,
       "trade_id": "356860-20260904115534",
-      "stock": "356860",
-      "qty": 1,
-      "price": 37350,
-      "avg_price": 37450,
-      "pnl_pct": -0.27,
-      "pnl_amt": -100,
-      "reason": "손절 (복구, -0.27%)"
+      "date": "09/04 13:53",
+      "stock": "티엘비",
+      "qty": 4,
+      "price": 37400,
+      "avg_price": 37400,
+      "pnl_pct": 0.0,
+      "pnl_amt": 0,
+      "reason": "2시간 부분청산 (+0.00%)"
     },
     {
       "action": "sell",
-      "date": "09/04 13:54",
+      "partial": true,
+      "trade_id": "356860-20260904115534",
+      "date": "09/04 13:53",
+      "stock": "티엘비",
+      "qty": 2,
+      "price": 37400,
+      "avg_price": 37400,
+      "pnl_pct": 0.0,
+      "pnl_amt": 0,
+      "reason": "2시간 부분청산 (+0.00%)"
+    },
+    {
+      "action": "sell",
       "partial": false,
       "trade_id": "356860-20260904115534",
-      "stock": "356860",
+      "date": "09/04 13:54",
+      "stock": "티엘비",
       "qty": 1,
       "price": 37350,
-      "avg_price": 37450,
-      "pnl_pct": -0.27,
-      "pnl_amt": -100,
-      "reason": "손절 (복구, -0.27%)"
+      "avg_price": 37400,
+      "pnl_pct": -0.13,
+      "pnl_amt": -50,
+      "reason": "손절 (-0.13%)"
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "356860-20260904115534",
+      "date": "09/04 13:54",
+      "stock": "티엘비",
+      "qty": 1,
+      "price": 37400,
+      "avg_price": 37400,
+      "pnl_pct": 0.0,
+      "pnl_amt": 0,
+      "reason": "2시간 부분청산 (+0.00%)"
     }
   ],
   "position": null,
   "last_updated": "2026-09-04T13:54:32.038407+09:00",
   "daily_loss_guard": {
     "date": "09/04",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
