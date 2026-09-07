@@ -1,7 +1,7 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 535.78,
-  "_last_raw_cash": 535.78,
+  "current_balance": 536.42,
+  "_last_raw_cash": 536.42,
   "pending_cash_deltas": [],
   "positions": {
     "DOC": {
@@ -13,9 +13,9 @@
       "entry_date": "20260717",
       "qty": 22,
       "sector": "Real Estate",
-      "current_price": 21.03,
-      "pnl_pct": -6.57,
-      "price_updated_at": "07:22"
+      "current_price": 20.65,
+      "pnl_pct": -8.26,
+      "price_updated_at": "06:45"
     },
     "BAX": {
       "stop_price": 24.33,
@@ -26,9 +26,9 @@
       "entry_date": "20260801",
       "qty": 19,
       "sector": "Health Care",
-      "current_price": 25.57,
-      "pnl_pct": -2.25,
-      "price_updated_at": "07:22"
+      "current_price": 25.83,
+      "pnl_pct": -1.26,
+      "price_updated_at": "06:45"
     },
     "VLO": {
       "stop_price": 285.42,
@@ -39,9 +39,9 @@
       "entry_date": "20260801",
       "qty": 1,
       "sector": "Energy",
-      "current_price": 370.69,
-      "pnl_pct": 20.78,
-      "price_updated_at": "07:22"
+      "current_price": 370.72,
+      "pnl_pct": 20.79,
+      "price_updated_at": "06:45"
     }
   },
   "trade_history": [
@@ -119,10 +119,6 @@
     }
   ],
   "balance_history": [
-    {
-      "date": "07/09",
-      "balance": 1974.98
-    },
     {
       "date": "07/10",
       "balance": 1974.98
@@ -350,9 +346,21 @@
     {
       "date": "09/04",
       "balance": 535.78
+    },
+    {
+      "date": "09/05",
+      "balance": 535.78
+    },
+    {
+      "date": "09/06",
+      "balance": 535.78
+    },
+    {
+      "date": "09/07",
+      "balance": 536.42
     }
   ],
-  "total_assets": 1854.96,
+  "total_assets": 1852.21,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -564,8 +572,20 @@
     },
     {
       "date": "09/04",
-      "balance": 1854.96
+      "balance": 1862.82
+    },
+    {
+      "date": "09/05",
+      "balance": 1851.57
+    },
+    {
+      "date": "09/06",
+      "balance": 1851.57
+    },
+    {
+      "date": "09/07",
+      "balance": 1852.21
     }
   ],
-  "last_updated": "2026-09-04T07:22:21.949831+09:00"
+  "last_updated": "2026-09-07T06:45:28.813890+09:00"
 }
