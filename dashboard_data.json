@@ -1488,32 +1488,27 @@
       "qty": 13,
       "price": 22550,
       "amount": 293150
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "030530-20260907143422",
+      "date": "09/07 15:20",
+      "stock": "원익홀딩스",
+      "qty": 13,
+      "price": 22350,
+      "avg_price": 22550,
+      "pnl_pct": -0.89,
+      "pnl_amt": -2600,
+      "reason": "강제청산 (15:20)"
     }
   ],
-  "position": {
-    "code": "030530",
-    "name": "030530",
-    "qty": 13,
-    "market": "Q",
-    "avg_price": 22550,
-    "current_price": 22450,
-    "stop_price": 22211,
-    "target_price": 23395,
-    "entry_time": "2026-09-07T14:34:22.352367+09:00",
-    "trailing_activated": false,
-    "trade_id": "030530-20260907143422",
-    "peak_pnl_pct": 0.22172949002217296,
-    "early_exit_logged_checkpoints": [
-      10,
-      20,
-      30
-    ]
-  },
+  "position": null,
   "last_updated": "2026-09-07T15:20:23.826122+09:00",
   "daily_loss_guard": {
     "date": "09/07",
-    "consecutive_losses": 1,
-    "notified": false
+    "consecutive_losses": 2,
+    "notified": true
   },
   "balance_history": [
     {
@@ -1693,7 +1688,7 @@
       "balance": 418668
     }
   ],
-  "position_version": 57,
+  "position_version": 58,
   "last_sold_code": "034020",
   "last_sold_at": "2026-09-07T12:46:54.355786+09:00",
   "stray_notified": null
