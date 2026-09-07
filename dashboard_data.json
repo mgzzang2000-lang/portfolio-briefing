@@ -1439,6 +1439,19 @@
       "qty": 3,
       "price": 83300,
       "amount": 249900
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "034020-20260907103416",
+      "date": "09/07 12:31",
+      "stock": "두산에너빌리티",
+      "qty": 1,
+      "price": 85100,
+      "avg_price": 83350,
+      "pnl_pct": 2.1,
+      "pnl_amt": 1750,
+      "reason": "+2% 부분익절 (+2.10%)"
     }
   ],
   "position": {
