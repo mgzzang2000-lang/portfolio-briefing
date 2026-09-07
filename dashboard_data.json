@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 415178,
+  "current_balance": 165278,
   "trades": [
     {
       "action": "buy",
@@ -1429,10 +1429,32 @@
       "pnl_pct": -1.6,
       "pnl_amt": -4800,
       "reason": "손절 (-1.60%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "034020-20260907103416",
+      "date": "09/07 10:34",
+      "code": "034020",
+      "stock": "034020",
+      "qty": 3,
+      "price": 83300,
+      "amount": 249900
     }
   ],
-  "position": null,
-  "last_updated": "2026-09-07T10:33:30.437710+09:00",
+  "position": {
+    "code": "034020",
+    "name": "034020",
+    "qty": 3,
+    "market": "J",
+    "avg_price": 83300,
+    "current_price": 83300,
+    "stop_price": 82099,
+    "target_price": 86475,
+    "entry_time": "2026-09-07T10:34:16.747482+09:00",
+    "trailing_activated": false,
+    "trade_id": "034020-20260907103416"
+  },
+  "last_updated": "2026-09-07T10:34:16.747830+09:00",
   "daily_loss_guard": {
     "date": "09/07",
     "consecutive_losses": 1,
@@ -1613,10 +1635,10 @@
     },
     {
       "date": "09/07",
-      "balance": 415178
+      "balance": 165278
     }
   ],
-  "position_version": 54,
+  "position_version": 55,
   "last_sold_code": "067310",
   "last_sold_at": "2026-09-07T10:01:01.397494+09:00",
   "stray_notified": null
