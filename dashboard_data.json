@@ -1406,9 +1406,31 @@
       "pnl_pct": -0.85,
       "pnl_amt": -1350,
       "reason": "강제청산 (15:20)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "067310-20260907092115",
+      "date": "09/07 09:21",
+      "code": "067310",
+      "stock": "067310",
+      "qty": 8,
+      "price": 37450,
+      "amount": 299600
     }
   ],
-  "position": null,
+  "position": {
+    "code": "067310",
+    "name": "067310",
+    "qty": 8,
+    "market": "Q",
+    "avg_price": 37450,
+    "current_price": 37450,
+    "stop_price": 36839,
+    "target_price": 38802,
+    "entry_time": "2026-09-07T09:21:15.156354+09:00",
+    "trailing_activated": false,
+    "trade_id": "067310-20260907092115"
+  },
   "last_updated": "2026-09-07T09:21:46.768010+09:00",
   "daily_loss_guard": {
     "date": "09/07",
@@ -1593,7 +1615,7 @@
       "balance": 419806
     }
   ],
-  "position_version": 52,
+  "position_version": 53,
   "last_sold_code": "010950",
   "last_sold_at": "2026-09-04T15:20:04.960855+09:00",
   "stray_notified": null
