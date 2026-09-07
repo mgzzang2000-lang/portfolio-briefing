@@ -1478,9 +1478,31 @@
       "pnl_pct": 3.9,
       "pnl_amt": 3250,
       "reason": "익절 (+3.90%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "030530-20260907143422",
+      "date": "09/07 14:34",
+      "code": "030530",
+      "stock": "030530",
+      "qty": 13,
+      "price": 22550,
+      "amount": 293150
     }
   ],
-  "position": null,
+  "position": {
+    "code": "030530",
+    "name": "030530",
+    "qty": 13,
+    "market": "Q",
+    "avg_price": 22550,
+    "current_price": 22550,
+    "stop_price": 22211,
+    "target_price": 23395,
+    "entry_time": "2026-09-07T14:34:22.352367+09:00",
+    "trailing_activated": false,
+    "trade_id": "030530-20260907143422"
+  },
   "last_updated": "2026-09-07T14:34:30.032621+09:00",
   "daily_loss_guard": {
     "date": "09/07",
@@ -1665,7 +1687,7 @@
       "balance": 421268
     }
   ],
-  "position_version": 56,
+  "position_version": 57,
   "last_sold_code": "034020",
   "last_sold_at": "2026-09-07T12:46:54.355786+09:00",
   "stray_notified": null
