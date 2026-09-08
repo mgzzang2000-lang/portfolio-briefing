@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 418668,
+  "current_balance": 123797,
   "trades": [
     {
       "action": "buy",
@@ -1501,10 +1501,32 @@
       "pnl_pct": -0.89,
       "pnl_amt": -2600,
       "reason": "강제청산 (15:20)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "032820-20260908102531",
+      "date": "09/08 10:25",
+      "code": "032820",
+      "stock": "032820",
+      "qty": 25,
+      "price": 11770,
+      "amount": 294250
     }
   ],
-  "position": null,
-  "last_updated": "2026-09-08T10:24:40.648454+09:00",
+  "position": {
+    "code": "032820",
+    "name": "032820",
+    "qty": 25,
+    "market": "Q",
+    "avg_price": 11770,
+    "current_price": 11770,
+    "stop_price": 11603,
+    "target_price": 12221,
+    "entry_time": "2026-09-08T10:25:31.985005+09:00",
+    "trailing_activated": false,
+    "trade_id": "032820-20260908102531"
+  },
+  "last_updated": "2026-09-08T10:25:31.985346+09:00",
   "daily_loss_guard": {
     "date": "09/08",
     "consecutive_losses": 0,
@@ -1689,10 +1711,10 @@
     },
     {
       "date": "09/08",
-      "balance": 418668
+      "balance": 123797
     }
   ],
-  "position_version": 58,
+  "position_version": 59,
   "last_sold_code": "030530",
   "last_sold_at": "2026-09-07T15:20:07.057145+09:00",
   "stray_notified": null
