@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 419882,
+  "current_balance": 423531,
   "trades": [
     {
       "action": "buy",
@@ -1511,6 +1511,19 @@
       "qty": 25,
       "price": 11770,
       "amount": 294250
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "032820-20260908102531",
+      "date": "09/08 11:16",
+      "stock": "우리기술",
+      "qty": 8,
+      "price": 12030,
+      "avg_price": 11775,
+      "pnl_pct": 2.17,
+      "pnl_amt": 2040,
+      "reason": "+2% 부분익절 (+2.17%)"
     }
   ],
   "position": {
@@ -1519,13 +1532,13 @@
     "qty": 25,
     "market": "Q",
     "avg_price": 11770,
-    "current_price": 11990,
-    "stop_price": 11603,
+    "current_price": 12030,
+    "stop_price": 11822.1,
     "target_price": 12221,
     "entry_time": "2026-09-08T10:25:31.985005+09:00",
-    "trailing_activated": false,
+    "trailing_activated": true,
     "trade_id": "032820-20260908102531",
-    "peak_pnl_pct": 1.9957537154989384,
+    "peak_pnl_pct": 2.1656050955414012,
     "early_exit_logged_checkpoints": [
       10,
       20,
@@ -1533,7 +1546,7 @@
       45
     ]
   },
-  "last_updated": "2026-09-08T11:15:27.744974+09:00",
+  "last_updated": "2026-09-08T11:16:03.240515+09:00",
   "daily_loss_guard": {
     "date": "09/08",
     "consecutive_losses": 0,
@@ -1718,7 +1731,7 @@
     },
     {
       "date": "09/08",
-      "balance": 419882
+      "balance": 423531
     }
   ],
   "position_version": 59,
