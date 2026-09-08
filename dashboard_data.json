@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 420471,
+  "current_balance": 419700,
   "trades": [
     {
       "action": "buy",
@@ -1524,30 +1524,23 @@
       "pnl_pct": 2.17,
       "pnl_amt": 2040,
       "reason": "+2% 부분익절 (+2.17%)"
+    },
+    {
+      "action": "sell",
+      "date": "09/08 15:19",
+      "partial": false,
+      "trade_id": "032820-20260908102531",
+      "stock": "032820",
+      "qty": 17,
+      "price": 11810,
+      "avg_price": 11770,
+      "pnl_pct": 0.34,
+      "pnl_amt": 680,
+      "reason": "익절 (복구, +0.34%)"
     }
   ],
-  "position": {
-    "code": "032820",
-    "name": "032820",
-    "qty": 25,
-    "market": "Q",
-    "avg_price": 11770,
-    "current_price": 11920,
-    "stop_price": 11822.1,
-    "target_price": 12221,
-    "entry_time": "2026-09-08T10:25:31.985005+09:00",
-    "trailing_activated": true,
-    "trade_id": "032820-20260908102531",
-    "peak_pnl_pct": 3.099787685774947,
-    "early_exit_logged_checkpoints": [
-      10,
-      20,
-      30,
-      45,
-      60
-    ]
-  },
-  "last_updated": "2026-09-08T15:19:14.067085+09:00",
+  "position": null,
+  "last_updated": "2026-09-08T15:20:23.610429+09:00",
   "daily_loss_guard": {
     "date": "09/08",
     "consecutive_losses": 0,
@@ -1732,10 +1725,10 @@
     },
     {
       "date": "09/08",
-      "balance": 420471
+      "balance": 419700
     }
   ],
-  "position_version": 59,
+  "position_version": 60,
   "last_sold_code": "030530",
   "last_sold_at": "2026-09-07T15:20:07.057145+09:00",
   "stray_notified": null
