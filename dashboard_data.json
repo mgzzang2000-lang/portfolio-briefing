@@ -1537,6 +1537,19 @@
       "pnl_pct": 0.38,
       "pnl_amt": 765,
       "reason": "손절 (+0.38%)"
+    },
+    {
+      "action": "sell",
+      "date": "09/08 15:19",
+      "partial": false,
+      "trade_id": "032820-20260908102531",
+      "stock": "032820",
+      "qty": 17,
+      "price": 11810,
+      "avg_price": 11770,
+      "pnl_pct": 0.34,
+      "pnl_amt": 680,
+      "reason": "익절 (복구, +0.34%)"
     }
   ],
   "position": null,
