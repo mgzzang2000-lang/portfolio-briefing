@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 122100,
+  "current_balance": 414085,
   "trades": [
     {
       "action": "buy",
@@ -1560,31 +1560,26 @@
       "qty": 15,
       "price": 19840,
       "amount": 297600
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "047040-20260909133439",
+      "date": "09/09 14:15",
+      "stock": "대우건설",
+      "qty": 15,
+      "price": 19540,
+      "avg_price": 19860,
+      "pnl_pct": -1.61,
+      "pnl_amt": -4800,
+      "reason": "손절 (-1.61%)"
     }
   ],
-  "position": {
-    "code": "047040",
-    "name": "047040",
-    "qty": 15,
-    "market": "J",
-    "avg_price": 19840,
-    "current_price": 19580,
-    "stop_price": 19562,
-    "target_price": 20604,
-    "entry_time": "2026-09-09T13:34:39.001799+09:00",
-    "trailing_activated": false,
-    "trade_id": "047040-20260909133439",
-    "peak_pnl_pct": 0.2014098690835851,
-    "early_exit_logged_checkpoints": [
-      10,
-      20,
-      30
-    ]
-  },
-  "last_updated": "2026-09-09T14:15:19.541489+09:00",
+  "position": null,
+  "last_updated": "2026-09-09T14:15:51.463697+09:00",
   "daily_loss_guard": {
     "date": "09/09",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
@@ -1770,11 +1765,11 @@
     },
     {
       "date": "09/09",
-      "balance": 122100
+      "balance": 414085
     }
   ],
-  "position_version": 61,
-  "last_sold_code": "032820",
-  "last_sold_at": "2026-09-08T15:19:25.347472+09:00",
+  "position_version": 62,
+  "last_sold_code": "047040",
+  "last_sold_at": "2026-09-09T14:15:51.463683+09:00",
   "stray_notified": null
 }
