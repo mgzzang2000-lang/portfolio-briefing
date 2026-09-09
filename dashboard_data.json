@@ -1573,6 +1573,19 @@
       "pnl_pct": -1.61,
       "pnl_amt": -4800,
       "reason": "손절 (-1.61%)"
+    },
+    {
+      "action": "sell",
+      "date": "09/09 14:15",
+      "partial": false,
+      "trade_id": "047040-20260909133439",
+      "stock": "047040",
+      "qty": 15,
+      "price": 19530,
+      "avg_price": 19840,
+      "pnl_pct": -1.56,
+      "pnl_amt": -4650,
+      "reason": "손절 (복구, -1.56%)"
     }
   ],
   "position": null,
