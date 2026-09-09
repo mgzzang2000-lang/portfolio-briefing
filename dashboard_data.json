@@ -1550,9 +1550,31 @@
       "pnl_pct": 0.34,
       "pnl_amt": 680,
       "reason": "익절 (복구, +0.34%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "047040-20260909133439",
+      "date": "09/09 13:34",
+      "code": "047040",
+      "stock": "047040",
+      "qty": 15,
+      "price": 19840,
+      "amount": 297600
     }
   ],
-  "position": null,
+  "position": {
+    "code": "047040",
+    "name": "047040",
+    "qty": 15,
+    "market": "J",
+    "avg_price": 19840,
+    "current_price": 19840,
+    "stop_price": 19562,
+    "target_price": 20604,
+    "entry_time": "2026-09-09T13:34:39.001799+09:00",
+    "trailing_activated": false,
+    "trade_id": "047040-20260909133439"
+  },
   "last_updated": "2026-09-09T13:35:03.287709+09:00",
   "daily_loss_guard": {
     "date": "09/09",
@@ -1745,7 +1767,7 @@
       "balance": 419960
     }
   ],
-  "position_version": 60,
+  "position_version": 61,
   "last_sold_code": "032820",
   "last_sold_at": "2026-09-08T15:19:25.347472+09:00",
   "stray_notified": null
