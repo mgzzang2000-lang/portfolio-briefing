@@ -1596,32 +1596,27 @@
       "qty": 15,
       "price": 19430,
       "amount": 291450
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "047040-20260909144437",
+      "date": "09/09 15:20",
+      "stock": "대우건설",
+      "qty": 15,
+      "price": 19440,
+      "avg_price": 19450,
+      "pnl_pct": -0.05,
+      "pnl_amt": -150,
+      "reason": "강제청산 (15:20)"
     }
   ],
-  "position": {
-    "code": "047040",
-    "name": "047040",
-    "qty": 15,
-    "market": "J",
-    "avg_price": 19430,
-    "current_price": 19440,
-    "stop_price": 19158,
-    "target_price": 20179,
-    "entry_time": "2026-09-09T14:44:37.766401+09:00",
-    "trailing_activated": false,
-    "trade_id": "047040-20260909144437",
-    "peak_pnl_pct": 0.8740359897172237,
-    "early_exit_logged_checkpoints": [
-      10,
-      20,
-      30
-    ]
-  },
+  "position": null,
   "last_updated": "2026-09-09T15:20:34.702562+09:00",
   "daily_loss_guard": {
     "date": "09/09",
-    "consecutive_losses": 1,
-    "notified": false
+    "consecutive_losses": 2,
+    "notified": true
   },
   "balance_history": [
     {
@@ -1809,7 +1804,7 @@
       "balance": 413895
     }
   ],
-  "position_version": 63,
+  "position_version": 64,
   "last_sold_code": "047040",
   "last_sold_at": "2026-09-09T14:15:51.463683+09:00",
   "stray_notified": null
