@@ -1,11 +1,15 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 979.5,
+  "current_balance": 563.7,
   "_last_raw_cash": 536.42,
   "pending_cash_deltas": [
     {
       "date": "2026-09-10",
       "delta": 443.08000000000004
+    },
+    {
+      "date": "2026-09-10",
+      "delta": -415.79999999999995
     }
   ],
   "positions": {
@@ -34,6 +38,16 @@
       "current_price": 385.88,
       "pnl_pct": 25.73,
       "price_updated_at": "02:45"
+    },
+    "CF": {
+      "stop_price": 128.26,
+      "tp_price": 180.18,
+      "partial_tp_price": 159.39,
+      "partial_taken": false,
+      "entry_price": 138.6,
+      "entry_date": "20260910",
+      "qty": 3,
+      "sector": "Materials"
     }
   },
   "trade_history": [
@@ -116,6 +130,14 @@
       "qty": 22,
       "price": 20.14,
       "reason": "하드손절 (기준 20.25)"
+    },
+    {
+      "action": "buy",
+      "date": "2026-09-10 02:53",
+      "symbol": "CF",
+      "qty": 3,
+      "price": 138.6,
+      "reason": "RS12w=32.1%"
     }
   ],
   "balance_history": [
@@ -357,10 +379,10 @@
     },
     {
       "date": "09/10",
-      "balance": 979.5
+      "balance": 563.7
     }
   ],
-  "total_assets": 1835.25,
+  "total_assets": 1835.79,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -596,8 +618,8 @@
     },
     {
       "date": "09/10",
-      "balance": 1835.25
+      "balance": 1835.79
     }
   ],
-  "last_updated": "2026-09-10T02:45:31.298167+09:00"
+  "last_updated": "2026-09-10T02:53:09.534549+09:00"
 }
