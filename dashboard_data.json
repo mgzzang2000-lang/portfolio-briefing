@@ -1573,13 +1573,26 @@
       "pnl_pct": -1.56,
       "pnl_amt": -4650,
       "reason": "손절 (복구, -1.56%)"
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "047040-20260909133439",
+      "date": "09/09 14:15",
+      "stock": "대우건설",
+      "qty": 15,
+      "price": 19540,
+      "avg_price": 19860,
+      "pnl_pct": -1.61,
+      "pnl_amt": -4800,
+      "reason": "손절 (-1.61%)"
     }
   ],
   "position": null,
   "last_updated": "2026-09-09T14:16:24.128431+09:00",
   "daily_loss_guard": {
     "date": "09/09",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
