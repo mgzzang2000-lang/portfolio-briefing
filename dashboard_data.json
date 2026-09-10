@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 419672,
+  "current_balance": 415446,
   "trades": [
     {
       "action": "buy",
@@ -1632,27 +1632,23 @@
       "pnl_pct": 2.13,
       "pnl_amt": 2100,
       "reason": "+2% 부분익절 (+2.13%)"
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "058610-20260910093251",
+      "date": "09/10 09:54",
+      "stock": "에스피지",
+      "qty": 2,
+      "price": 99000,
+      "avg_price": 98700,
+      "pnl_pct": 0.3,
+      "pnl_amt": 600,
+      "reason": "손절 (+0.30%)"
     }
   ],
-  "position": {
-    "code": "058610",
-    "name": "058610",
-    "qty": 3,
-    "market": "Q",
-    "avg_price": 98700,
-    "current_price": 99200,
-    "stop_price": 99094.8,
-    "target_price": 102349,
-    "entry_time": "2026-09-10T09:32:51.883608+09:00",
-    "trailing_activated": true,
-    "trade_id": "058610-20260910093251",
-    "peak_pnl_pct": 2.127659574468085,
-    "early_exit_logged_checkpoints": [
-      10,
-      20
-    ]
-  },
-  "last_updated": "2026-09-10T09:53:44.638046+09:00",
+  "position": null,
+  "last_updated": "2026-09-10T09:54:18.043556+09:00",
   "daily_loss_guard": {
     "date": "09/10",
     "consecutive_losses": 0,
@@ -1845,11 +1841,11 @@
     },
     {
       "date": "09/10",
-      "balance": 419672
+      "balance": 415446
     }
   ],
-  "position_version": 65,
-  "last_sold_code": "047040",
-  "last_sold_at": "2026-09-09T15:20:04.497233+09:00",
+  "position_version": 66,
+  "last_sold_code": "058610",
+  "last_sold_at": "2026-09-10T09:54:18.043541+09:00",
   "stray_notified": null
 }
