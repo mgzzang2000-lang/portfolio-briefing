@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 415100,
+  "current_balance": 414577,
   "trades": [
     {
       "action": "buy",
@@ -1668,30 +1668,36 @@
       "pnl_pct": 0.0,
       "pnl_amt": 0,
       "reason": "2시간 부분청산 (+0.00%)"
+    },
+    {
+      "action": "sell",
+      "date": "09/10 14:32",
+      "partial": false,
+      "trade_id": "058610-20260910123319",
+      "stock": "058610",
+      "qty": 1,
+      "price": 98400,
+      "avg_price": 98400,
+      "pnl_pct": 0.0,
+      "pnl_amt": 0,
+      "reason": "익절 (복구, +0.00%)"
+    },
+    {
+      "action": "sell",
+      "date": "09/10 14:32",
+      "partial": false,
+      "trade_id": "058610-20260910123319",
+      "stock": "058610",
+      "qty": 1,
+      "price": 98500,
+      "avg_price": 98400,
+      "pnl_pct": 0.1,
+      "pnl_amt": 100,
+      "reason": "익절 (복구, +0.10%)"
     }
   ],
-  "position": {
-    "code": "058610",
-    "name": "058610",
-    "qty": 3,
-    "market": "Q",
-    "avg_price": 98400,
-    "current_price": 98100,
-    "stop_price": 97022,
-    "target_price": 102193,
-    "entry_time": "2026-09-10T12:33:19.177128+09:00",
-    "trailing_activated": false,
-    "trade_id": "058610-20260910123319",
-    "peak_pnl_pct": 0.0,
-    "early_exit_logged_checkpoints": [
-      10,
-      20,
-      30,
-      45,
-      60
-    ]
-  },
-  "last_updated": "2026-09-10T14:31:54.361679+09:00",
+  "position": null,
+  "last_updated": "2026-09-10T14:33:07.319419+09:00",
   "daily_loss_guard": {
     "date": "09/10",
     "consecutive_losses": 0,
@@ -1884,10 +1890,10 @@
     },
     {
       "date": "09/10",
-      "balance": 415100
+      "balance": 414577
     }
   ],
-  "position_version": 67,
+  "position_version": 68,
   "last_sold_code": "058610",
   "last_sold_at": "2026-09-10T09:54:18.043541+09:00",
   "stray_notified": null
