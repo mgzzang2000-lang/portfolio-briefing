@@ -26,9 +26,9 @@
       "entry_date": "20260801",
       "qty": 1,
       "sector": "Energy",
-      "current_price": 386.56,
-      "pnl_pct": 25.95,
-      "price_updated_at": "23:00"
+      "current_price": 384.21,
+      "pnl_pct": 25.19,
+      "price_updated_at": "23:15"
     },
     "CF": {
       "stop_price": 128.26,
@@ -39,9 +39,9 @@
       "entry_date": "20260910",
       "qty": 3,
       "sector": "Materials",
-      "current_price": 139.18,
-      "pnl_pct": 0.93,
-      "price_updated_at": "23:00"
+      "current_price": 137.54,
+      "pnl_pct": -0.26,
+      "price_updated_at": "23:15"
     }
   },
   "trade_history": [
@@ -384,7 +384,7 @@
       "balance": 1017.42
     }
   ],
-  "total_assets": 1821.52,
+  "total_assets": 1814.25,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -620,8 +620,8 @@
     },
     {
       "date": "09/10",
-      "balance": 1821.52
+      "balance": 1814.25
     }
   ],
-  "last_updated": "2026-09-10T23:00:51.644607+09:00"
+  "last_updated": "2026-09-10T23:15:43.940411+09:00"
 }
