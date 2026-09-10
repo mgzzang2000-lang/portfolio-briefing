@@ -1,6 +1,6 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 563.7,
+  "current_balance": 1017.42,
   "_last_raw_cash": 536.42,
   "pending_cash_deltas": [
     {
@@ -10,22 +10,13 @@
     {
       "date": "2026-09-10",
       "delta": -415.79999999999995
+    },
+    {
+      "date": "2026-09-10",
+      "delta": 453.71999999999997
     }
   ],
   "positions": {
-    "BAX": {
-      "stop_price": 24.33,
-      "tp_price": 34.18,
-      "partial_tp_price": 30.23,
-      "partial_taken": false,
-      "entry_price": 26.29,
-      "entry_date": "20260801",
-      "qty": 19,
-      "sector": "Health Care",
-      "current_price": 24.4196,
-      "pnl_pct": -6.65,
-      "price_updated_at": "22:15"
-    },
     "VLO": {
       "stop_price": 285.42,
       "tp_price": 400.96,
@@ -35,9 +26,9 @@
       "entry_date": "20260801",
       "qty": 1,
       "sector": "Energy",
-      "current_price": 392.68,
-      "pnl_pct": 27.95,
-      "price_updated_at": "22:15"
+      "current_price": 389.58,
+      "pnl_pct": 26.94,
+      "price_updated_at": "22:30"
     },
     "CF": {
       "stop_price": 128.26,
@@ -48,9 +39,9 @@
       "entry_date": "20260910",
       "qty": 3,
       "sector": "Materials",
-      "current_price": 141.24,
-      "pnl_pct": 2.43,
-      "price_updated_at": "22:15"
+      "current_price": 140.295,
+      "pnl_pct": 1.74,
+      "price_updated_at": "22:30"
     }
   },
   "trade_history": [
@@ -141,6 +132,14 @@
       "qty": 3,
       "price": 138.6,
       "reason": "RS12w=32.1%"
+    },
+    {
+      "action": "sell",
+      "date": "2026-09-10 22:30",
+      "symbol": "BAX",
+      "qty": 19,
+      "price": 23.88,
+      "reason": "하드손절 (기준 24.33)"
     }
   ],
   "balance_history": [
@@ -382,10 +381,10 @@
     },
     {
       "date": "09/10",
-      "balance": 563.7
+      "balance": 1017.42
     }
   ],
-  "total_assets": 1844.07,
+  "total_assets": 1827.88,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -621,8 +620,8 @@
     },
     {
       "date": "09/10",
-      "balance": 1844.07
+      "balance": 1827.88
     }
   ],
-  "last_updated": "2026-09-10T22:15:36.925915+09:00"
+  "last_updated": "2026-09-10T22:30:44.134495+09:00"
 }
