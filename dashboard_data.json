@@ -1655,6 +1655,19 @@
       "qty": 3,
       "price": 98400,
       "amount": 295200
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "058610-20260910123319",
+      "date": "09/10 14:31",
+      "stock": "에스피지",
+      "qty": 1,
+      "price": 98500,
+      "avg_price": 98500,
+      "pnl_pct": 0.0,
+      "pnl_amt": 0,
+      "reason": "2시간 부분청산 (+0.00%)"
     }
   ],
   "position": {
