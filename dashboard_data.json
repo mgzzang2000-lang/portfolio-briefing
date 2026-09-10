@@ -1671,19 +1671,6 @@
     },
     {
       "action": "sell",
-      "partial": true,
-      "trade_id": "058610-20260910123319",
-      "date": "09/10 14:32",
-      "stock": "에스피지",
-      "qty": 1,
-      "price": 98500,
-      "avg_price": 98500,
-      "pnl_pct": 0.0,
-      "pnl_amt": 0,
-      "reason": "2시간 부분청산 (+0.00%)"
-    },
-    {
-      "action": "sell",
       "partial": false,
       "trade_id": "058610-20260910123319",
       "date": "09/10 14:32",
@@ -1694,6 +1681,19 @@
       "pnl_pct": 0.0,
       "pnl_amt": 0,
       "reason": "손절 (+0.00%)"
+    },
+    {
+      "action": "sell",
+      "date": "09/10 14:32",
+      "partial": false,
+      "trade_id": "058610-20260910123319",
+      "stock": "058610",
+      "qty": 1,
+      "price": 98400,
+      "avg_price": 98400,
+      "pnl_pct": 0.0,
+      "pnl_amt": 0,
+      "reason": "익절 (복구, +0.00%)"
     },
     {
       "action": "buy",
