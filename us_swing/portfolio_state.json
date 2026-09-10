@@ -1,6 +1,6 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 1017.42,
+  "current_balance": 741.8,
   "_last_raw_cash": 536.42,
   "pending_cash_deltas": [
     {
@@ -14,6 +14,10 @@
     {
       "date": "2026-09-10",
       "delta": 453.71999999999997
+    },
+    {
+      "date": "2026-09-10",
+      "delta": -275.62
     }
   ],
   "positions": {
@@ -42,6 +46,16 @@
       "current_price": 137.54,
       "pnl_pct": -0.26,
       "price_updated_at": "23:15"
+    },
+    "CRL": {
+      "stop_price": 255.05,
+      "tp_price": 358.31,
+      "partial_tp_price": 316.96,
+      "partial_taken": false,
+      "entry_price": 275.62,
+      "entry_date": "20260910",
+      "qty": 1,
+      "sector": "Health Care"
     }
   },
   "trade_history": [
@@ -140,6 +154,14 @@
       "qty": 19,
       "price": 23.88,
       "reason": "하드손절 (기준 24.33)"
+    },
+    {
+      "action": "buy",
+      "date": "2026-09-10 23:30",
+      "symbol": "CRL",
+      "qty": 1,
+      "price": 275.62,
+      "reason": "RS12w=47.6%"
     }
   ],
   "balance_history": [
@@ -381,10 +403,10 @@
     },
     {
       "date": "09/10",
-      "balance": 1017.42
+      "balance": 741.8
     }
   ],
-  "total_assets": 1814.25,
+  "total_assets": 1814.24,
   "total_assets_history": [
     {
       "date": "07/14",
@@ -620,8 +642,8 @@
     },
     {
       "date": "09/10",
-      "balance": 1814.25
+      "balance": 1814.24
     }
   ],
-  "last_updated": "2026-09-10T23:15:43.940411+09:00"
+  "last_updated": "2026-09-10T23:30:43.772471+09:00"
 }
