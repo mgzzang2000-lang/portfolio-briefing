@@ -1632,9 +1632,11 @@
     "target_price": 102349,
     "entry_time": "2026-09-10T09:32:51.883608+09:00",
     "trailing_activated": false,
-    "trade_id": "058610-20260910093251"
+    "trade_id": "058610-20260910093251",
+    "peak_pnl_pct": 0.0,
+    "early_exit_logged_checkpoints": []
   },
-  "last_updated": "2026-09-10T09:32:51.883911+09:00",
+  "last_updated": "2026-09-10T09:33:20.870873+09:00",
   "daily_loss_guard": {
     "date": "09/10",
     "consecutive_losses": 0,
