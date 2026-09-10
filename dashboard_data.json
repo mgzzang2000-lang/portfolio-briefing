@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 415446,
+  "current_balance": 120246,
   "trades": [
     {
       "action": "buy",
@@ -1645,10 +1645,32 @@
       "pnl_pct": 0.3,
       "pnl_amt": 600,
       "reason": "손절 (+0.30%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "058610-20260910123319",
+      "date": "09/10 12:33",
+      "code": "058610",
+      "stock": "058610",
+      "qty": 3,
+      "price": 98400,
+      "amount": 295200
     }
   ],
-  "position": null,
-  "last_updated": "2026-09-10T12:32:32.415016+09:00",
+  "position": {
+    "code": "058610",
+    "name": "058610",
+    "qty": 3,
+    "market": "Q",
+    "avg_price": 98400,
+    "current_price": 98400,
+    "stop_price": 97022,
+    "target_price": 102193,
+    "entry_time": "2026-09-10T12:33:19.177128+09:00",
+    "trailing_activated": false,
+    "trade_id": "058610-20260910123319"
+  },
+  "last_updated": "2026-09-10T12:33:19.177460+09:00",
   "daily_loss_guard": {
     "date": "09/10",
     "consecutive_losses": 0,
@@ -1841,10 +1863,10 @@
     },
     {
       "date": "09/10",
-      "balance": 415446
+      "balance": 120246
     }
   ],
-  "position_version": 66,
+  "position_version": 67,
   "last_sold_code": "058610",
   "last_sold_at": "2026-09-10T09:54:18.043541+09:00",
   "stray_notified": null
