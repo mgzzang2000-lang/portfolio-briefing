@@ -1672,10 +1672,11 @@
     "peak_pnl_pct": 0.0,
     "early_exit_logged_checkpoints": [
       10,
-      20
+      20,
+      30
     ]
   },
-  "last_updated": "2026-09-10T13:03:50.966048+09:00",
+  "last_updated": "2026-09-10T13:04:29.341219+09:00",
   "daily_loss_guard": {
     "date": "09/10",
     "consecutive_losses": 0,
