@@ -1635,16 +1635,16 @@
     },
     {
       "action": "sell",
-      "date": "09/10 09:54",
       "partial": false,
       "trade_id": "058610-20260910093251",
-      "stock": "058610",
+      "date": "09/10 09:54",
+      "stock": "에스피지",
       "qty": 2,
       "price": 99000,
       "avg_price": 98700,
       "pnl_pct": 0.3,
       "pnl_amt": 600,
-      "reason": "익절 (복구, +0.30%)"
+      "reason": "손절 (+0.30%)"
     }
   ],
   "position": null,
