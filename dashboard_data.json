@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 413306,
+  "current_balance": 414900,
   "trades": [
     {
       "action": "buy",
@@ -1655,6 +1655,19 @@
       "qty": 3,
       "price": 98400,
       "amount": 295200
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "058610-20260910123319",
+      "date": "09/10 14:31",
+      "stock": "에스피지",
+      "qty": 1,
+      "price": 98500,
+      "avg_price": 98500,
+      "pnl_pct": 0.0,
+      "pnl_amt": 0,
+      "reason": "2시간 부분청산 (+0.00%)"
     }
   ],
   "position": {
@@ -1663,8 +1676,8 @@
     "qty": 3,
     "market": "Q",
     "avg_price": 98400,
-    "current_price": 98400,
-    "stop_price": 97022,
+    "current_price": 98500,
+    "stop_price": 98894.0,
     "target_price": 102193,
     "entry_time": "2026-09-10T12:33:19.177128+09:00",
     "trailing_activated": false,
@@ -1678,7 +1691,7 @@
       60
     ]
   },
-  "last_updated": "2026-09-10T14:31:11.044230+09:00",
+  "last_updated": "2026-09-10T14:31:53.860599+09:00",
   "daily_loss_guard": {
     "date": "09/10",
     "consecutive_losses": 0,
@@ -1871,7 +1884,7 @@
     },
     {
       "date": "09/10",
-      "balance": 413306
+      "balance": 414900
     }
   ],
   "position_version": 67,
