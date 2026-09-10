@@ -14,6 +14,10 @@
     {
       "date": "2026-09-10",
       "delta": 453.71999999999997
+    },
+    {
+      "date": "2026-09-10",
+      "delta": -275.62
     }
   ],
   "positions": {
@@ -42,6 +46,16 @@
       "current_price": 137.42,
       "pnl_pct": -0.34,
       "price_updated_at": "23:30"
+    },
+    "CRL": {
+      "stop_price": 255.05,
+      "tp_price": 358.31,
+      "partial_tp_price": 316.96,
+      "partial_taken": false,
+      "entry_price": 275.62,
+      "entry_date": "20260910",
+      "qty": 1,
+      "sector": "Health Care"
     }
   },
   "trade_history": [
@@ -140,6 +154,14 @@
       "qty": 19,
       "price": 23.88,
       "reason": "하드손절 (기준 24.33)"
+    },
+    {
+      "action": "buy",
+      "date": "2026-09-10 23:30",
+      "symbol": "CRL",
+      "qty": 1,
+      "price": 275.62,
+      "reason": "RS12w=47.6%"
     }
   ],
   "balance_history": [
