@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 112873,
+  "current_balance": 404447,
   "trades": [
     {
       "action": "buy",
@@ -1727,26 +1727,23 @@
       "qty": 104,
       "price": 2860,
       "amount": 297440
+    },
+    {
+      "action": "sell",
+      "date": "09/14 12:36",
+      "partial": false,
+      "trade_id": "203650-20260914122302",
+      "stock": "203650",
+      "qty": 104,
+      "price": 2820,
+      "avg_price": 2860,
+      "pnl_pct": -1.4,
+      "pnl_amt": -4160,
+      "reason": "손절 (복구, -1.40%)"
     }
   ],
-  "position": {
-    "code": "203650",
-    "name": "203650",
-    "qty": 104,
-    "market": "Q",
-    "avg_price": 2860,
-    "current_price": 2835,
-    "stop_price": 2822,
-    "target_price": 2972,
-    "entry_time": "2026-09-14T12:23:02.759349+09:00",
-    "trailing_activated": false,
-    "trade_id": "203650-20260914122302",
-    "peak_pnl_pct": 0.8710801393728222,
-    "early_exit_logged_checkpoints": [
-      10
-    ]
-  },
-  "last_updated": "2026-09-14T12:34:48.577255+09:00",
+  "position": null,
+  "last_updated": "2026-09-14T12:38:22.902789+09:00",
   "daily_loss_guard": {
     "date": "09/14",
     "consecutive_losses": 0,
@@ -1947,10 +1944,10 @@
     },
     {
       "date": "09/14",
-      "balance": 112873
+      "balance": 404447
     }
   ],
-  "position_version": 71,
+  "position_version": 72,
   "last_sold_code": "058610",
   "last_sold_at": "2026-09-10T15:20:08.352740+09:00",
   "stray_notified": null
