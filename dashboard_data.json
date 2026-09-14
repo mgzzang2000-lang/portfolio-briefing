@@ -1717,9 +1717,33 @@
       "pnl_pct": -1.12,
       "pnl_amt": -3300,
       "reason": "강제청산 (15:20)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "203650-20260914122302",
+      "date": "09/14 12:23",
+      "code": "203650",
+      "stock": "203650",
+      "qty": 104,
+      "price": 2860,
+      "amount": 297440
     }
   ],
-  "position": null,
+  "position": {
+    "code": "203650",
+    "name": "203650",
+    "qty": 104,
+    "market": "Q",
+    "avg_price": 2860,
+    "current_price": 2875,
+    "stop_price": 2822,
+    "target_price": 2972,
+    "entry_time": "2026-09-14T12:23:02.759349+09:00",
+    "trailing_activated": false,
+    "trade_id": "203650-20260914122302",
+    "peak_pnl_pct": 0.8710801393728222,
+    "early_exit_logged_checkpoints": []
+  },
   "last_updated": "2026-09-14T12:26:35.117426+09:00",
   "daily_loss_guard": {
     "date": "09/14",
@@ -1924,7 +1948,7 @@
       "balance": 409441
     }
   ],
-  "position_version": 70,
+  "position_version": 71,
   "last_sold_code": "058610",
   "last_sold_at": "2026-09-10T15:20:08.352740+09:00",
   "stray_notified": null
