@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 406289,
+  "current_balance": 406145,
   "trades": [
     {
       "action": "buy",
@@ -1815,30 +1815,23 @@
       "pnl_pct": 0.76,
       "pnl_amt": 129,
       "reason": "2시간 부분청산 (+0.76%)"
+    },
+    {
+      "action": "sell",
+      "date": "09/14 14:55",
+      "partial": false,
+      "trade_id": "356680-20260914125519",
+      "stock": "356680",
+      "qty": 1,
+      "price": 17110,
+      "avg_price": 17040,
+      "pnl_pct": 0.41,
+      "pnl_amt": 70,
+      "reason": "익절 (복구, +0.41%)"
     }
   ],
-  "position": {
-    "code": "356680",
-    "name": "356680",
-    "qty": 17,
-    "market": "Q",
-    "avg_price": 17040,
-    "current_price": 17220,
-    "stop_price": 16804,
-    "target_price": 17699,
-    "entry_time": "2026-09-14T12:55:19.857820+09:00",
-    "trailing_activated": false,
-    "trade_id": "356680-20260914125519",
-    "peak_pnl_pct": 1.4632381870289646,
-    "early_exit_logged_checkpoints": [
-      10,
-      20,
-      30,
-      45,
-      60
-    ]
-  },
-  "last_updated": "2026-09-14T14:54:56.458397+09:00",
+  "position": null,
+  "last_updated": "2026-09-14T14:56:05.795673+09:00",
   "daily_loss_guard": {
     "date": "09/14",
     "consecutive_losses": 1,
@@ -2039,10 +2032,10 @@
     },
     {
       "date": "09/14",
-      "balance": 406289
+      "balance": 406145
     }
   ],
-  "position_version": 73,
+  "position_version": 74,
   "last_sold_code": "203650",
   "last_sold_at": "2026-09-14T12:36:33.519364+09:00",
   "stray_notified": null
