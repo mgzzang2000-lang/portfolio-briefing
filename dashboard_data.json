@@ -1828,6 +1828,19 @@
       "pnl_pct": 0.41,
       "pnl_amt": 70,
       "reason": "익절 (복구, +0.41%)"
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "356680-20260914125519",
+      "date": "09/14 14:55",
+      "stock": "엑스게이트",
+      "qty": 1,
+      "price": 17120,
+      "avg_price": 17066,
+      "pnl_pct": 0.32,
+      "pnl_amt": 54,
+      "reason": "손절 (+0.32%)"
     }
   ],
   "position": null,
