@@ -1730,23 +1730,23 @@
     },
     {
       "action": "sell",
-      "date": "09/14 12:36",
       "partial": false,
       "trade_id": "203650-20260914122302",
-      "stock": "203650",
+      "date": "09/14 12:36",
+      "stock": "드림시큐리티",
       "qty": 104,
       "price": 2820,
-      "avg_price": 2860,
-      "pnl_pct": -1.4,
-      "pnl_amt": -4160,
-      "reason": "손절 (복구, -1.40%)"
+      "avg_price": 2870,
+      "pnl_pct": -1.74,
+      "pnl_amt": -5200,
+      "reason": "손절 (-1.74%)"
     }
   ],
   "position": null,
   "last_updated": "2026-09-14T12:38:22.902789+09:00",
   "daily_loss_guard": {
     "date": "09/14",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
