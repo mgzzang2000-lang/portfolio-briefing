@@ -1740,9 +1740,33 @@
       "pnl_pct": -1.74,
       "pnl_amt": -5200,
       "reason": "손절 (-1.74%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "356680-20260914125519",
+      "date": "09/14 12:55",
+      "code": "356680",
+      "stock": "356680",
+      "qty": 17,
+      "price": 17040,
+      "amount": 289680
     }
   ],
-  "position": null,
+  "position": {
+    "code": "356680",
+    "name": "356680",
+    "qty": 17,
+    "market": "Q",
+    "avg_price": 17040,
+    "current_price": 17090,
+    "stop_price": 16804,
+    "target_price": 17699,
+    "entry_time": "2026-09-14T12:55:19.857820+09:00",
+    "trailing_activated": false,
+    "trade_id": "356680-20260914125519",
+    "peak_pnl_pct": 0.14477277599335858,
+    "early_exit_logged_checkpoints": []
+  },
   "last_updated": "2026-09-14T12:56:03.032094+09:00",
   "daily_loss_guard": {
     "date": "09/14",
@@ -1947,7 +1971,7 @@
       "balance": 404827
     }
   ],
-  "position_version": 72,
+  "position_version": 73,
   "last_sold_code": "203650",
   "last_sold_at": "2026-09-14T12:36:33.519364+09:00",
   "stray_notified": "356680(17주)"
