@@ -1828,13 +1828,26 @@
       "pnl_pct": 0.32,
       "pnl_amt": 54,
       "reason": "손절 (+0.32%)"
+    },
+    {
+      "action": "sell",
+      "date": "09/14 14:55",
+      "partial": false,
+      "trade_id": "356680-20260914125519",
+      "stock": "356680",
+      "qty": 1,
+      "price": 17110,
+      "avg_price": 17040,
+      "pnl_pct": 0.41,
+      "pnl_amt": 70,
+      "reason": "익절 (복구, +0.41%)"
     }
   ],
   "position": null,
   "last_updated": "2026-09-14T14:56:18.764736+09:00",
   "daily_loss_guard": {
     "date": "09/14",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
