@@ -1750,6 +1750,19 @@
       "qty": 17,
       "price": 17040,
       "amount": 289680
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "356680-20260914125519",
+      "date": "09/14 14:53",
+      "stock": "엑스게이트",
+      "qty": 8,
+      "price": 17210,
+      "avg_price": 17065,
+      "pnl_pct": 0.85,
+      "pnl_amt": 1157,
+      "reason": "2시간 부분청산 (+0.85%)"
     }
   ],
   "position": {
