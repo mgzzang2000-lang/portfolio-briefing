@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 406632,
+  "current_balance": 406485,
   "trades": [
     {
       "action": "buy",
@@ -1763,6 +1763,19 @@
       "pnl_pct": 0.85,
       "pnl_amt": 1157,
       "reason": "2시간 부분청산 (+0.85%)"
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "356680-20260914125519",
+      "date": "09/14 14:53",
+      "stock": "엑스게이트",
+      "qty": 4,
+      "price": 17230,
+      "avg_price": 17065,
+      "pnl_pct": 0.96,
+      "pnl_amt": 658,
+      "reason": "2시간 부분청산 (+0.96%)"
     }
   ],
   "position": {
@@ -1771,8 +1784,8 @@
     "qty": 17,
     "market": "Q",
     "avg_price": 17040,
-    "current_price": 17210,
-    "stop_price": 17133.5552764,
+    "current_price": 17230,
+    "stop_price": 17133.5946332,
     "target_price": 17699,
     "entry_time": "2026-09-14T12:55:19.857820+09:00",
     "trailing_activated": false,
@@ -1786,7 +1799,7 @@
       60
     ]
   },
-  "last_updated": "2026-09-14T14:53:23.251130+09:00",
+  "last_updated": "2026-09-14T14:53:52.005330+09:00",
   "daily_loss_guard": {
     "date": "09/14",
     "consecutive_losses": 1,
@@ -1987,7 +2000,7 @@
     },
     {
       "date": "09/14",
-      "balance": 406632
+      "balance": 406485
     }
   ],
   "position_version": 73,
