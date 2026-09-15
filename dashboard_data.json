@@ -1844,10 +1844,10 @@
     }
   ],
   "position": null,
-  "last_updated": "2026-09-14T15:29:56.562916+09:00",
+  "last_updated": "2026-09-15T09:00:02.059814+09:00",
   "daily_loss_guard": {
-    "date": "09/14",
-    "consecutive_losses": 1,
+    "date": "09/15",
+    "consecutive_losses": 0,
     "notified": false
   },
   "balance_history": [
@@ -2045,6 +2045,10 @@
     },
     {
       "date": "09/14",
+      "balance": 406145
+    },
+    {
+      "date": "09/15",
       "balance": 406145
     }
   ],
