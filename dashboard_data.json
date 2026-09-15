@@ -1854,23 +1854,23 @@
     },
     {
       "action": "sell",
-      "date": "09/15 13:26",
       "partial": false,
       "trade_id": "093370-20260915110208",
-      "stock": "093370",
+      "date": "09/15 13:26",
+      "stock": "후성",
       "qty": 20,
       "price": 14630,
-      "avg_price": 14810,
-      "pnl_pct": -1.22,
-      "pnl_amt": -3600,
-      "reason": "손절 (복구, -1.22%)"
+      "avg_price": 14860,
+      "pnl_pct": -1.55,
+      "pnl_amt": -4600,
+      "reason": "손절 (-1.55%)"
     }
   ],
   "position": null,
   "last_updated": "2026-09-15T13:27:31.171920+09:00",
   "daily_loss_guard": {
     "date": "09/15",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
