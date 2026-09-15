@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 402105,
+  "current_balance": 400881,
   "trades": [
     {
       "action": "buy",
@@ -1851,30 +1851,23 @@
       "qty": 20,
       "price": 14810,
       "amount": 296200
+    },
+    {
+      "action": "sell",
+      "date": "09/15 13:26",
+      "partial": false,
+      "trade_id": "093370-20260915110208",
+      "stock": "093370",
+      "qty": 20,
+      "price": 14630,
+      "avg_price": 14810,
+      "pnl_pct": -1.22,
+      "pnl_amt": -3600,
+      "reason": "손절 (복구, -1.22%)"
     }
   ],
-  "position": {
-    "code": "093370",
-    "name": "093370",
-    "qty": 20,
-    "market": "J",
-    "avg_price": 14810,
-    "current_price": 14740,
-    "stop_price": 14637,
-    "target_price": 15417,
-    "entry_time": "2026-09-15T11:02:08.651184+09:00",
-    "trailing_activated": false,
-    "trade_id": "093370-20260915110208",
-    "peak_pnl_pct": 1.9515477792732168,
-    "early_exit_logged_checkpoints": [
-      10,
-      20,
-      30,
-      45,
-      60
-    ]
-  },
-  "last_updated": "2026-09-15T13:24:59.626473+09:00",
+  "position": null,
+  "last_updated": "2026-09-15T13:27:31.171920+09:00",
   "daily_loss_guard": {
     "date": "09/15",
     "consecutive_losses": 0,
@@ -2079,10 +2072,10 @@
     },
     {
       "date": "09/15",
-      "balance": 402105
+      "balance": 400881
     }
   ],
-  "position_version": 75,
+  "position_version": 76,
   "last_sold_code": "356680",
   "last_sold_at": "2026-09-14T14:55:25.164479+09:00",
   "stray_notified": null
