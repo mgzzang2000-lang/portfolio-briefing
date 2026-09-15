@@ -1864,9 +1864,31 @@
       "pnl_pct": -1.55,
       "pnl_amt": -4600,
       "reason": "손절 (-1.55%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "093370-20260915135543",
+      "date": "09/15 13:55",
+      "code": "093370",
+      "stock": "093370",
+      "qty": 20,
+      "price": 14700,
+      "amount": 294000
     }
   ],
-  "position": null,
+  "position": {
+    "code": "093370",
+    "name": "093370",
+    "qty": 20,
+    "market": "J",
+    "avg_price": 14700,
+    "current_price": 14700,
+    "stop_price": 14479,
+    "target_price": 15251,
+    "entry_time": "2026-09-15T13:55:43.791885+09:00",
+    "trailing_activated": false,
+    "trade_id": "093370-20260915135543"
+  },
   "last_updated": "2026-09-15T13:56:07.841925+09:00",
   "daily_loss_guard": {
     "date": "09/15",
@@ -2075,7 +2097,7 @@
       "balance": 400441
     }
   ],
-  "position_version": 76,
+  "position_version": 77,
   "last_sold_code": "093370",
   "last_sold_at": "2026-09-15T13:26:43.552429+09:00",
   "stray_notified": null
