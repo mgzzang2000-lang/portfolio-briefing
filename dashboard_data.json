@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 391803,
+  "current_balance": 101313,
   "trades": [
     {
       "action": "buy",
@@ -1910,10 +1910,32 @@
       "pnl_pct": -1.55,
       "pnl_amt": -3000,
       "reason": "손절 (-1.55%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "417200-20260916120522",
+      "date": "09/16 12:05",
+      "code": "417200",
+      "stock": "417200",
+      "qty": 23,
+      "price": 12630,
+      "amount": 290490
     }
   ],
-  "position": null,
-  "last_updated": "2026-09-16T12:04:27.783826+09:00",
+  "position": {
+    "code": "417200",
+    "name": "417200",
+    "qty": 23,
+    "market": "Q",
+    "avg_price": 12630,
+    "current_price": 12630,
+    "stop_price": 12397,
+    "target_price": 13211,
+    "entry_time": "2026-09-16T12:05:22.689614+09:00",
+    "trailing_activated": false,
+    "trade_id": "417200-20260916120522"
+  },
+  "last_updated": "2026-09-16T12:05:22.689891+09:00",
   "daily_loss_guard": {
     "date": "09/16",
     "consecutive_losses": 1,
@@ -2122,10 +2144,10 @@
     },
     {
       "date": "09/16",
-      "balance": 391803
+      "balance": 101313
     }
   ],
-  "position_version": 80,
+  "position_version": 81,
   "last_sold_code": "005935",
   "last_sold_at": "2026-09-16T10:45:14.573970+09:00",
   "stray_notified": null
