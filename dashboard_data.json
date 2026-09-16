@@ -1900,23 +1900,23 @@
     },
     {
       "action": "sell",
-      "date": "09/16 10:45",
       "partial": false,
       "trade_id": "005935-20260916092941",
-      "stock": "005935",
+      "date": "09/16 10:45",
+      "stock": "삼성전자우",
       "qty": 1,
       "price": 191100,
-      "avg_price": 193900,
-      "pnl_pct": -1.44,
-      "pnl_amt": -2800,
-      "reason": "손절 (복구, -1.44%)"
+      "avg_price": 194100,
+      "pnl_pct": -1.55,
+      "pnl_amt": -3000,
+      "reason": "손절 (-1.55%)"
     }
   ],
   "position": null,
   "last_updated": "2026-09-16T10:51:05.960366+09:00",
   "daily_loss_guard": {
     "date": "09/16",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
