@@ -1,22 +1,14 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 746.08,
+  "current_balance": 1146.13,
   "_last_raw_cash": 746.08,
-  "pending_cash_deltas": [],
+  "pending_cash_deltas": [
+    {
+      "date": "2026-09-17",
+      "delta": 400.05
+    }
+  ],
   "positions": {
-    "VLO": {
-      "stop_price": 285.42,
-      "tp_price": 400.96,
-      "partial_tp_price": 354.69,
-      "partial_taken": false,
-      "entry_price": 308.43,
-      "entry_date": "20260801",
-      "qty": 1,
-      "sector": "Energy",
-      "current_price": 399.365,
-      "pnl_pct": 30.12,
-      "price_updated_at": "00:30"
-    },
     "CF": {
       "stop_price": 128.26,
       "tp_price": 180.18,
@@ -26,9 +18,9 @@
       "entry_date": "20260910",
       "qty": 3,
       "sector": "Materials",
-      "current_price": 133.41,
-      "pnl_pct": -3.25,
-      "price_updated_at": "00:30"
+      "current_price": 133.94,
+      "pnl_pct": -2.87,
+      "price_updated_at": "00:45"
     },
     "CRL": {
       "stop_price": 255.05,
@@ -39,9 +31,9 @@
       "entry_date": "20260910",
       "qty": 1,
       "sector": "Health Care",
-      "current_price": 277.015,
-      "pnl_pct": 1.21,
-      "price_updated_at": "00:30"
+      "current_price": 277.6225,
+      "pnl_pct": 1.43,
+      "price_updated_at": "00:45"
     }
   },
   "trade_history": [
@@ -148,6 +140,14 @@
       "qty": 1,
       "price": 275.62,
       "reason": "RS12w=47.6%"
+    },
+    {
+      "action": "sell",
+      "date": "2026-09-17 00:45",
+      "symbol": "VLO",
+      "qty": 1,
+      "price": 400.05,
+      "reason": "최종익절 (기준 400.96)"
     }
   ],
   "balance_history": [
@@ -389,10 +389,10 @@
     },
     {
       "date": "09/17",
-      "balance": 746.08
+      "balance": 1146.13
     }
   ],
-  "total_assets": 1822.69,
+  "total_assets": 1825.57,
   "total_assets_history": [
     {
       "date": "07/20",
@@ -632,8 +632,8 @@
     },
     {
       "date": "09/17",
-      "balance": 1822.69
+      "balance": 1825.57
     }
   ],
-  "last_updated": "2026-09-17T00:30:43.125427+09:00"
+  "last_updated": "2026-09-17T00:45:39.802109+09:00"
 }
