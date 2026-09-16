@@ -1920,29 +1920,22 @@
       "qty": 23,
       "price": 12630,
       "amount": 290490
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "417200-20260916120522",
+      "date": "09/16 15:20",
+      "stock": "LS머트리얼즈",
+      "qty": 23,
+      "price": 12740,
+      "avg_price": 12640,
+      "pnl_pct": 0.79,
+      "pnl_amt": 2300,
+      "reason": "강제청산 (15:20)"
     }
   ],
-  "position": {
-    "code": "417200",
-    "name": "417200",
-    "qty": 23,
-    "market": "Q",
-    "avg_price": 12630,
-    "current_price": 12750,
-    "stop_price": 12397,
-    "target_price": 13211,
-    "entry_time": "2026-09-16T12:05:22.689614+09:00",
-    "trailing_activated": false,
-    "trade_id": "417200-20260916120522",
-    "peak_pnl_pct": 1.89873417721519,
-    "early_exit_logged_checkpoints": [
-      10,
-      20,
-      30,
-      45,
-      60
-    ]
-  },
+  "position": null,
   "last_updated": "2026-09-16T15:20:56.934974+09:00",
   "daily_loss_guard": {
     "date": "09/16",
@@ -2155,7 +2148,7 @@
       "balance": 394063
     }
   ],
-  "position_version": 81,
+  "position_version": 82,
   "last_sold_code": "005935",
   "last_sold_at": "2026-09-16T10:45:14.573970+09:00",
   "stray_notified": null
