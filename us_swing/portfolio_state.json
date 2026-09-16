@@ -13,9 +13,9 @@
       "entry_date": "20260801",
       "qty": 1,
       "sector": "Energy",
-      "current_price": 400.14,
-      "pnl_pct": 30.38,
-      "price_updated_at": "23:45"
+      "current_price": 397.82,
+      "pnl_pct": 29.62,
+      "price_updated_at": "00:00"
     },
     "CF": {
       "stop_price": 128.26,
@@ -26,9 +26,9 @@
       "entry_date": "20260910",
       "qty": 3,
       "sector": "Materials",
-      "current_price": 132.9,
-      "pnl_pct": -3.62,
-      "price_updated_at": "23:45"
+      "current_price": 132.1,
+      "pnl_pct": -4.2,
+      "price_updated_at": "00:00"
     },
     "CRL": {
       "stop_price": 255.05,
@@ -39,9 +39,9 @@
       "entry_date": "20260910",
       "qty": 1,
       "sector": "Health Care",
-      "current_price": 273.025,
-      "pnl_pct": -0.25,
-      "price_updated_at": "23:45"
+      "current_price": 274.635,
+      "pnl_pct": 0.34,
+      "price_updated_at": "00:00"
     }
   },
   "trade_history": [
@@ -151,10 +151,6 @@
     }
   ],
   "balance_history": [
-    {
-      "date": "07/19",
-      "balance": 545.51
-    },
     {
       "date": "07/20",
       "balance": 545.51
@@ -390,14 +386,14 @@
     {
       "date": "09/16",
       "balance": 746.08
+    },
+    {
+      "date": "09/17",
+      "balance": 746.08
     }
   ],
-  "total_assets": 1817.95,
+  "total_assets": 1814.84,
   "total_assets_history": [
-    {
-      "date": "07/19",
-      "balance": 1925.56
-    },
     {
       "date": "07/20",
       "balance": 1925.81
@@ -633,7 +629,11 @@
     {
       "date": "09/16",
       "balance": 1817.95
+    },
+    {
+      "date": "09/17",
+      "balance": 1814.84
     }
   ],
-  "last_updated": "2026-09-16T23:45:37.886797+09:00"
+  "last_updated": "2026-09-17T00:00:49.825562+09:00"
 }
