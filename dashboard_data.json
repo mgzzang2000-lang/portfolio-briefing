@@ -1956,9 +1956,31 @@
       "pnl_pct": -1.74,
       "pnl_amt": -5200,
       "reason": "손절 (-1.74%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "319400-20260918131225",
+      "date": "09/18 13:12",
+      "code": "319400",
+      "stock": "319400",
+      "qty": 13,
+      "price": 22850,
+      "amount": 297050
     }
   ],
-  "position": null,
+  "position": {
+    "code": "319400",
+    "name": "319400",
+    "qty": 13,
+    "market": "Q",
+    "avg_price": 22850,
+    "current_price": 22850,
+    "stop_price": 22507,
+    "target_price": 23706,
+    "entry_time": "2026-09-18T13:12:25.171181+09:00",
+    "trailing_activated": false,
+    "trade_id": "319400-20260918131225"
+  },
   "last_updated": "2026-09-18T13:12:39.089068+09:00",
   "daily_loss_guard": {
     "date": "09/18",
@@ -2179,7 +2201,7 @@
       "balance": 387341
     }
   ],
-  "position_version": 84,
+  "position_version": 85,
   "last_sold_code": "319400",
   "last_sold_at": "2026-09-18T12:05:33.048567+09:00",
   "stray_notified": "319400(13주)"
