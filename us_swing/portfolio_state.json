@@ -1,17 +1,8 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 725.09,
-  "_last_raw_cash": 746.08,
-  "pending_cash_deltas": [
-    {
-      "date": "2026-09-17",
-      "delta": 400.05
-    },
-    {
-      "date": "2026-09-17",
-      "delta": -421.04
-    }
-  ],
+  "current_balance": 726.81,
+  "_last_raw_cash": 726.81,
+  "pending_cash_deltas": [],
   "positions": {
     "CF": {
       "stop_price": 128.26,
@@ -22,9 +13,9 @@
       "entry_date": "20260910",
       "qty": 3,
       "sector": "Materials",
-      "current_price": 133.82,
-      "pnl_pct": -2.96,
-      "price_updated_at": "06:45"
+      "current_price": 133.6156,
+      "pnl_pct": -3.1,
+      "price_updated_at": "22:00"
     },
     "CRL": {
       "stop_price": 255.05,
@@ -35,9 +26,9 @@
       "entry_date": "20260910",
       "qty": 1,
       "sector": "Health Care",
-      "current_price": 281.67,
-      "pnl_pct": 2.91,
-      "price_updated_at": "06:45"
+      "current_price": 281.01,
+      "pnl_pct": 2.67,
+      "price_updated_at": "22:00"
     },
     "MPC": {
       "stop_price": 389.62,
@@ -48,9 +39,9 @@
       "entry_date": "20260917",
       "qty": 1,
       "sector": "Energy",
-      "current_price": 421.96,
-      "pnl_pct": 0.65,
-      "price_updated_at": "06:45"
+      "current_price": 420.34,
+      "pnl_pct": 0.26,
+      "price_updated_at": "22:00"
     }
   },
   "trade_history": [
@@ -414,10 +405,10 @@
     },
     {
       "date": "09/18",
-      "balance": 725.09
+      "balance": 726.81
     }
   ],
-  "total_assets": 1830.18,
+  "total_assets": 1829.01,
   "total_assets_history": [
     {
       "date": "07/21",
@@ -657,8 +648,8 @@
     },
     {
       "date": "09/18",
-      "balance": 1830.18
+      "balance": 1829.01
     }
   ],
-  "last_updated": "2026-09-18T06:45:32.246670+09:00"
+  "last_updated": "2026-09-18T22:00:47.530128+09:00"
 }
