@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 389307,
+  "current_balance": 388031,
   "trades": [
     {
       "action": "buy",
@@ -1943,33 +1943,26 @@
       "qty": 13,
       "price": 22950,
       "amount": 298350
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "319400-20260918100413",
+      "date": "09/18 12:05",
+      "stock": "현대무벡스",
+      "qty": 13,
+      "price": 22550,
+      "avg_price": 22950,
+      "pnl_pct": -1.74,
+      "pnl_amt": -5200,
+      "reason": "손절 (-1.74%)"
     }
   ],
-  "position": {
-    "code": "319400",
-    "name": "319400",
-    "qty": 13,
-    "market": "Q",
-    "avg_price": 22950,
-    "current_price": 22600,
-    "stop_price": 22556,
-    "target_price": 23758,
-    "entry_time": "2026-09-18T10:04:13.209237+09:00",
-    "trailing_activated": false,
-    "trade_id": "319400-20260918100413",
-    "peak_pnl_pct": 0.0,
-    "early_exit_logged_checkpoints": [
-      10,
-      20,
-      30,
-      45,
-      60
-    ]
-  },
-  "last_updated": "2026-09-18T12:05:17.156175+09:00",
+  "position": null,
+  "last_updated": "2026-09-18T12:05:33.048584+09:00",
   "daily_loss_guard": {
     "date": "09/18",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
@@ -2183,11 +2176,11 @@
     },
     {
       "date": "09/18",
-      "balance": 389307
+      "balance": 388031
     }
   ],
-  "position_version": 83,
-  "last_sold_code": "417200",
-  "last_sold_at": "2026-09-16T15:20:05.146145+09:00",
+  "position_version": 84,
+  "last_sold_code": "319400",
+  "last_sold_at": "2026-09-18T12:05:33.048567+09:00",
   "stray_notified": null
 }
