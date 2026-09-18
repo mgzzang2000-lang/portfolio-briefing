@@ -1984,10 +1984,11 @@
     "early_exit_logged_checkpoints": [
       10,
       20,
-      30
+      30,
+      45
     ]
   },
-  "last_updated": "2026-09-18T13:56:54.784113+09:00",
+  "last_updated": "2026-09-18T13:57:41.229154+09:00",
   "daily_loss_guard": {
     "date": "09/18",
     "consecutive_losses": 1,
