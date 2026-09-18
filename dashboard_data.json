@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 388641,
+  "current_balance": 391241,
   "trades": [
     {
       "action": "buy",
@@ -1974,14 +1974,16 @@
     "qty": 13,
     "market": "Q",
     "avg_price": 22850,
-    "current_price": 22850,
+    "current_price": 23150,
     "stop_price": 22507,
     "target_price": 23706,
     "entry_time": "2026-09-18T13:12:25.171181+09:00",
     "trailing_activated": false,
-    "trade_id": "319400-20260918131225"
+    "trade_id": "319400-20260918131225",
+    "peak_pnl_pct": 1.0917030567685588,
+    "early_exit_logged_checkpoints": []
   },
-  "last_updated": "2026-09-18T13:14:56.211649+09:00",
+  "last_updated": "2026-09-18T13:18:34.565716+09:00",
   "daily_loss_guard": {
     "date": "09/18",
     "consecutive_losses": 1,
@@ -2198,7 +2200,7 @@
     },
     {
       "date": "09/18",
-      "balance": 388641
+      "balance": 391241
     }
   ],
   "position_version": 85,
