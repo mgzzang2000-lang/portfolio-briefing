@@ -1946,23 +1946,23 @@
     },
     {
       "action": "sell",
-      "date": "09/18 12:05",
       "partial": false,
       "trade_id": "319400-20260918100413",
-      "stock": "319400",
+      "date": "09/18 12:05",
+      "stock": "현대무벡스",
       "qty": 13,
       "price": 22550,
       "avg_price": 22950,
       "pnl_pct": -1.74,
       "pnl_amt": -5200,
-      "reason": "손절 (복구, -1.74%)"
+      "reason": "손절 (-1.74%)"
     }
   ],
   "position": null,
   "last_updated": "2026-09-18T12:11:28.190582+09:00",
   "daily_loss_guard": {
     "date": "09/18",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
