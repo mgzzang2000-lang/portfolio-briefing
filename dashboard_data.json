@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 394063,
+  "current_balance": 95547,
   "trades": [
     {
       "action": "buy",
@@ -1933,10 +1933,32 @@
       "pnl_pct": 0.79,
       "pnl_amt": 2300,
       "reason": "강제청산 (15:20)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "319400-20260918100413",
+      "date": "09/18 10:04",
+      "code": "319400",
+      "stock": "319400",
+      "qty": 13,
+      "price": 22950,
+      "amount": 298350
     }
   ],
-  "position": null,
-  "last_updated": "2026-09-18T10:03:19.168235+09:00",
+  "position": {
+    "code": "319400",
+    "name": "319400",
+    "qty": 13,
+    "market": "Q",
+    "avg_price": 22950,
+    "current_price": 22950,
+    "stop_price": 22556,
+    "target_price": 23758,
+    "entry_time": "2026-09-18T10:04:13.209237+09:00",
+    "trailing_activated": false,
+    "trade_id": "319400-20260918100413"
+  },
+  "last_updated": "2026-09-18T10:04:13.209727+09:00",
   "daily_loss_guard": {
     "date": "09/18",
     "consecutive_losses": 0,
@@ -2153,10 +2175,10 @@
     },
     {
       "date": "09/18",
-      "balance": 394063
+      "balance": 95547
     }
   ],
-  "position_version": 82,
+  "position_version": 83,
   "last_sold_code": "417200",
   "last_sold_at": "2026-09-16T15:20:05.146145+09:00",
   "stray_notified": null
