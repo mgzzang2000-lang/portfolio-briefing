@@ -1997,7 +1997,7 @@
     "qty": 3,
     "market": "Q",
     "avg_price": 75400,
-    "current_price": 74900,
+    "current_price": 74800,
     "stop_price": 74269,
     "target_price": 78227,
     "entry_time": "2026-09-21T11:03:18.862116+09:00",
@@ -2006,10 +2006,11 @@
     "peak_pnl_pct": 0.06626905235255136,
     "early_exit_logged_checkpoints": [
       10,
-      20
+      20,
+      30
     ]
   },
-  "last_updated": "2026-09-21T11:32:40.121016+09:00",
+  "last_updated": "2026-09-21T11:33:22.476938+09:00",
   "daily_loss_guard": {
     "date": "09/21",
     "consecutive_losses": 0,
