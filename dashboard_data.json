@@ -1979,9 +1979,33 @@
       "pnl_pct": -0.44,
       "pnl_amt": -1300,
       "reason": "강제청산 (15:20)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "080220-20260921110318",
+      "date": "09/21 11:03",
+      "code": "080220",
+      "stock": "080220",
+      "qty": 3,
+      "price": 75400,
+      "amount": 226200
     }
   ],
-  "position": null,
+  "position": {
+    "code": "080220",
+    "name": "080220",
+    "qty": 3,
+    "market": "Q",
+    "avg_price": 75400,
+    "current_price": 75400,
+    "stop_price": 74269,
+    "target_price": 78227,
+    "entry_time": "2026-09-21T11:03:18.862116+09:00",
+    "trailing_activated": false,
+    "trade_id": "080220-20260921110318",
+    "peak_pnl_pct": -0.06626905235255136,
+    "early_exit_logged_checkpoints": []
+  },
   "last_updated": "2026-09-21T11:04:11.486339+09:00",
   "daily_loss_guard": {
     "date": "09/21",
@@ -2206,7 +2230,7 @@
       "balance": 381986
     }
   ],
-  "position_version": 86,
+  "position_version": 87,
   "last_sold_code": "319400",
   "last_sold_at": "2026-09-18T15:20:06.793640+09:00",
   "stray_notified": null
