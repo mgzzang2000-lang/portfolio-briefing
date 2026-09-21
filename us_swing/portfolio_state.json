@@ -6,6 +6,10 @@
     {
       "date": "2026-09-19",
       "delta": 382.17
+    },
+    {
+      "date": "2026-09-21",
+      "delta": -469.69999999999993
     }
   ],
   "positions": {
@@ -34,6 +38,16 @@
       "current_price": 416.05,
       "pnl_pct": -0.76,
       "price_updated_at": "23:30"
+    },
+    "HPQ": {
+      "stop_price": 31.05,
+      "tp_price": 43.61,
+      "partial_tp_price": 38.58,
+      "partial_taken": false,
+      "entry_price": 33.55,
+      "entry_date": "20260921",
+      "qty": 14,
+      "sector": "Information Technology"
     }
   },
   "trade_history": [
@@ -164,6 +178,14 @@
       "qty": 3,
       "price": 127.39,
       "reason": "하드손절 (기준 128.26)"
+    },
+    {
+      "action": "buy",
+      "date": "2026-09-21 23:30",
+      "symbol": "HPQ",
+      "qty": 14,
+      "price": 33.55,
+      "reason": "RS12w=50.1%"
     }
   ],
   "balance_history": [
