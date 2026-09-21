@@ -22,9 +22,9 @@
       "entry_date": "20260910",
       "qty": 1,
       "sector": "Health Care",
-      "current_price": 278.26,
-      "pnl_pct": 1.66,
-      "price_updated_at": "03:45"
+      "current_price": 278.01,
+      "pnl_pct": 1.57,
+      "price_updated_at": "04:00"
     },
     "MPC": {
       "stop_price": 389.62,
@@ -35,9 +35,9 @@
       "entry_date": "20260917",
       "qty": 1,
       "sector": "Energy",
-      "current_price": 413.95,
-      "pnl_pct": -1.26,
-      "price_updated_at": "03:45"
+      "current_price": 411.93,
+      "pnl_pct": -1.74,
+      "price_updated_at": "04:00"
     },
     "HPQ": {
       "stop_price": 31.05,
@@ -48,9 +48,9 @@
       "entry_date": "20260921",
       "qty": 14,
       "sector": "Information Technology",
-      "current_price": 32.96,
-      "pnl_pct": -1.27,
-      "price_updated_at": "03:45"
+      "current_price": 32.795,
+      "pnl_pct": -1.77,
+      "price_updated_at": "04:00"
     }
   },
   "trade_history": [
@@ -433,7 +433,7 @@
       "balance": 639.28
     }
   ],
-  "total_assets": 1792.93,
+  "total_assets": 1788.35,
   "total_assets_history": [
     {
       "date": "07/25",
@@ -673,8 +673,8 @@
     },
     {
       "date": "09/22",
-      "balance": 1792.93
+      "balance": 1788.35
     }
   ],
-  "last_updated": "2026-09-22T03:45:35.023590+09:00"
+  "last_updated": "2026-09-22T04:00:58.649824+09:00"
 }
