@@ -1989,33 +1989,26 @@
       "qty": 3,
       "price": 75400,
       "amount": 226200
+    },
+    {
+      "action": "sell",
+      "partial": false,
+      "trade_id": "080220-20260921110318",
+      "date": "09/21 15:20",
+      "stock": "제주반도체",
+      "qty": 3,
+      "price": 75200,
+      "avg_price": 75450,
+      "pnl_pct": -0.33,
+      "pnl_amt": -750,
+      "reason": "강제청산 (15:20)"
     }
   ],
-  "position": {
-    "code": "080220",
-    "name": "080220",
-    "qty": 3,
-    "market": "Q",
-    "avg_price": 75400,
-    "current_price": 75200,
-    "stop_price": 74269,
-    "target_price": 78227,
-    "entry_time": "2026-09-21T11:03:18.862116+09:00",
-    "trailing_activated": false,
-    "trade_id": "080220-20260921110318",
-    "peak_pnl_pct": 0.06626905235255136,
-    "early_exit_logged_checkpoints": [
-      10,
-      20,
-      30,
-      45,
-      60
-    ]
-  },
+  "position": null,
   "last_updated": "2026-09-21T15:20:28.228205+09:00",
   "daily_loss_guard": {
     "date": "09/21",
-    "consecutive_losses": 0,
+    "consecutive_losses": 1,
     "notified": false
   },
   "balance_history": [
@@ -2236,7 +2229,7 @@
       "balance": 381386
     }
   ],
-  "position_version": 87,
+  "position_version": 88,
   "last_sold_code": "319400",
   "last_sold_at": "2026-09-18T15:20:06.793640+09:00",
   "stray_notified": null
