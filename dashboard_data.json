@@ -2002,9 +2002,11 @@
     "target_price": 78227,
     "entry_time": "2026-09-21T11:03:18.862116+09:00",
     "trailing_activated": false,
-    "trade_id": "080220-20260921110318"
+    "trade_id": "080220-20260921110318",
+    "peak_pnl_pct": -0.06626905235255136,
+    "early_exit_logged_checkpoints": []
   },
-  "last_updated": "2026-09-21T11:03:18.862397+09:00",
+  "last_updated": "2026-09-21T11:03:47.691323+09:00",
   "daily_loss_guard": {
     "date": "09/21",
     "consecutive_losses": 0,
