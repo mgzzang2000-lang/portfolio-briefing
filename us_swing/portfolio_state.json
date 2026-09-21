@@ -1,11 +1,15 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 1108.98,
+  "current_balance": 639.28,
   "_last_raw_cash": 726.81,
   "pending_cash_deltas": [
     {
       "date": "2026-09-19",
       "delta": 382.17
+    },
+    {
+      "date": "2026-09-21",
+      "delta": -469.69999999999993
     }
   ],
   "positions": {
@@ -34,6 +38,16 @@
       "current_price": 417.1999,
       "pnl_pct": -0.49,
       "price_updated_at": "23:15"
+    },
+    "HPQ": {
+      "stop_price": 31.05,
+      "tp_price": 43.61,
+      "partial_tp_price": 38.58,
+      "partial_taken": false,
+      "entry_price": 33.55,
+      "entry_date": "20260921",
+      "qty": 14,
+      "sector": "Information Technology"
     }
   },
   "trade_history": [
@@ -164,6 +178,14 @@
       "qty": 3,
       "price": 127.39,
       "reason": "하드손절 (기준 128.26)"
+    },
+    {
+      "action": "buy",
+      "date": "2026-09-21 23:30",
+      "symbol": "HPQ",
+      "qty": 14,
+      "price": 33.55,
+      "reason": "RS12w=50.1%"
     }
   ],
   "balance_history": [
@@ -405,10 +427,10 @@
     },
     {
       "date": "09/21",
-      "balance": 1108.98
+      "balance": 639.28
     }
   ],
-  "total_assets": 1802.67,
+  "total_assets": 1802.54,
   "total_assets_history": [
     {
       "date": "07/24",
@@ -648,8 +670,8 @@
     },
     {
       "date": "09/21",
-      "balance": 1802.67
+      "balance": 1802.54
     }
   ],
-  "last_updated": "2026-09-21T23:15:34.904254+09:00"
+  "last_updated": "2026-09-21T23:30:45.899956+09:00"
 }
