@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 381386,
+  "current_balance": 99505,
   "trades": [
     {
       "action": "buy",
@@ -2002,10 +2002,32 @@
       "pnl_pct": -0.33,
       "pnl_amt": -750,
       "reason": "강제청산 (15:20)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "047040-20260922100006",
+      "date": "09/22 10:00",
+      "code": "047040",
+      "stock": "047040",
+      "qty": 15,
+      "price": 18760,
+      "amount": 281400
     }
   ],
-  "position": null,
-  "last_updated": "2026-09-22T09:55:04.320301+09:00",
+  "position": {
+    "code": "047040",
+    "name": "047040",
+    "qty": 15,
+    "market": "J",
+    "avg_price": 18760,
+    "current_price": 18760,
+    "stop_price": 18508,
+    "target_price": 19494,
+    "entry_time": "2026-09-22T10:00:06.376273+09:00",
+    "trailing_activated": false,
+    "trade_id": "047040-20260922100006"
+  },
+  "last_updated": "2026-09-22T10:00:06.376438+09:00",
   "daily_loss_guard": {
     "date": "09/22",
     "consecutive_losses": 0,
@@ -2230,10 +2252,10 @@
     },
     {
       "date": "09/22",
-      "balance": 381386
+      "balance": 99505
     }
   ],
-  "position_version": 88,
+  "position_version": 89,
   "last_sold_code": "080220",
   "last_sold_at": "2026-09-21T15:20:03.499052+09:00",
   "stray_notified": null
