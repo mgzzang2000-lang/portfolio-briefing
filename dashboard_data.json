@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 380453,
+  "current_balance": 380334,
   "trades": [
     {
       "action": "buy",
@@ -2025,6 +2025,19 @@
       "pnl_pct": 0.0,
       "pnl_amt": 0,
       "reason": "2시간 부분청산 (+0.00%)"
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "047040-20260922100006",
+      "date": "09/22 11:59",
+      "stock": "대우건설",
+      "qty": 4,
+      "price": 18800,
+      "avg_price": 18800,
+      "pnl_pct": 0.0,
+      "pnl_amt": 0,
+      "reason": "2시간 부분청산 (+0.00%)"
     }
   ],
   "position": {
@@ -2048,7 +2061,7 @@
       60
     ]
   },
-  "last_updated": "2026-09-22T11:58:46.373080+09:00",
+  "last_updated": "2026-09-22T11:59:02.278621+09:00",
   "daily_loss_guard": {
     "date": "09/22",
     "consecutive_losses": 0,
@@ -2273,7 +2286,7 @@
     },
     {
       "date": "09/22",
-      "balance": 380453
+      "balance": 380334
     }
   ],
   "position_version": 89,
