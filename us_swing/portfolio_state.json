@@ -1,11 +1,15 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 1496.86,
+  "current_balance": 1098.43,
   "_last_raw_cash": 1109.76,
   "pending_cash_deltas": [
     {
       "date": "2026-09-22",
       "delta": 387.1
+    },
+    {
+      "date": "2026-09-22",
+      "delta": -398.43
     }
   ],
   "positions": {
@@ -34,6 +38,16 @@
       "current_price": 33.13,
       "pnl_pct": -0.76,
       "price_updated_at": "23:15"
+    },
+    "MPC": {
+      "stop_price": 368.7,
+      "tp_price": 517.96,
+      "partial_tp_price": 458.19,
+      "partial_taken": false,
+      "entry_price": 398.43,
+      "entry_date": "20260922",
+      "qty": 1,
+      "sector": "Energy"
     }
   },
   "trade_history": [
@@ -180,6 +194,14 @@
       "qty": 1,
       "price": 387.1,
       "reason": "하드손절 (기준 389.62)"
+    },
+    {
+      "action": "buy",
+      "date": "2026-09-22 23:30",
+      "symbol": "MPC",
+      "qty": 1,
+      "price": 398.43,
+      "reason": "RS12w=43.4%"
     }
   ],
   "balance_history": [
@@ -421,10 +443,10 @@
     },
     {
       "date": "09/22",
-      "balance": 1496.86
+      "balance": 1098.43
     }
   ],
-  "total_assets": 2244.05,
+  "total_assets": 2233.61,
   "total_assets_history": [
     {
       "date": "07/25",
@@ -664,8 +686,8 @@
     },
     {
       "date": "09/22",
-      "balance": 2244.05
+      "balance": 2233.61
     }
   ],
-  "last_updated": "2026-09-22T23:15:36.654028+09:00"
+  "last_updated": "2026-09-22T23:30:43.262368+09:00"
 }
