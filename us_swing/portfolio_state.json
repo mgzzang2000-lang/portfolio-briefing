@@ -1,11 +1,15 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 1108.98,
+  "current_balance": 639.28,
   "_last_raw_cash": 726.81,
   "pending_cash_deltas": [
     {
       "date": "2026-09-19",
       "delta": 382.17
+    },
+    {
+      "date": "2026-09-21",
+      "delta": -469.69999999999993
     }
   ],
   "positions": {
@@ -18,9 +22,9 @@
       "entry_date": "20260910",
       "qty": 1,
       "sector": "Health Care",
-      "current_price": 278.06,
-      "pnl_pct": 1.59,
-      "price_updated_at": "06:45"
+      "current_price": 279.01,
+      "pnl_pct": 1.94,
+      "price_updated_at": "07:29"
     },
     "MPC": {
       "stop_price": 389.62,
@@ -31,9 +35,22 @@
       "entry_date": "20260917",
       "qty": 1,
       "sector": "Energy",
-      "current_price": 424.89,
-      "pnl_pct": 1.35,
-      "price_updated_at": "06:45"
+      "current_price": 402.38,
+      "pnl_pct": -4.02,
+      "price_updated_at": "07:29"
+    },
+    "HPQ": {
+      "stop_price": 31.05,
+      "tp_price": 43.61,
+      "partial_tp_price": 38.58,
+      "partial_taken": false,
+      "entry_price": 33.55,
+      "entry_date": "20260921",
+      "qty": 14,
+      "sector": "Information Technology",
+      "current_price": 32.95,
+      "pnl_pct": -1.3,
+      "price_updated_at": "07:29"
     }
   },
   "trade_history": [
@@ -164,13 +181,17 @@
       "qty": 3,
       "price": 127.39,
       "reason": "하드손절 (기준 128.26)"
+    },
+    {
+      "action": "buy",
+      "date": "2026-09-21 23:30",
+      "symbol": "HPQ",
+      "qty": 14,
+      "price": 33.55,
+      "reason": "RS12w=50.1%"
     }
   ],
   "balance_history": [
-    {
-      "date": "07/24",
-      "balance": 547.88
-    },
     {
       "date": "07/25",
       "balance": 547.88
@@ -405,15 +426,15 @@
     },
     {
       "date": "09/21",
-      "balance": 1108.98
+      "balance": 639.28
+    },
+    {
+      "date": "09/22",
+      "balance": 639.28
     }
   ],
-  "total_assets": 1811.93,
+  "total_assets": 1781.97,
   "total_assets_history": [
-    {
-      "date": "07/24",
-      "balance": 1884.87
-    },
     {
       "date": "07/25",
       "balance": 1884.25
@@ -648,8 +669,12 @@
     },
     {
       "date": "09/21",
-      "balance": 1811.93
+      "balance": 1797.54
+    },
+    {
+      "date": "09/22",
+      "balance": 1781.97
     }
   ],
-  "last_updated": "2026-09-21T06:45:29.606621+09:00"
+  "last_updated": "2026-09-22T07:29:07.213648+09:00"
 }
