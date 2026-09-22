@@ -2027,9 +2027,11 @@
     "trailing_activated": false,
     "trade_id": "047040-20260922100006",
     "peak_pnl_pct": -0.425531914893617,
-    "early_exit_logged_checkpoints": []
+    "early_exit_logged_checkpoints": [
+      10
+    ]
   },
-  "last_updated": "2026-09-22T10:09:27.869593+09:00",
+  "last_updated": "2026-09-22T10:10:22.039977+09:00",
   "daily_loss_guard": {
     "date": "09/22",
     "consecutive_losses": 0,
