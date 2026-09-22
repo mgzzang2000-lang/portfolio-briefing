@@ -1,8 +1,13 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 1109.76,
+  "current_balance": 1496.86,
   "_last_raw_cash": 1109.76,
-  "pending_cash_deltas": [],
+  "pending_cash_deltas": [
+    {
+      "date": "2026-09-22",
+      "delta": 387.1
+    }
+  ],
   "positions": {
     "CRL": {
       "stop_price": 255.05,
@@ -13,22 +18,9 @@
       "entry_date": "20260910",
       "qty": 1,
       "sector": "Health Care",
-      "current_price": 280.99,
-      "pnl_pct": 2.66,
-      "price_updated_at": "22:15"
-    },
-    "MPC": {
-      "stop_price": 389.62,
-      "tp_price": 547.35,
-      "partial_tp_price": 484.2,
-      "partial_taken": false,
-      "entry_price": 421.04,
-      "entry_date": "20260917",
-      "qty": 1,
-      "sector": "Energy",
-      "current_price": 392.5,
-      "pnl_pct": -6.38,
-      "price_updated_at": "22:15"
+      "current_price": 281.425,
+      "pnl_pct": 2.82,
+      "price_updated_at": "22:30"
     },
     "HPQ": {
       "stop_price": 31.05,
@@ -39,9 +31,9 @@
       "entry_date": "20260921",
       "qty": 14,
       "sector": "Information Technology",
-      "current_price": 33.1299,
-      "pnl_pct": -0.76,
-      "price_updated_at": "22:15"
+      "current_price": 33.135,
+      "pnl_pct": -0.75,
+      "price_updated_at": "22:30"
     }
   },
   "trade_history": [
@@ -180,6 +172,14 @@
       "qty": 14,
       "price": 33.55,
       "reason": "RS12w=50.1%"
+    },
+    {
+      "action": "sell",
+      "date": "2026-09-22 22:30",
+      "symbol": "MPC",
+      "qty": 1,
+      "price": 387.1,
+      "reason": "하드손절 (기준 389.62)"
     }
   ],
   "balance_history": [
@@ -421,10 +421,10 @@
     },
     {
       "date": "09/22",
-      "balance": 1109.76
+      "balance": 1496.86
     }
   ],
-  "total_assets": 2247.07,
+  "total_assets": 2242.18,
   "total_assets_history": [
     {
       "date": "07/25",
@@ -664,8 +664,8 @@
     },
     {
       "date": "09/22",
-      "balance": 2247.07
+      "balance": 2242.18
     }
   ],
-  "last_updated": "2026-09-22T22:15:33.022921+09:00"
+  "last_updated": "2026-09-22T22:30:48.365283+09:00"
 }
