@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 377019,
+  "current_balance": 376773,
   "trades": [
     {
       "action": "buy",
@@ -2159,6 +2159,19 @@
       "qty": 2,
       "price": 118500,
       "amount": 237000
+    },
+    {
+      "action": "sell",
+      "partial": true,
+      "trade_id": "007660-20260923121441",
+      "date": "09/23 14:15",
+      "stock": "이수페타시스",
+      "qty": 1,
+      "price": 118700,
+      "avg_price": 118600,
+      "pnl_pct": 0.08,
+      "pnl_amt": 100,
+      "reason": "2시간 부분청산 (+0.08%)"
     }
   ],
   "position": {
@@ -2167,8 +2180,8 @@
     "qty": 2,
     "market": "J",
     "avg_price": 118500,
-    "current_price": 118500,
-    "stop_price": 116821,
+    "current_price": 118700,
+    "stop_price": 119074.4,
     "target_price": 123047,
     "entry_time": "2026-09-23T12:14:41.129168+09:00",
     "trailing_activated": false,
@@ -2182,7 +2195,7 @@
       60
     ]
   },
-  "last_updated": "2026-09-23T14:15:44.155347+09:00",
+  "last_updated": "2026-09-23T14:15:58.953172+09:00",
   "daily_loss_guard": {
     "date": "09/23",
     "consecutive_losses": 1,
@@ -2411,7 +2424,7 @@
     },
     {
       "date": "09/23",
-      "balance": 377019
+      "balance": 376773
     }
   ],
   "position_version": 95,
