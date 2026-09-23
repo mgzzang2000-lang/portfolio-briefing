@@ -2136,6 +2136,19 @@
       "pnl_pct": -1.72,
       "pnl_amt": -3300,
       "reason": "손절 (-1.72%)"
+    },
+    {
+      "action": "sell",
+      "date": "09/23 10:07",
+      "partial": false,
+      "trade_id": "003670-20260923094316",
+      "stock": "003670",
+      "qty": 1,
+      "price": 188700,
+      "avg_price": 191300,
+      "pnl_pct": -1.36,
+      "pnl_amt": -2600,
+      "reason": "손절 (복구, -1.36%)"
     }
   ],
   "position": null,
