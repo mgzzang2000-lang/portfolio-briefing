@@ -2113,9 +2113,33 @@
       "pnl_pct": 0.53,
       "pnl_amt": 1200,
       "reason": "강제청산 (15:20)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "003670-20260923094316",
+      "date": "09/23 09:43",
+      "code": "003670",
+      "stock": "003670",
+      "qty": 1,
+      "price": 191300,
+      "amount": 191300
     }
   ],
-  "position": null,
+  "position": {
+    "code": "003670",
+    "name": "003670",
+    "qty": 1,
+    "market": "J",
+    "avg_price": 191300,
+    "current_price": 191900,
+    "stop_price": 188923,
+    "target_price": 198992,
+    "entry_time": "2026-09-23T09:43:16.134127+09:00",
+    "trailing_activated": false,
+    "trade_id": "003670-20260923094316",
+    "peak_pnl_pct": 0.05211047420531526,
+    "early_exit_logged_checkpoints": []
+  },
   "last_updated": "2026-09-23T09:43:57.617129+09:00",
   "daily_loss_guard": {
     "date": "09/23",
@@ -2348,7 +2372,7 @@
       "balance": 380346
     }
   ],
-  "position_version": 92,
+  "position_version": 93,
   "last_sold_code": "007660",
   "last_sold_at": "2026-09-22T15:20:03.440190+09:00",
   "stray_notified": null
