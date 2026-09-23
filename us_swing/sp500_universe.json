@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-16T22:15:36.530617+09:00",
+  "fetched_at": "2026-09-23T22:30:41.732619+09:00",
   "universe": [
     {
       "symbol": "MMM",
@@ -270,6 +270,10 @@
       "sector": "Financials"
     },
     {
+      "symbol": "BE",
+      "sector": "Industrials"
+    },
+    {
       "symbol": "BNY",
       "sector": "Financials"
     },
@@ -304,10 +308,6 @@
     {
       "symbol": "BF.B",
       "sector": "Consumer Staples"
-    },
-    {
-      "symbol": "BLDR",
-      "sector": "Industrials"
     },
     {
       "symbol": "BG",
@@ -718,6 +718,10 @@
       "sector": "Utilities"
     },
     {
+      "symbol": "P",
+      "sector": "Information Technology"
+    },
+    {
       "symbol": "ES",
       "sector": "Utilities"
     },
@@ -988,6 +992,10 @@
     {
       "symbol": "ITW",
       "sector": "Industrials"
+    },
+    {
+      "symbol": "ILMN",
+      "sector": "Health Care"
     },
     {
       "symbol": "INCY",
@@ -1268,10 +1276,6 @@
     {
       "symbol": "MRNA",
       "sector": "Health Care"
-    },
-    {
-      "symbol": "TAP",
-      "sector": "Consumer Staples"
     },
     {
       "symbol": "MDLZ",
@@ -1775,10 +1779,6 @@
     },
     {
       "symbol": "TKO",
-      "sector": "Communication Services"
-    },
-    {
-      "symbol": "TTD",
       "sector": "Communication Services"
     },
     {
