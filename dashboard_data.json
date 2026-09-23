@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 377249,
+  "current_balance": 140249,
   "trades": [
     {
       "action": "buy",
@@ -2149,10 +2149,32 @@
       "pnl_pct": -1.36,
       "pnl_amt": -2600,
       "reason": "손절 (복구, -1.36%)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "007660-20260923121441",
+      "date": "09/23 12:14",
+      "code": "007660",
+      "stock": "007660",
+      "qty": 2,
+      "price": 118500,
+      "amount": 237000
     }
   ],
-  "position": null,
-  "last_updated": "2026-09-23T12:13:48.343645+09:00",
+  "position": {
+    "code": "007660",
+    "name": "007660",
+    "qty": 2,
+    "market": "J",
+    "avg_price": 118500,
+    "current_price": 118500,
+    "stop_price": 116821,
+    "target_price": 123047,
+    "entry_time": "2026-09-23T12:14:41.129168+09:00",
+    "trailing_activated": false,
+    "trade_id": "007660-20260923121441"
+  },
+  "last_updated": "2026-09-23T12:14:41.129447+09:00",
   "daily_loss_guard": {
     "date": "09/23",
     "consecutive_losses": 1,
@@ -2381,10 +2403,10 @@
     },
     {
       "date": "09/23",
-      "balance": 377249
+      "balance": 140249
     }
   ],
-  "position_version": 94,
+  "position_version": 95,
   "last_sold_code": "003670",
   "last_sold_at": "2026-09-23T10:07:28.644981+09:00",
   "stray_notified": null
