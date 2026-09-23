@@ -1,6 +1,6 @@
 {
   "initial_balance": 500000,
-  "current_balance": 381346,
+  "current_balance": 189566,
   "trades": [
     {
       "action": "buy",
@@ -2113,10 +2113,32 @@
       "pnl_pct": 0.53,
       "pnl_amt": 1200,
       "reason": "강제청산 (15:20)"
+    },
+    {
+      "action": "buy",
+      "trade_id": "003670-20260923094316",
+      "date": "09/23 09:43",
+      "code": "003670",
+      "stock": "003670",
+      "qty": 1,
+      "price": 191300,
+      "amount": 191300
     }
   ],
-  "position": null,
-  "last_updated": "2026-09-23T09:42:25.900715+09:00",
+  "position": {
+    "code": "003670",
+    "name": "003670",
+    "qty": 1,
+    "market": "J",
+    "avg_price": 191300,
+    "current_price": 191300,
+    "stop_price": 188923,
+    "target_price": 198992,
+    "entry_time": "2026-09-23T09:43:16.134127+09:00",
+    "trailing_activated": false,
+    "trade_id": "003670-20260923094316"
+  },
+  "last_updated": "2026-09-23T09:43:16.134414+09:00",
   "daily_loss_guard": {
     "date": "09/23",
     "consecutive_losses": 0,
@@ -2345,10 +2367,10 @@
     },
     {
       "date": "09/23",
-      "balance": 381346
+      "balance": 189566
     }
   ],
-  "position_version": 92,
+  "position_version": 93,
   "last_sold_code": "007660",
   "last_sold_at": "2026-09-22T15:20:03.440190+09:00",
   "stray_notified": null
