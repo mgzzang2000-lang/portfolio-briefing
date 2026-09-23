@@ -2131,16 +2131,18 @@
     "qty": 1,
     "market": "J",
     "avg_price": 191300,
-    "current_price": 192400,
+    "current_price": 192300,
     "stop_price": 188923,
     "target_price": 198992,
     "entry_time": "2026-09-23T09:43:16.134127+09:00",
     "trailing_activated": false,
     "trade_id": "003670-20260923094316",
     "peak_pnl_pct": 0.26055237102657636,
-    "early_exit_logged_checkpoints": []
+    "early_exit_logged_checkpoints": [
+      10
+    ]
   },
-  "last_updated": "2026-09-23T09:53:11.355448+09:00",
+  "last_updated": "2026-09-23T09:53:54.951539+09:00",
   "daily_loss_guard": {
     "date": "09/23",
     "consecutive_losses": 0,
