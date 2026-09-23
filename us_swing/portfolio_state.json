@@ -1,17 +1,8 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 639.28,
-  "_last_raw_cash": 726.81,
-  "pending_cash_deltas": [
-    {
-      "date": "2026-09-19",
-      "delta": 382.17
-    },
-    {
-      "date": "2026-09-21",
-      "delta": -469.69999999999993
-    }
-  ],
+  "current_balance": 641.21,
+  "_last_raw_cash": 641.21,
+  "pending_cash_deltas": [],
   "positions": {
     "CRL": {
       "stop_price": 255.05,
@@ -22,22 +13,9 @@
       "entry_date": "20260910",
       "qty": 1,
       "sector": "Health Care",
-      "current_price": 279.01,
-      "pnl_pct": 1.94,
-      "price_updated_at": "07:29"
-    },
-    "MPC": {
-      "stop_price": 389.62,
-      "tp_price": 547.35,
-      "partial_tp_price": 484.2,
-      "partial_taken": false,
-      "entry_price": 421.04,
-      "entry_date": "20260917",
-      "qty": 1,
-      "sector": "Energy",
-      "current_price": 402.38,
-      "pnl_pct": -4.02,
-      "price_updated_at": "07:29"
+      "current_price": 285.11,
+      "pnl_pct": 4.16,
+      "price_updated_at": "08:34"
     },
     "HPQ": {
       "stop_price": 31.05,
@@ -48,9 +26,22 @@
       "entry_date": "20260921",
       "qty": 14,
       "sector": "Information Technology",
-      "current_price": 32.95,
-      "pnl_pct": -1.3,
-      "price_updated_at": "07:29"
+      "current_price": 32.04,
+      "pnl_pct": -4.03,
+      "price_updated_at": "08:34"
+    },
+    "MPC": {
+      "stop_price": 368.7,
+      "tp_price": 517.96,
+      "partial_tp_price": 458.19,
+      "partial_taken": false,
+      "entry_price": 398.43,
+      "entry_date": "20260922",
+      "qty": 1,
+      "sector": "Energy",
+      "current_price": 389.68,
+      "pnl_pct": -1.79,
+      "price_updated_at": "08:34"
     }
   },
   "trade_history": [
@@ -189,13 +180,25 @@
       "qty": 14,
       "price": 33.55,
       "reason": "RS12w=50.1%"
+    },
+    {
+      "action": "sell",
+      "date": "2026-09-22 22:30",
+      "symbol": "MPC",
+      "qty": 1,
+      "price": 387.1,
+      "reason": "하드손절 (기준 389.62)"
+    },
+    {
+      "action": "buy",
+      "date": "2026-09-22 23:30",
+      "symbol": "MPC",
+      "qty": 1,
+      "price": 398.43,
+      "reason": "RS12w=43.4%"
     }
   ],
   "balance_history": [
-    {
-      "date": "07/25",
-      "balance": 547.88
-    },
     {
       "date": "07/26",
       "balance": 547.88
@@ -430,15 +433,15 @@
     },
     {
       "date": "09/22",
-      "balance": 639.28
+      "balance": 1098.43
+    },
+    {
+      "date": "09/23",
+      "balance": 641.21
     }
   ],
-  "total_assets": 1781.97,
+  "total_assets": 1764.56,
   "total_assets_history": [
-    {
-      "date": "07/25",
-      "balance": 1884.25
-    },
     {
       "date": "07/26",
       "balance": 1884.25
@@ -673,8 +676,12 @@
     },
     {
       "date": "09/22",
-      "balance": 1781.97
+      "balance": 2232.27
+    },
+    {
+      "date": "09/23",
+      "balance": 1764.56
     }
   ],
-  "last_updated": "2026-09-22T07:29:07.213648+09:00"
+  "last_updated": "2026-09-23T08:34:14.845376+09:00"
 }
