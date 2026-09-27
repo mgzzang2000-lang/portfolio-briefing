@@ -115,7 +115,9 @@ find_fvg_with_sweep)도 옛 A/B 전용이라 함께 삭제. 같은 날, A 보완
 import os, json, time
 from datetime import datetime, timezone, timedelta
 import market_calendar
-import auto_trading as bot  # 섀도우D가 실거래봇의 조건식 함수를 그대로 재사용
+# [2026-09-27] 섀도우D가 쓰는 실거래봇(auto_trading) import는 scan_shadow_d() 안으로
+# 옮김 — 모듈 맨 위에서 import하면 실거래봇 설정(계좌번호·카톡키 등)이 없는 환경에서
+# 이 파일 전체가 import 실패해, 섀도우A~C와 1분봉 수집까지 통째로 멈췄음(9/2~9/25).
 
 KST = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
@@ -694,6 +696,7 @@ def scan_shadow_c(token, stocks, kospi_set, today_str):
 # check_5min_momentum/calc_atr을 auto_trading.py에서 그대로 가져다 써서, 실거래
 # 로직이 바뀌면 섀도우D도 자동으로 같이 바뀐다(로직 두 곳에 따로 유지 안 함).
 def scan_shadow_d(token, stocks, kospi_set):
+    import auto_trading as bot  # 실거래봇의 조건식 함수를 그대로 재사용(위 import부 주석 참고)
     candidates = []
     for code in stocks:
         try:

@@ -45,10 +45,18 @@
 등록한 날부터 후보가 잡히고 그 후보 종목의 1분봉이 그날부터 쌓이기 시작함.
 =====================================================
 """
-import os, json, time
+import os, json, time, traceback
 from datetime import datetime, timezone, timedelta
-import shadow_scan
 import market_calendar
+# [2026-09-27] 1분봉 수집은 실거래·섀도우와 무관하게 항상 돌아야 한다(사용자 방침) —
+# 9/1 섀도우D 추가 때 shadow_scan import가 깨지면서 1분봉 수집까지 3주 넘게 같이 멈췄던
+# 사고 재발 방지. shadow_scan을 못 불러와도, 섀도우 하나가 에러를 내도 1분봉은 계속 쌓는다.
+try:
+    import shadow_scan
+except Exception:
+    traceback.print_exc()
+    print("[경고] shadow_scan 불러오기 실패 — 섀도우 스캔 없이 1분봉 수집만 진행")
+    shadow_scan = None
 
 KST = timezone(timedelta(hours=9))
 BASE_URL = "https://openapi.koreainvestment.com:9443"
@@ -284,8 +292,9 @@ def get_live_trade_codes_today(today_str):
         if t.get('action') == 'buy' and str(t.get('date', '')).startswith(today_disp) and t.get('code'):
             codes.add(t['code'])
     pos = dash.get('position')
-    if pos and pos.get('pdno'):
-        codes.add(pos['pdno'])
+    pos_code = (pos or {}).get('code') or (pos or {}).get('pdno')  # 대시보드 position 키는 'code'
+    if pos_code:
+        codes.add(pos_code)
     return codes
 
 
@@ -333,25 +342,32 @@ def main():
     # 옛 섀도우C만 A로 승격 + 신규 섀도우B("낙폭과대 반등", 평균회귀 — A와 성격이
     # 다른 비교군으로 신설) 추가, 같은 날 이어서 신규 섀도우C("눌림목 분할매수")
     # 추가(shadow_scan.py [섀도우 C] 설명 참고) ──
-    stocks, kospi_set = shadow_scan.get_universe(token)
-    a_candidates = shadow_scan.scan_shadow_a(token, stocks, kospi_set)
-    shadow_scan.append_snapshot(f"shadow_data/A_{today_str}.json", a_candidates)
-    print(f"[섀도우A] 후보 {len(a_candidates)}종목: {[c['name'] for c in a_candidates]}")
-
-    b_candidates = shadow_scan.scan_shadow_b(token, stocks, kospi_set)
-    shadow_scan.append_snapshot(f"shadow_data/B_{today_str}.json", b_candidates)
-    print(f"[섀도우B] 후보 {len(b_candidates)}종목: {[c['name'] for c in b_candidates]}")
-
-    c_candidates = shadow_scan.scan_shadow_c(token, stocks, kospi_set, today_str)
-    shadow_scan.append_snapshot(f"shadow_data/C_{today_str}.json", c_candidates)
-    print(f"[섀도우C] 후보 {len(c_candidates)}종목: {[c['name'] for c in c_candidates]}")
-
-    d_candidates = shadow_scan.scan_shadow_d(token, stocks, kospi_set)
-    shadow_scan.append_snapshot(f"shadow_data/D_{today_str}.json", d_candidates)
-    print(f"[섀도우D] 후보 {len(d_candidates)}종목: {[c['name'] for c in d_candidates]}")
-
-    shadow_codes = ({c['code'] for c in a_candidates} | {c['code'] for c in b_candidates}
-                     | {c['code'] for c in c_candidates} | {c['code'] for c in d_candidates})
+    shadow_codes = set()
+    universe = None
+    if shadow_scan is not None:
+        try:
+            universe = shadow_scan.get_universe(token)
+        except Exception:
+            traceback.print_exc()
+            print("[경고] 섀도우 유니버스 조회 실패 — 이번 사이클 섀도우 스캔 건너뜀")
+    if universe is not None:
+        stocks, kospi_set = universe
+        # 섀도우마다 따로 감싸서, 하나가 에러를 내도 나머지 섀도우와 1분봉 수집은 계속 진행
+        scans = [
+            ('A', lambda: shadow_scan.scan_shadow_a(token, stocks, kospi_set)),
+            ('B', lambda: shadow_scan.scan_shadow_b(token, stocks, kospi_set)),
+            ('C', lambda: shadow_scan.scan_shadow_c(token, stocks, kospi_set, today_str)),
+            ('D', lambda: shadow_scan.scan_shadow_d(token, stocks, kospi_set)),
+        ]
+        for label, scan in scans:
+            try:
+                cands = scan()
+                shadow_scan.append_snapshot(f"shadow_data/{label}_{today_str}.json", cands)
+                print(f"[섀도우{label}] 후보 {len(cands)}종목: {[c['name'] for c in cands]}")
+                shadow_codes |= {c['code'] for c in cands}
+            except Exception:
+                traceback.print_exc()
+                print(f"[경고] 섀도우{label} 스캔 실패 — 건너뛰고 계속 진행")
     live_trade_codes = get_live_trade_codes_today(today_str)
     watchlist = merge_into_watchlist(watchlist, shadow_codes | live_trade_codes, token)
     save_json(watchlist_path, watchlist)
@@ -368,7 +384,11 @@ def main():
         stored = load_json(bars_path, [])
         stored_times = {b['stck_cntg_hour'] for b in stored}
 
-        raw = get_minute_ohlcv_raw(token, code, market)
+        try:
+            raw = get_minute_ohlcv_raw(token, code, market)
+        except Exception as e:  # 한 종목 조회 오류로 나머지 종목 수집까지 멈추지 않게
+            print(f" {w['name']}({code}): 1분봉 조회 실패 — {e}")
+            raw = []
         # [2026-07-17] dedup 키(stck_cntg_hour)가 시각만 보고 날짜를 안 봐서, 휴장일처럼
         # API가 예전 거래일 봉을 그대로 돌려주면 오늘 날짜 파일에 그 봉이 섞여 들어갔음 —
         # 위 main()의 휴장일 게이트가 걸러주지만, 혹시 놓친 경우를 대비해 여기서도 재확인.
@@ -386,10 +406,16 @@ def main():
         # 한해 프로그램매매 시계열도 같이 쌓음 — 나중에 minute_data의 급등 시각과
         # 대조해 프로그램순매수가 선행지표로 쓸만한지 분석하기 위함. 아직 조건식
         # 아님(shadow_scan.py 섀도우E 설명 참고).
+        if shadow_scan is None:
+            continue
         e_path = f"shadow_data/E_{code}_{today_str}.json"
         e_stored = load_json(e_path, [])
         e_seen = {r['bsop_hour'] for r in e_stored if r.get('bsop_hour')}
-        e_raw = shadow_scan.get_program_trade_raw(token, code)
+        try:
+            e_raw = shadow_scan.get_program_trade_raw(token, code)
+        except Exception as e:
+            print(f"  [섀도우E] {code} 프로그램매매 조회 실패: {e}")
+            e_raw = []
         e_new = [r for r in e_raw if r.get('bsop_hour') and r['bsop_hour'] not in e_seen]
         if e_new:
             e_stored.extend(e_new)

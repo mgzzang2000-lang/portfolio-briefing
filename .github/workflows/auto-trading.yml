@@ -128,6 +128,9 @@ jobs:
           path: daily_filter_cache.json
           key: daily-filter-${{ github.run_id }}
       - name: 대시보드 데이터 푸시
+        # [2026-09-27] if: always() 추가 — 앞 스텝(매매/수집)이 하나라도 실패하면 이 푸시가
+        # 통째로 건너뛰어져, 그 실행에서 이미 모은 1분봉까지 버려지고 있었음.
+        if: always()
         # git 설정(병합 드라이버 등록)은 위 "git 설정" 스텝에서 이미 완료 — 같은 잡
         # 내에서는 스텝 사이에도 유지되므로 여기서 다시 등록할 필요 없음.
         run: |
