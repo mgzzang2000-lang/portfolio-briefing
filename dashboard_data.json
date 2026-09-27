@@ -642,19 +642,6 @@
       "reason": "익절 (+4.17%)"
     },
     {
-      "action": "sell",
-      "date": "08/06 13:31",
-      "partial": false,
-      "trade_id": "477850-20260806130543",
-      "stock": "477850",
-      "qty": 6,
-      "price": 32450,
-      "avg_price": 31250,
-      "pnl_pct": 3.84,
-      "pnl_amt": 7200,
-      "reason": "익절 (복구, +3.84%)"
-    },
-    {
       "action": "buy",
       "trade_id": "096770-20260807115443",
       "date": "08/07 11:54",
@@ -842,19 +829,6 @@
       "reason": "손절 (-1.52%)"
     },
     {
-      "action": "sell",
-      "date": "08/19 13:32",
-      "partial": false,
-      "trade_id": "257720-20260819125258",
-      "stock": "257720",
-      "qty": 6,
-      "price": 45400,
-      "avg_price": 46150,
-      "pnl_pct": -1.63,
-      "pnl_amt": -4500,
-      "reason": "손절 (복구, -1.63%)"
-    },
-    {
       "action": "buy",
       "trade_id": "067290-20260820094246",
       "date": "08/20 09:42",
@@ -886,19 +860,6 @@
       "qty": 1,
       "price": 293500,
       "amount": 293500
-    },
-    {
-      "action": "sell",
-      "date": "08/20 11:10",
-      "partial": false,
-      "trade_id": "032830-20260820104125",
-      "stock": "032830",
-      "qty": 1,
-      "price": 305000,
-      "avg_price": 293500,
-      "pnl_pct": 3.92,
-      "pnl_amt": 11500,
-      "reason": "익절 (복구, +3.92%)"
     },
     {
       "action": "sell",
@@ -1248,19 +1209,6 @@
       "reason": "손절 (-1.62%)"
     },
     {
-      "action": "sell",
-      "date": "09/03 10:37",
-      "partial": false,
-      "trade_id": "014950-20260903101416",
-      "stock": "014950",
-      "qty": 48,
-      "price": 6030,
-      "avg_price": 6155,
-      "pnl_pct": -2.03,
-      "pnl_amt": -6000,
-      "reason": "손절 (복구, -2.03%)"
-    },
-    {
       "action": "buy",
       "trade_id": "417840-20260903121056",
       "date": "09/03 12:10",
@@ -1282,19 +1230,6 @@
       "pnl_pct": -1.63,
       "pnl_amt": -4750,
       "reason": "손절 (-1.63%)"
-    },
-    {
-      "action": "sell",
-      "date": "09/03 14:03",
-      "partial": false,
-      "trade_id": "417840-20260903121056",
-      "stock": "417840",
-      "qty": 19,
-      "price": 15001,
-      "avg_price": 15300,
-      "pnl_pct": -1.95,
-      "pnl_amt": -5681,
-      "reason": "손절 (복구, -1.95%)"
     },
     {
       "action": "buy",
@@ -1331,32 +1266,6 @@
       "pnl_pct": 0.0,
       "pnl_amt": 0,
       "reason": "2시간 부분청산 (+0.00%)"
-    },
-    {
-      "action": "sell",
-      "date": "09/04 13:53",
-      "partial": false,
-      "trade_id": "356860-20260904115534",
-      "stock": "356860",
-      "qty": 4,
-      "price": 37350,
-      "avg_price": 37450,
-      "pnl_pct": -0.27,
-      "pnl_amt": -400,
-      "reason": "손절 (복구, -0.27%)"
-    },
-    {
-      "action": "sell",
-      "date": "09/04 13:53",
-      "partial": false,
-      "trade_id": "356860-20260904115534",
-      "stock": "356860",
-      "qty": 2,
-      "price": 37350,
-      "avg_price": 37450,
-      "pnl_pct": -0.27,
-      "pnl_amt": -200,
-      "reason": "손절 (복구, -0.27%)"
     },
     {
       "action": "sell",
@@ -1539,19 +1448,6 @@
       "reason": "손절 (+0.38%)"
     },
     {
-      "action": "sell",
-      "date": "09/08 15:19",
-      "partial": false,
-      "trade_id": "032820-20260908102531",
-      "stock": "032820",
-      "qty": 17,
-      "price": 11810,
-      "avg_price": 11770,
-      "pnl_pct": 0.34,
-      "pnl_amt": 680,
-      "reason": "익절 (복구, +0.34%)"
-    },
-    {
       "action": "buy",
       "trade_id": "047040-20260909133439",
       "date": "09/09 13:34",
@@ -1573,19 +1469,6 @@
       "pnl_pct": -1.61,
       "pnl_amt": -4800,
       "reason": "손절 (-1.61%)"
-    },
-    {
-      "action": "sell",
-      "date": "09/09 14:15",
-      "partial": false,
-      "trade_id": "047040-20260909133439",
-      "stock": "047040",
-      "qty": 15,
-      "price": 19530,
-      "avg_price": 19840,
-      "pnl_pct": -1.56,
-      "pnl_amt": -4650,
-      "reason": "손절 (복구, -1.56%)"
     },
     {
       "action": "buy",
@@ -1830,19 +1713,6 @@
       "reason": "손절 (+0.32%)"
     },
     {
-      "action": "sell",
-      "date": "09/14 14:55",
-      "partial": false,
-      "trade_id": "356680-20260914125519",
-      "stock": "356680",
-      "qty": 1,
-      "price": 17110,
-      "avg_price": 17040,
-      "pnl_pct": 0.41,
-      "pnl_amt": 70,
-      "reason": "익절 (복구, +0.41%)"
-    },
-    {
       "action": "buy",
       "trade_id": "093370-20260915110208",
       "date": "09/15 11:02",
@@ -2028,19 +1898,6 @@
     },
     {
       "action": "sell",
-      "date": "09/22 11:58",
-      "partial": false,
-      "trade_id": "047040-20260922100006",
-      "stock": "047040",
-      "qty": 7,
-      "price": 18790,
-      "avg_price": 18760,
-      "pnl_pct": 0.16,
-      "pnl_amt": 210,
-      "reason": "익절 (복구, +0.16%)"
-    },
-    {
-      "action": "sell",
       "partial": true,
       "trade_id": "047040-20260922100006",
       "date": "09/22 11:59",
@@ -2077,19 +1934,6 @@
       "pnl_pct": 0.0,
       "pnl_amt": 0,
       "reason": "손절 (+0.00%)"
-    },
-    {
-      "action": "sell",
-      "date": "09/22 11:59",
-      "partial": false,
-      "trade_id": "047040-20260922100006",
-      "stock": "047040",
-      "qty": 4,
-      "price": 18790,
-      "avg_price": 18760,
-      "pnl_pct": 0.16,
-      "pnl_amt": 120,
-      "reason": "익절 (복구, +0.16%)"
     },
     {
       "action": "buy",
@@ -2138,19 +1982,6 @@
       "reason": "손절 (-1.72%)"
     },
     {
-      "action": "sell",
-      "date": "09/23 10:07",
-      "partial": false,
-      "trade_id": "003670-20260923094316",
-      "stock": "003670",
-      "qty": 1,
-      "price": 188700,
-      "avg_price": 191300,
-      "pnl_pct": -1.36,
-      "pnl_amt": -2600,
-      "reason": "손절 (복구, -1.36%)"
-    },
-    {
       "action": "buy",
       "trade_id": "007660-20260923121441",
       "date": "09/23 12:14",
@@ -2175,19 +2006,6 @@
     },
     {
       "action": "sell",
-      "date": "09/23 14:15",
-      "partial": false,
-      "trade_id": "007660-20260923121441",
-      "stock": "007660",
-      "qty": 1,
-      "price": 118500,
-      "avg_price": 118500,
-      "pnl_pct": 0.0,
-      "pnl_amt": 0,
-      "reason": "익절 (복구, +0.00%)"
-    },
-    {
-      "action": "sell",
       "partial": false,
       "trade_id": "007660-20260923121441",
       "date": "09/23 14:16",
@@ -2198,19 +2016,6 @@
       "pnl_pct": 0.0,
       "pnl_amt": 0,
       "reason": "손절 (+0.00%)"
-    },
-    {
-      "action": "sell",
-      "date": "09/23 14:16",
-      "partial": false,
-      "trade_id": "007660-20260923121441",
-      "stock": "007660",
-      "qty": 1,
-      "price": 118500,
-      "avg_price": 118500,
-      "pnl_pct": 0.0,
-      "pnl_amt": 0,
-      "reason": "익절 (복구, +0.00%)"
     }
   ],
   "position": null,

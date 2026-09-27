@@ -47,6 +47,13 @@ TARGET_R_MULTIPLE = 2.5
 # 가격이 저점에서 많이 벗어난 뒤에야 뒤늦게 진입하는(재돌파 문제의 축소판) 결과로
 # 이어짐 — 반전봉이 확인돌파 캔들 기준 최근 N봉 이내인 경우만 인정.
 PULLBACK_CONFIRM_WINDOW = 3
+# [2026-09-27] 실거래 신규매수 중단 스위치(사용자 결정) — 8/13~9/23 40건 승률 30%,
+# 잔고 -18.9%(누적 -24.7%)로 전략 자체가 적자라 데이터(1분봉·섀도우)만 쌓으며 재검토.
+# True면 watcher·GitHub Actions 양쪽 모두 신규 매수를 안 한다. 이미 들고 있는 포지션의
+# 손절/익절/강제청산은 그대로 동작. 재개하려면 False로 바꾸고 watcher.service 재시작.
+# ※ GH Actions 자동매매 워크플로우(cron-job.org 호출)를 끄는 방식으로 멈추면 그 안에서
+#   도는 1분봉 수집까지 같이 멈추므로, 멈출 땐 반드시 이 스위치를 쓸 것.
+NEW_ENTRY_PAUSED = True
 ACCOUNT_NO   = os.environ['KIS_ACCOUNT_NO']
 ACCOUNT_PROD = "01"
 KIS_APP_KEY    = os.environ['KIS_APP_KEY']
@@ -1224,6 +1231,10 @@ def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
 # 로직으로 갈라지며 생기는 버그 위험을 없앤다. 호출 전 daily guard/stray 종목 체크까지
 # 이 함수 안에서 전부 처리하고, 각 분기가 끝나면 항상 save_dashboard(dash)를 호출한다.
 def attempt_entry_scan(kis_token, kakao_token, dash, guard, holdings, cash):
+    if NEW_ENTRY_PAUSED:
+        print("[매수 중단] NEW_ENTRY_PAUSED=True — 신규 매수 스캔 건너뜀 (보유 포지션 매도 관리는 정상 동작)")
+        save_dashboard(dash)
+        return
     # [2026-07-16] 계좌에 봇이 모르는 종목이 남아있으면 신규 매수를 하지 않는다 —
     # 003280 부분매도 뒤 포지션을 오판해 279570을 추가 매수하며 한때 두 종목을
     # 동시보유했던 사고(실손실 -16,770원)의 재발 방지용 최종 안전장치.
