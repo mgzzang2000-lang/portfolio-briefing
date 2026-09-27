@@ -1075,6 +1075,7 @@ def log_early_exit_checkpoints(pos, name, pnl, now):
             except Exception as e:
                 print(f"  [경고] 조기청산 페이퍼 로그 저장 실패: {e}")
 # ── 보유 포지션 관리 (GitHub Actions·로컬 감시 스크립트 공용) ──────
+_TWO_HOUR_DONE = set()  # 2시간 부분청산을 이미 실행한 포지션(trade_id) — manage_position 참고
 def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
     code      = h['pdno']
     name      = h['prdt_name']
@@ -1138,7 +1139,13 @@ def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
             print(f"  [트레일링] +2% 도달 → 손절선 상향: {stop_price:,.0f} (수량 부족으로 부분익절 스킵)")
 
     # [2026-07-02 추가] 2시간 부분청산 (0~+1% 구간)
-    if pos.get('entry_time'):
+    # [2026-09-27] "이미 했음" 표시가 없어서 ±2분 창 안에서 watcher(수초 주기)가 매 사이클
+    # 다시 절반씩 팔아 몇십 초 만에 전량 매도되던 버그 수정(갤럭시아머니트리 08/25:
+    # 23→12→6→3→1→1주). 포지션당 1회만 실행 — pos 플래그는 대시보드 병합 때 낡은 사본에
+    # 덮여 사라질 수 있어서, 상시 떠 있는 watcher 프로세스 메모리에도 trade_id를 같이 남긴다.
+    two_hour_key = pos.get('trade_id') or f"{code}-{pos.get('entry_time')}"
+    two_hour_done = pos.get('two_hour_done') or two_hour_key in _TWO_HOUR_DONE
+    if pos.get('entry_time') and not two_hour_done:
         entry_dt = datetime.fromisoformat(pos['entry_time'])
         elapsed_sec = (now - entry_dt).total_seconds()
         two_hours = 2 * 3600
@@ -1153,9 +1160,14 @@ def manage_position(kis_token, kakao_token, dash, guard, now, h, force_sell_at):
                         send_kakao(kakao_token, err_msg)
                         save_dashboard(dash)
                         return
+                    pos['two_hour_done'] = True
+                    _TWO_HOUR_DONE.add(two_hour_key)
                     time.sleep(1)
                     _, new_cash = get_balance(kis_token)
-                    pos['stop_price'] = avg_price * 1.004
+                    # [2026-09-27] 이 구간은 수익률 0~1%라 손절선을 평단+0.4%로 올리면 현재가가
+                    # 이미 그 아래인 경우(0~0.4%) 다음 사이클에 남은 물량이 즉시 손절됐음 —
+                    # 손절선은 현재가보다 0.3% 아래를 넘지 않게 제한한다.
+                    pos['stop_price'] = max(stop_price, min(avg_price * 1.004, cur_price * 0.997))
                     balance_known = new_cash is not None
                     balance_for_dash = new_cash if balance_known else dash.get('current_balance', 0)
                     if not balance_known:
@@ -1384,6 +1396,14 @@ def main():
                       f"{matched_recheck[0]['hldg_qty']}주 보유 확인 — 포지션 유지")
                 holdings = holdings_recheck
                 matched = matched_recheck
+            elif watcher_is_alive():
+                # [2026-09-27] 상시감시(watcher.py)가 살아있으면 그쪽이 이미 팔고 기록했을
+                # 가능성이 높다 — 이 잡은 시작 시점의 낡은 대시보드(포지션 있음)를 들고 있어서
+                # 여기서 복구를 돌리면 watcher가 남긴 매도를 한 번 더 기록하게 됨(8/13~9/23
+                # 15건 중복, 003670 09/23 run 35804830399로 확증). 포지션 정리는 watcher에 맡긴다.
+                print(f"[백업 대기] {bot_code} 계좌에 없음 — 상시감시가 살아있어 매도기록/포지션 정리는 그쪽에 맡김")
+                save_dashboard(dash)
+                return
             else:
                 # 대시보드엔 포지션이 남아있는데 실제 계좌엔 없음(수동 매도, 또는 다른
                 # 프로세스가 이미 팔았는데 git 동기화만 실패한 경우) — 지우기 전에

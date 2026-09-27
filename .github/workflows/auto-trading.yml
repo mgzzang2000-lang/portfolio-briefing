@@ -104,9 +104,16 @@ jobs:
         # collect_intraday_data.py 안에서 섀도우 스캔까지 실행하고 그 후보 종목들도
         # 워치리스트에 합쳐 1분봉을 함께 수집하도록 통합.
         if: always()
+        # [2026-09-27] 9/1 섀도우D 추가로 shadow_scan.py가 auto_trading.py를 import하게 됐는데,
+        # auto_trading.py는 import 시점에 KIS_ACCOUNT_NO·KAKAO_*를 읽어서 이 스텝이 매번 KeyError로
+        # 죽었음(9/2~9/25 1분봉 수집·섀도우 전부 중단). 조회만 하고 주문은 안 냄.
         env:
           KIS_APP_KEY:    ${{ secrets.KIS_APP_KEY }}
           KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+          KIS_ACCOUNT_NO: ${{ secrets.KIS_ACCOUNT_NO }}
+          KAKAO_CLIENT_ID:     ${{ secrets.KAKAO_CLIENT_ID }}
+          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
+          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
         run: python collect_intraday_data.py
       - name: 토큰 캐시 저장
         if: always()

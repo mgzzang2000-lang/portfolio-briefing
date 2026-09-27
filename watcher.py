@@ -146,6 +146,7 @@ def main():
     kakao_token = None
     kakao_fetched_at = 0
     loop_count = 0
+    missing_since = None  # 대시보드 포지션이 계좌에서 처음 안 보인 시각 (아래 not matched 분기 참고)
     holiday_cache = {'date': None, 'is_holiday': False}
 
     while True:
@@ -271,11 +272,52 @@ def main():
         bot_code = dash_position['code']
         matched = [h for h in holdings
                    if h.get('pdno') == bot_code and int(h.get('hldg_qty', 0)) > 0]
-        if not matched:
-            print(f"[{now.strftime('%H:%M:%S')}] 대시보드엔 포지션 있는데 실제 계좌엔 없음 "
-                  f"(GitHub Actions가 이미 처리했을 수 있음) — 다음 git pull에서 갱신 확인")
+        if not matched and cash is None:
+            # 잔고조회 실패 시 holdings가 빈 목록으로 올 수 있음 — "계좌에 없음"으로 세지 않는다.
+            print(f"[{now.strftime('%H:%M:%S')}] 잔고 조회 실패(None) — 포지션 확인 건너뜀")
             wait_seconds(POSITION_CHECK_INTERVAL)
             continue
+        if not matched:
+            # [2026-09-27] 예전엔 이 정리(체결내역 복구+포지션 비우기)를 GitHub Actions가
+            # 맡았는데, 그쪽은 낡은 대시보드로 복구를 돌려 watcher가 이미 남긴 매도를
+            # 중복 기록하는 문제가 있어 watcher가 살아있는 동안은 손 떼게 바꿨다 — 대신
+            # 여기서 직접 정리한다. 매도 직후 잔고 정산 지연·git 동기화 지연과 구분하려고
+            # 90초 넘게, 그리고 git pull로 최신 대시보드를 한 번 더 받은 뒤에도 계속
+            # 없을 때만 실행한다(수동 매도 등 외부 요인으로 사라진 포지션).
+            if missing_since is None:
+                missing_since = now
+            print(f"[{now.strftime('%H:%M:%S')}] 대시보드엔 포지션 있는데 실제 계좌엔 없음 "
+                  f"({(now - missing_since).total_seconds():.0f}초째) — 다음 git pull에서 갱신 확인")
+            if (now - missing_since).total_seconds() >= 90:
+                git_pull()
+                dash = bot.load_dashboard()
+                dash_position = dash.get('position')
+                try:
+                    recheck, recheck_cash = bot.get_balance(kis_token)
+                except Exception:
+                    recheck, recheck_cash = [], None
+                still_held = any(h.get('pdno') == bot_code and int(h.get('hldg_qty', 0)) > 0
+                                 for h in (recheck or []))
+                if recheck_cash is None or still_held:
+                    print(f"  → 재조회 결과 {'보유 확인' if still_held else '조회 실패'} — 정리 보류")
+                elif dash_position and dash_position.get('code') == bot_code:
+                    print(f"  → 최신 대시보드에도 {bot_code} 포지션 잔존 — 체결내역 복구 후 정리")
+                    try:
+                        recovered = bot.recover_missing_sells(kis_token, dash, dash_position)
+                    except Exception as e:
+                        print(f"  [복구 오류] {e}")
+                        recovered = False
+                    if not recovered:
+                        bot.send_kakao(kakao_token,
+                                       f"⚠️ {dash_position.get('name', bot_code)} 매도 기록 유실 — 체결내역 직접 확인 필요")
+                    dash['position'] = None
+                    dash['position_version'] = dash.get('position_version', 0) + 1
+                    bot.save_dashboard(dash)
+                    git_push_dashboard()
+                missing_since = None
+            wait_seconds(POSITION_CHECK_INTERVAL)
+            continue
+        missing_since = None
 
         qty_before = int(matched[0].get('hldg_qty', 0))
         try:
