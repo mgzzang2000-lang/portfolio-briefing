@@ -35,6 +35,11 @@ ACCOUNT_PROD = "01"
 DATA_DIR = os.path.dirname(__file__)
 STATE_FILE = os.path.join(DATA_DIR, "portfolio_state.json")
 
+# [2026-09-27] 신규매수 중단 스위치(사용자 결정) — 실전 8건 1승7패·총자산 -10.6%(같은 기간
+# SPY 약 +2%)이고, 실가동 전 백테스트는 현재 S&P500 명단으로만 돌려 생존편향이 있어 근거가
+# 안 됨. 생존편향 제거한 재검증 끝날 때까지 신규매수만 멈춤. 보유종목의 추세이탈 매도(위 1번)와
+# position_monitor.py의 손절/익절은 그대로 동작. 재개하려면 False로 바꾸면 됨(다음 실행부터 반영).
+NEW_ENTRY_PAUSED = True
 MAX_POSITIONS = 3
 PER_POSITION_KRW = 1_000_000
 MAX_POSITION_USD = 500  # [2026-07-09] 사용자 확정 — 종목당 매수금액 상한. 현재 환율 기준
@@ -136,6 +141,11 @@ def main():
     # 매도(추세이탈/하드손절)는 이 필터와 무관하게 항상 실행되므로 이 분기보다 위에서
     # 이미 처리됨. 리서치 근거: "지수 자체를 먼저 걸러내는 게 어떤 손절 규칙보다도
     # 하락장에서 자본을 더 많이 지켰다"(Weinstein 방법론 위계 구조).
+    if NEW_ENTRY_PAUSED:
+        print("[매수 중단] NEW_ENTRY_PAUSED=True — 신규매수 건너뜀 (보유종목 매도 관리는 정상 동작)")
+        sync_total_assets(state, [h for h in holdings if h["symbol"] in held_symbols])
+        save_json(STATE_FILE, state)
+        return
     if not scan_result.get("spy_market_healthy", True):
         print("[시장필터] SPY가 Stage2(상승국면) 아님 — 이번 사이클 신규매수 보류")
         sync_total_assets(state, [h for h in holdings if h["symbol"] in held_symbols])
