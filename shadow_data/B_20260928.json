@@ -23,5 +23,30 @@
         "market_cap": 5420.0
       }
     ]
+  },
+  {
+    "time": "09:43:21",
+    "candidates": [
+      {
+        "code": "0010S0",
+        "name": "0010S0",
+        "price": 40150.0,
+        "drop_pct": 2.43,
+        "rsi": 48.5,
+        "stop_price": 39360.6,
+        "target_price": 42123.5,
+        "market_cap": 4033.0
+      },
+      {
+        "code": "299660",
+        "name": "299660",
+        "price": 2750.0,
+        "drop_pct": 2.14,
+        "rsi": 33.3,
+        "stop_price": 2732.3,
+        "target_price": 2794.3,
+        "market_cap": 811.0
+      }
+    ]
   }
 ]
