@@ -63,5 +63,60 @@
         "market_cap": 3245.0
       }
     ]
+  },
+  {
+    "time": "09:31:27",
+    "candidates": [
+      {
+        "code": "012210",
+        "name": "012210",
+        "price": 12370.0,
+        "base_high": 12260.0,
+        "stop_price": 12057.9,
+        "target_price": 13150.2,
+        "breakout_vol_ratio": 6.96,
+        "market_cap": 2817.0
+      },
+      {
+        "code": "036540",
+        "name": "036540",
+        "price": 10900.0,
+        "base_high": 10830.0,
+        "stop_price": 10629.4,
+        "target_price": 11576.6,
+        "breakout_vol_ratio": 3.73,
+        "market_cap": 17844.0
+      },
+      {
+        "code": "256840",
+        "name": "256840",
+        "price": 3380.0,
+        "base_high": 3360.0,
+        "stop_price": 3306.7,
+        "target_price": 3563.3,
+        "breakout_vol_ratio": 3.41,
+        "market_cap": 2298.0
+      },
+      {
+        "code": "047920",
+        "name": "047920",
+        "price": 11650.0,
+        "base_high": 11540.0,
+        "stop_price": 11188.8,
+        "target_price": 12803.0,
+        "breakout_vol_ratio": 2.5,
+        "market_cap": 3887.0
+      },
+      {
+        "code": "003580",
+        "name": "003580",
+        "price": 1952.0,
+        "base_high": 1940.0,
+        "stop_price": 1855.1,
+        "target_price": 2194.1,
+        "breakout_vol_ratio": 2.48,
+        "market_cap": 990.0
+      }
+    ]
   }
 ]
