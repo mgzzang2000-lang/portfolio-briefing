@@ -203,5 +203,30 @@
         "market_cap": 3682.0
       }
     ]
+  },
+  {
+    "time": "12:50:10",
+    "candidates": [
+      {
+        "code": "0017J0",
+        "name": "0017J0",
+        "price": 2875.0,
+        "drop_pct": 2.21,
+        "rsi": 34.5,
+        "stop_price": 2842.2,
+        "target_price": 2957.1,
+        "market_cap": 871.0
+      },
+      {
+        "code": "468670",
+        "name": "468670",
+        "price": 34450.0,
+        "drop_pct": 2.13,
+        "rsi": 44.3,
+        "stop_price": 32767.2,
+        "target_price": 38657.0,
+        "market_cap": 3920.0
+      }
+    ]
   }
 ]
