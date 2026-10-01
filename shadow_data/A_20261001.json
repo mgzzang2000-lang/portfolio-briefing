@@ -123,5 +123,30 @@
         "market_cap": 57132.0
       }
     ]
+  },
+  {
+    "time": "10:19:37",
+    "candidates": [
+      {
+        "code": "043260",
+        "name": "043260",
+        "price": 27450.0,
+        "base_high": 27350.0,
+        "stop_price": 26973.0,
+        "target_price": 28642.5,
+        "breakout_vol_ratio": 4.07,
+        "market_cap": 20674.0
+      },
+      {
+        "code": "267320",
+        "name": "267320",
+        "price": 2845.0,
+        "base_high": 2830.0,
+        "stop_price": 2707.3,
+        "target_price": 3189.3,
+        "breakout_vol_ratio": 1.68,
+        "market_cap": 1622.0
+      }
+    ]
   }
 ]
