@@ -153,5 +153,30 @@
         "market_cap": 3312.0
       }
     ]
+  },
+  {
+    "time": "10:42:50",
+    "candidates": [
+      {
+        "code": "468670",
+        "name": "468670",
+        "price": 33850.0,
+        "base_high": 33500.0,
+        "stop_price": 32817.2,
+        "target_price": 36432.1,
+        "breakout_vol_ratio": 5.02,
+        "market_cap": 3761.0
+      },
+      {
+        "code": "0017J0",
+        "name": "0017J0",
+        "price": 3160.0,
+        "base_high": 3130.0,
+        "stop_price": 3081.9,
+        "target_price": 3355.2,
+        "breakout_vol_ratio": 1.58,
+        "market_cap": 965.0
+      }
+    ]
   }
 ]

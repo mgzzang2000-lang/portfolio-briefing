@@ -73,5 +73,30 @@
         "market_cap": 7961.0
       }
     ]
+  },
+  {
+    "time": "10:43:48",
+    "candidates": [
+      {
+        "code": "088800",
+        "name": "088800",
+        "price": 2420.0,
+        "drop_pct": 2.42,
+        "rsi": 39.3,
+        "stop_price": 2402.6,
+        "target_price": 2463.5,
+        "market_cap": 1827.0
+      },
+      {
+        "code": "0017J0",
+        "name": "0017J0",
+        "price": 3115.0,
+        "drop_pct": 2.04,
+        "rsi": 32.3,
+        "stop_price": 3081.9,
+        "target_price": 3197.7,
+        "market_cap": 954.0
+      }
+    ]
   }
 ]
