@@ -15,7 +15,7 @@
       "sector": "Health Care",
       "current_price": 290.19,
       "pnl_pct": 6.02,
-      "price_updated_at": "23:45"
+      "price_updated_at": "00:00"
     },
     "MPC": {
       "stop_price": 368.7,
@@ -28,7 +28,7 @@
       "sector": "Energy",
       "current_price": 422.33,
       "pnl_pct": 6.43,
-      "price_updated_at": "23:45"
+      "price_updated_at": "00:00"
     }
   },
   "trade_history": [
@@ -194,10 +194,6 @@
     }
   ],
   "balance_history": [
-    {
-      "date": "08/06",
-      "balance": 533.88
-    },
     {
       "date": "08/07",
       "balance": 533.88
@@ -433,14 +429,14 @@
     {
       "date": "10/04",
       "balance": 1064.0
+    },
+    {
+      "date": "10/05",
+      "balance": 1064.0
     }
   ],
   "total_assets": 1776.52,
   "total_assets_history": [
-    {
-      "date": "08/06",
-      "balance": 533.88
-    },
     {
       "date": "08/07",
       "balance": 1818.34
@@ -676,7 +672,11 @@
     {
       "date": "10/04",
       "balance": 1776.52
+    },
+    {
+      "date": "10/05",
+      "balance": 1776.52
     }
   ],
-  "last_updated": "2026-10-04T23:45:33.523104+09:00"
+  "last_updated": "2026-10-05T00:00:54.870795+09:00"
 }
