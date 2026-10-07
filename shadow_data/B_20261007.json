@@ -178,5 +178,30 @@
         "market_cap": 1763.0
       }
     ]
+  },
+  {
+    "time": "12:32:39",
+    "candidates": [
+      {
+        "code": "0161M0",
+        "name": "0161M0",
+        "price": 14510.0,
+        "drop_pct": 2.81,
+        "rsi": 42.6,
+        "stop_price": 14195.8,
+        "target_price": 15295.5,
+        "market_cap": 1760.0
+      },
+      {
+        "code": "000020",
+        "name": "000020",
+        "price": 5620.0,
+        "drop_pct": 2.09,
+        "rsi": 38.9,
+        "stop_price": 5584.4,
+        "target_price": 5709.0,
+        "market_cap": 1567.0
+      }
+    ]
   }
 ]
