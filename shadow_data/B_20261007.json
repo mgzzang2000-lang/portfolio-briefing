@@ -63,5 +63,30 @@
         "market_cap": 933.0
       }
     ]
+  },
+  {
+    "time": "10:10:22",
+    "candidates": [
+      {
+        "code": "158430",
+        "name": "158430",
+        "price": 6650.0,
+        "drop_pct": 2.35,
+        "rsi": 33.3,
+        "stop_price": 6573.4,
+        "target_price": 6841.4,
+        "market_cap": 1650.0
+      },
+      {
+        "code": "278650",
+        "name": "278650",
+        "price": 4305.0,
+        "drop_pct": 2.27,
+        "rsi": 54.9,
+        "stop_price": 4205.8,
+        "target_price": 4553.0,
+        "market_cap": 753.0
+      }
+    ]
   }
 ]
