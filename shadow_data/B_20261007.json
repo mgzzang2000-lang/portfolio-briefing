@@ -23,5 +23,30 @@
         "market_cap": 39254.0
       }
     ]
+  },
+  {
+    "time": "09:37:00",
+    "candidates": [
+      {
+        "code": "204270",
+        "name": "204270",
+        "price": 26500.0,
+        "drop_pct": 3.11,
+        "rsi": 45.2,
+        "stop_price": 25774.2,
+        "target_price": 28314.5,
+        "market_cap": 15474.0
+      },
+      {
+        "code": "203650",
+        "name": "203650",
+        "price": 3000.0,
+        "drop_pct": 2.12,
+        "rsi": 44.0,
+        "stop_price": 2982.0,
+        "target_price": 3045.0,
+        "market_cap": 3051.0
+      }
+    ]
   }
 ]
