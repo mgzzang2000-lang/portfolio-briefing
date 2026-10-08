@@ -68,5 +68,30 @@
         "market_cap": 2149.0
       }
     ]
+  },
+  {
+    "time": "09:56:03",
+    "candidates": [
+      {
+        "code": "042510",
+        "name": "042510",
+        "price": 15510.0,
+        "drop_pct": 2.33,
+        "rsi": 36.8,
+        "stop_price": 14805.2,
+        "target_price": 17272.0,
+        "market_cap": 1737.0
+      },
+      {
+        "code": "452190",
+        "name": "452190",
+        "price": 6910.0,
+        "drop_pct": 2.26,
+        "rsi": 37.5,
+        "stop_price": 6793.2,
+        "target_price": 7202.0,
+        "market_cap": 1679.0
+      }
+    ]
   }
 ]
