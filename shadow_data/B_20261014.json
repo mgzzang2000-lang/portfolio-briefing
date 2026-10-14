@@ -38,5 +38,30 @@
         "market_cap": 8481.0
       }
     ]
+  },
+  {
+    "time": "10:24:42",
+    "candidates": [
+      {
+        "code": "053260",
+        "name": "053260",
+        "price": 7160.0,
+        "drop_pct": 6.65,
+        "rsi": 22.4,
+        "stop_price": 7102.9,
+        "target_price": 7302.8,
+        "market_cap": 1342.0
+      },
+      {
+        "code": "079650",
+        "name": "079650",
+        "price": 7750.0,
+        "drop_pct": 2.02,
+        "rsi": 45.1,
+        "stop_price": 7462.5,
+        "target_price": 8468.7,
+        "market_cap": 1546.0
+      }
+    ]
   }
 ]
