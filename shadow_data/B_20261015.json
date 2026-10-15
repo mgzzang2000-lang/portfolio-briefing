@@ -203,5 +203,30 @@
         "market_cap": 7774.0
       }
     ]
+  },
+  {
+    "time": "13:35:53",
+    "candidates": [
+      {
+        "code": "179880",
+        "name": "179880",
+        "price": 20450.0,
+        "drop_pct": 5.1,
+        "rsi": 37.7,
+        "stop_price": 19210.8,
+        "target_price": 23548.1,
+        "market_cap": 2564.0
+      },
+      {
+        "code": "002720",
+        "name": "002720",
+        "price": 4305.0,
+        "drop_pct": 2.6,
+        "rsi": 42.3,
+        "stop_price": 4230.8,
+        "target_price": 4490.6,
+        "market_cap": 913.0
+      }
+    ]
   }
 ]
