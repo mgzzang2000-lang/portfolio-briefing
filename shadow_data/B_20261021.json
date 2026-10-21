@@ -73,5 +73,30 @@
         "market_cap": 21651.0
       }
     ]
+  },
+  {
+    "time": "12:55:38",
+    "candidates": [
+      {
+        "code": "003010",
+        "name": "003010",
+        "price": 8860.0,
+        "drop_pct": 4.73,
+        "rsi": 64.2,
+        "stop_price": 8251.7,
+        "target_price": 10380.7,
+        "market_cap": 1135.0
+      },
+      {
+        "code": "039860",
+        "name": "039860",
+        "price": 4825.0,
+        "drop_pct": 3.88,
+        "rsi": 52.5,
+        "stop_price": 4715.3,
+        "target_price": 5099.3,
+        "market_cap": 1809.0
+      }
+    ]
   }
 ]
