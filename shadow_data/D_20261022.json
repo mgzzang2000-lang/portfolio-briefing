@@ -13,5 +13,30 @@
         "market_cap": 4730.0
       }
     ]
+  },
+  {
+    "time": "09:42:40",
+    "candidates": [
+      {
+        "code": "088350",
+        "name": "088350",
+        "price": 4300.0,
+        "stop_price": 4235.5,
+        "target_price": 4461.2,
+        "stoch_k": 100.0,
+        "stoch_d": 97.7,
+        "market_cap": 37347.0
+      },
+      {
+        "code": "001510",
+        "name": "001510",
+        "price": 2030.0,
+        "stop_price": 1999.5,
+        "target_price": 2106.1,
+        "stoch_k": 89.1,
+        "stoch_d": 80.1,
+        "market_cap": 4695.0
+      }
+    ]
   }
 ]
