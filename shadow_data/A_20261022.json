@@ -83,5 +83,90 @@
         "market_cap": 15147.0
       }
     ]
+  },
+  {
+    "time": "09:50:53",
+    "candidates": [
+      {
+        "code": "142280",
+        "name": "142280",
+        "price": 3845.0,
+        "base_high": 3815.0,
+        "stop_price": 3761.2,
+        "target_price": 4054.4,
+        "breakout_vol_ratio": 5.65,
+        "market_cap": 921.0
+      },
+      {
+        "code": "069540",
+        "name": "069540",
+        "price": 3920.0,
+        "base_high": 3900.0,
+        "stop_price": 3806.2,
+        "target_price": 4204.5,
+        "breakout_vol_ratio": 2.83,
+        "market_cap": 4395.0
+      },
+      {
+        "code": "005930",
+        "name": "005930",
+        "price": 224250.0,
+        "base_high": 223500.0,
+        "stop_price": 220279.5,
+        "target_price": 234176.2,
+        "breakout_vol_ratio": 2.5,
+        "market_cap": 13124895.0
+      },
+      {
+        "code": "005935",
+        "name": "005935",
+        "price": 174100.0,
+        "base_high": 173500.0,
+        "stop_price": 171328.5,
+        "target_price": 181028.8,
+        "breakout_vol_ratio": 2.09,
+        "market_cap": 1400940.0
+      },
+      {
+        "code": "043260",
+        "name": "043260",
+        "price": 28500.0,
+        "base_high": 28350.0,
+        "stop_price": 27672.3,
+        "target_price": 30569.2,
+        "breakout_vol_ratio": 1.89,
+        "market_cap": 21240.0
+      },
+      {
+        "code": "009900",
+        "name": "009900",
+        "price": 9930.0,
+        "base_high": 9880.0,
+        "stop_price": 9790.2,
+        "target_price": 10279.5,
+        "breakout_vol_ratio": 1.79,
+        "market_cap": 5221.0
+      },
+      {
+        "code": "000660",
+        "name": "000660",
+        "price": 1290000.0,
+        "base_high": 1282000.0,
+        "stop_price": 1269729.0,
+        "target_price": 1340677.5,
+        "breakout_vol_ratio": 1.65,
+        "market_cap": 9430656.0
+      },
+      {
+        "code": "010170",
+        "name": "010170",
+        "price": 14780.0,
+        "base_high": 14720.0,
+        "stop_price": 14105.9,
+        "target_price": 16465.3,
+        "breakout_vol_ratio": 1.54,
+        "market_cap": 22825.0
+      }
+    ]
   }
 ]
