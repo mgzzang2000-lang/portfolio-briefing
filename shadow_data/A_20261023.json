@@ -243,5 +243,30 @@
         "market_cap": 59866.0
       }
     ]
+  },
+  {
+    "time": "10:26:58",
+    "candidates": [
+      {
+        "code": "138360",
+        "name": "138360",
+        "price": 1630.0,
+        "base_high": 1575.0,
+        "stop_price": 1543.5,
+        "target_price": 1846.4,
+        "breakout_vol_ratio": 7.83,
+        "market_cap": 1425.0
+      },
+      {
+        "code": "0158S0",
+        "name": "0158S0",
+        "price": 94200.0,
+        "base_high": 93300.0,
+        "stop_price": 90909.0,
+        "target_price": 102427.5,
+        "breakout_vol_ratio": 4.33,
+        "market_cap": 10472.0
+      }
+    ]
   }
 ]
