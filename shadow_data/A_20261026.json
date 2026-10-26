@@ -93,5 +93,30 @@
         "market_cap": 788.0
       }
     ]
+  },
+  {
+    "time": "10:55:44",
+    "candidates": [
+      {
+        "code": "0015M0",
+        "name": "0015M0",
+        "price": 25850.0,
+        "base_high": 25700.0,
+        "stop_price": 25074.9,
+        "target_price": 27787.7,
+        "breakout_vol_ratio": 2.68,
+        "market_cap": 3839.0
+      },
+      {
+        "code": "008970",
+        "name": "008970",
+        "price": 1289.0,
+        "base_high": 1284.0,
+        "stop_price": 1272.7,
+        "target_price": 1329.7,
+        "breakout_vol_ratio": 1.95,
+        "market_cap": 1332.0
+      }
+    ]
   }
 ]
