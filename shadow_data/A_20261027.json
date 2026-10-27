@@ -78,5 +78,40 @@
         "market_cap": 970.0
       }
     ]
+  },
+  {
+    "time": "09:42:41",
+    "candidates": [
+      {
+        "code": "0035S0",
+        "name": "0035S0",
+        "price": 31050.0,
+        "base_high": 30800.0,
+        "stop_price": 28571.4,
+        "target_price": 37246.5,
+        "breakout_vol_ratio": 4.5,
+        "market_cap": 3091.0
+      },
+      {
+        "code": "468670",
+        "name": "468670",
+        "price": 19890.0,
+        "base_high": 19650.0,
+        "stop_price": 18771.2,
+        "target_price": 22687.0,
+        "breakout_vol_ratio": 2.92,
+        "market_cap": 2318.0
+      },
+      {
+        "code": "322000",
+        "name": "322000",
+        "price": 87400.0,
+        "base_high": 87000.0,
+        "stop_price": 85014.9,
+        "target_price": 93362.8,
+        "breakout_vol_ratio": 1.6,
+        "market_cap": 9766.0
+      }
+    ]
   }
 ]
