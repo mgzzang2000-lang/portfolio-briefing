@@ -1,22 +1,14 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 1064.0,
+  "current_balance": 1433.76,
   "_last_raw_cash": 1064.0,
-  "pending_cash_deltas": [],
+  "pending_cash_deltas": [
+    {
+      "date": "2026-10-29",
+      "delta": 369.76
+    }
+  ],
   "positions": {
-    "CRL": {
-      "stop_price": 255.05,
-      "tp_price": 358.31,
-      "partial_tp_price": 316.96,
-      "partial_taken": false,
-      "entry_price": 275.62,
-      "entry_date": "20260910",
-      "qty": 1,
-      "sector": "Health Care",
-      "current_price": 358.84,
-      "pnl_pct": 31.1,
-      "price_updated_at": "07:52"
-    },
     "MPC": {
       "stop_price": 368.7,
       "tp_price": 517.96,
@@ -26,9 +18,9 @@
       "entry_date": "20260922",
       "qty": 1,
       "sector": "Energy",
-      "current_price": 435.98,
-      "pnl_pct": 9.87,
-      "price_updated_at": "07:52"
+      "current_price": 440.82,
+      "pnl_pct": 11.09,
+      "price_updated_at": "03:41"
     }
   },
   "trade_history": [
@@ -191,13 +183,17 @@
       "qty": 14,
       "price": 30.82,
       "reason": "하드손절 (기준 31.05)"
+    },
+    {
+      "action": "sell",
+      "date": "2026-10-29 03:41",
+      "symbol": "CRL",
+      "qty": 1,
+      "price": 369.76,
+      "reason": "최종익절 (기준 358.31)"
     }
   ],
   "balance_history": [
-    {
-      "date": "08/24",
-      "balance": 533.88
-    },
     {
       "date": "08/25",
       "balance": 533.88
@@ -433,14 +429,14 @@
     {
       "date": "10/28",
       "balance": 1064.0
+    },
+    {
+      "date": "10/29",
+      "balance": 1433.76
     }
   ],
-  "total_assets": 1858.82,
+  "total_assets": 1874.58,
   "total_assets_history": [
-    {
-      "date": "08/24",
-      "balance": 1853.64
-    },
     {
       "date": "08/25",
       "balance": 1847.84
@@ -676,7 +672,11 @@
     {
       "date": "10/28",
       "balance": 1858.82
+    },
+    {
+      "date": "10/29",
+      "balance": 1874.58
     }
   ],
-  "last_updated": "2026-10-28T07:52:38.353800+09:00"
+  "last_updated": "2026-10-29T03:41:11.448359+09:00"
 }
