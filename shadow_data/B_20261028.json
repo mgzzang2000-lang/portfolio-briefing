@@ -88,5 +88,30 @@
         "market_cap": 702.0
       }
     ]
+  },
+  {
+    "time": "11:41:56",
+    "candidates": [
+      {
+        "code": "179880",
+        "name": "179880",
+        "price": 17450.0,
+        "drop_pct": 2.73,
+        "rsi": 39.3,
+        "stop_price": 17182.8,
+        "target_price": 18118.0,
+        "market_cap": 2202.0
+      },
+      {
+        "code": "439960",
+        "name": "439960",
+        "price": 5380.0,
+        "drop_pct": 2.54,
+        "rsi": 31.0,
+        "stop_price": 5284.7,
+        "target_price": 5618.2,
+        "market_cap": 1749.0
+      }
+    ]
   }
 ]
