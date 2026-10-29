@@ -357,7 +357,7 @@
     "early_high": 7100.0,
     "unavailable": false,
     "tranche1_done": true,
-    "tranche2_done": false
+    "tranche2_done": true
   },
   "217590": {
     "early_high": null,
@@ -384,6 +384,12 @@
     "tranche2_done": false
   },
   "030960": {
+    "early_high": null,
+    "unavailable": true,
+    "tranche1_done": false,
+    "tranche2_done": false
+  },
+  "451760": {
     "early_high": null,
     "unavailable": true,
     "tranche1_done": false,
