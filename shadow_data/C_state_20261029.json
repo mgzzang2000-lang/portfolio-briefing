@@ -356,7 +356,7 @@
   "330350": {
     "early_high": 7100.0,
     "unavailable": false,
-    "tranche1_done": false,
+    "tranche1_done": true,
     "tranche2_done": false
   },
   "217590": {
@@ -366,6 +366,24 @@
     "tranche2_done": false
   },
   "100590": {
+    "early_high": null,
+    "unavailable": true,
+    "tranche1_done": false,
+    "tranche2_done": false
+  },
+  "0220W0": {
+    "early_high": null,
+    "unavailable": true,
+    "tranche1_done": false,
+    "tranche2_done": false
+  },
+  "000720": {
+    "early_high": null,
+    "unavailable": true,
+    "tranche1_done": false,
+    "tranche2_done": false
+  },
+  "030960": {
     "early_high": null,
     "unavailable": true,
     "tranche1_done": false,
