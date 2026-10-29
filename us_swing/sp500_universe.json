@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-10-23T02:49:07.171196+09:00",
+  "fetched_at": "2026-10-30T03:45:24.368440+09:00",
   "universe": [
     {
       "symbol": "MMM",
@@ -1502,12 +1502,12 @@
       "sector": "Financials"
     },
     {
-      "symbol": "PEG",
-      "sector": "Utilities"
-    },
-    {
       "symbol": "PTC",
       "sector": "Information Technology"
+    },
+    {
+      "symbol": "PEG",
+      "sector": "Utilities"
     },
     {
       "symbol": "PSA",
@@ -1518,20 +1518,20 @@
       "sector": "Consumer Discretionary"
     },
     {
-      "symbol": "PWR",
-      "sector": "Industrials"
+      "symbol": "Q",
+      "sector": "Information Technology"
     },
     {
       "symbol": "QCOM",
       "sector": "Information Technology"
     },
     {
-      "symbol": "DGX",
-      "sector": "Health Care"
+      "symbol": "PWR",
+      "sector": "Industrials"
     },
     {
-      "symbol": "Q",
-      "sector": "Information Technology"
+      "symbol": "DGX",
+      "sector": "Health Care"
     },
     {
       "symbol": "RL",
@@ -1544,10 +1544,6 @@
     {
       "symbol": "RDDT",
       "sector": "Communication Services"
-    },
-    {
-      "symbol": "RTX",
-      "sector": "Industrials"
     },
     {
       "symbol": "O",
@@ -1600,6 +1596,10 @@
     {
       "symbol": "RCL",
       "sector": "Consumer Discretionary"
+    },
+    {
+      "symbol": "RTX",
+      "sector": "Industrials"
     },
     {
       "symbol": "SPGI",
