@@ -133,5 +133,30 @@
         "market_cap": 2221.0
       }
     ]
+  },
+  {
+    "time": "10:59:15",
+    "candidates": [
+      {
+        "code": "411080",
+        "name": "411080",
+        "price": 7810.0,
+        "drop_pct": 2.86,
+        "rsi": 28.1,
+        "stop_price": 7792.2,
+        "target_price": 7854.5,
+        "market_cap": 1191.0
+      },
+      {
+        "code": "011690",
+        "name": "011690",
+        "price": 2775.0,
+        "drop_pct": 2.29,
+        "rsi": 16.7,
+        "stop_price": 2742.3,
+        "target_price": 2856.9,
+        "market_cap": 1024.0
+      }
+    ]
   }
 ]
