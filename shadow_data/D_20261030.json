@@ -68,5 +68,30 @@
         "market_cap": 1229.0
       }
     ]
+  },
+  {
+    "time": "13:24:23",
+    "candidates": [
+      {
+        "code": "317400",
+        "name": "317400",
+        "price": 6550.0,
+        "stop_price": 6451.8,
+        "target_price": 6795.6,
+        "stoch_k": 89.7,
+        "stoch_d": 88.4,
+        "market_cap": 2540.0
+      },
+      {
+        "code": "011200",
+        "name": "011200",
+        "price": 23300.0,
+        "stop_price": 22950.5,
+        "target_price": 24173.8,
+        "stoch_k": 88.4,
+        "stoch_d": 62.8,
+        "market_cap": 219774.0
+      }
+    ]
   }
 ]
