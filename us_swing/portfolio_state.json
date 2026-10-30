@@ -1,13 +1,8 @@
 {
   "initial_balance": 1974.98,
-  "current_balance": 1433.76,
-  "_last_raw_cash": 1064.0,
-  "pending_cash_deltas": [
-    {
-      "date": "2026-10-29",
-      "delta": 369.76
-    }
-  ],
+  "current_balance": 1434.34,
+  "_last_raw_cash": 1434.34,
+  "pending_cash_deltas": [],
   "positions": {
     "MPC": {
       "stop_price": 368.7,
@@ -18,9 +13,9 @@
       "entry_date": "20260922",
       "qty": 1,
       "sector": "Energy",
-      "current_price": 432.51,
-      "pnl_pct": 9.0,
-      "price_updated_at": "08:07"
+      "current_price": 442.46,
+      "pnl_pct": 11.51,
+      "price_updated_at": "03:26"
     }
   },
   "trade_history": [
@@ -194,10 +189,6 @@
     }
   ],
   "balance_history": [
-    {
-      "date": "08/26",
-      "balance": 533.88
-    },
     {
       "date": "08/27",
       "balance": 533.88
@@ -433,14 +424,14 @@
     {
       "date": "10/30",
       "balance": 1433.76
+    },
+    {
+      "date": "10/31",
+      "balance": 1434.34
     }
   ],
-  "total_assets": 1866.27,
+  "total_assets": 1876.8,
   "total_assets_history": [
-    {
-      "date": "08/26",
-      "balance": 1853.4
-    },
     {
       "date": "08/27",
       "balance": 1848.97
@@ -676,7 +667,11 @@
     {
       "date": "10/30",
       "balance": 1866.27
+    },
+    {
+      "date": "10/31",
+      "balance": 1876.8
     }
   ],
-  "last_updated": "2026-10-30T08:07:07.283585+09:00"
+  "last_updated": "2026-10-31T03:26:40.044759+09:00"
 }
