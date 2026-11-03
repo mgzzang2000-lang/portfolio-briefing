@@ -23,5 +23,40 @@
         "market_cap": 4687.0
       }
     ]
+  },
+  {
+    "time": "10:05:20",
+    "candidates": [
+      {
+        "code": "005930",
+        "name": "005930",
+        "price": 220750.0,
+        "stop_price": 217438.8,
+        "target_price": 229028.1,
+        "stoch_k": 74.4,
+        "stoch_d": 63.2,
+        "market_cap": 12905660.0
+      },
+      {
+        "code": "009830",
+        "name": "009830",
+        "price": 23100.0,
+        "stop_price": 22753.5,
+        "target_price": 23966.2,
+        "stoch_k": 100.0,
+        "stoch_d": 80.2,
+        "market_cap": 51950.0
+      },
+      {
+        "code": "001510",
+        "name": "001510",
+        "price": 1911.0,
+        "stop_price": 1882.3,
+        "target_price": 1982.7,
+        "stoch_k": 95.0,
+        "stoch_d": 77.2,
+        "market_cap": 4420.0
+      }
+    ]
   }
 ]
