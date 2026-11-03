@@ -168,5 +168,30 @@
         "market_cap": 1504.0
       }
     ]
+  },
+  {
+    "time": "12:37:45",
+    "candidates": [
+      {
+        "code": "0147B0",
+        "name": "0147B0",
+        "price": 19550.0,
+        "drop_pct": 3.93,
+        "rsi": 44.5,
+        "stop_price": 18591.4,
+        "target_price": 21946.5,
+        "market_cap": 2747.0
+      },
+      {
+        "code": "263860",
+        "name": "263860",
+        "price": 29900.0,
+        "drop_pct": 3.08,
+        "rsi": 29.7,
+        "stop_price": 29470.5,
+        "target_price": 30973.8,
+        "market_cap": 2706.0
+      }
+    ]
   }
 ]
