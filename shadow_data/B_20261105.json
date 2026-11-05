@@ -298,5 +298,30 @@
         "market_cap": 1270.0
       }
     ]
+  },
+  {
+    "time": "14:58:56",
+    "candidates": [
+      {
+        "code": "199820",
+        "name": "199820",
+        "price": 6720.0,
+        "drop_pct": 3.59,
+        "rsi": 37.2,
+        "stop_price": 6523.5,
+        "target_price": 7211.3,
+        "market_cap": 1500.0
+      },
+      {
+        "code": "0147B0",
+        "name": "0147B0",
+        "price": 10330.0,
+        "drop_pct": 2.82,
+        "rsi": 34.2,
+        "stop_price": 10229.8,
+        "target_price": 10580.6,
+        "market_cap": 1500.0
+      }
+    ]
   }
 ]
