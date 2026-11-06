@@ -228,5 +228,30 @@
         "market_cap": 1002.0
       }
     ]
+  },
+  {
+    "time": "12:44:00",
+    "candidates": [
+      {
+        "code": "0013Y0",
+        "name": "0013Y0",
+        "price": 6820.0,
+        "drop_pct": 2.71,
+        "rsi": 33.3,
+        "stop_price": 6753.2,
+        "target_price": 6986.9,
+        "market_cap": 1844.0
+      },
+      {
+        "code": "012200",
+        "name": "012200",
+        "price": 2585.0,
+        "drop_pct": 2.08,
+        "rsi": 48.6,
+        "stop_price": 2557.4,
+        "target_price": 2653.9,
+        "market_cap": 916.0
+      }
+    ]
   }
 ]
