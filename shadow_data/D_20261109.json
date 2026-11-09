@@ -38,5 +38,50 @@
         "market_cap": 1455.0
       }
     ]
+  },
+  {
+    "time": "10:40:43",
+    "candidates": [
+      {
+        "code": "034020",
+        "name": "034020",
+        "price": 43800.0,
+        "stop_price": 43143.0,
+        "target_price": 45442.5,
+        "stoch_k": 88.7,
+        "stoch_d": 82.9,
+        "market_cap": 280566.0
+      },
+      {
+        "code": "047040",
+        "name": "047040",
+        "price": 10640.0,
+        "stop_price": 10480.4,
+        "target_price": 11039.0,
+        "stoch_k": 100.0,
+        "stoch_d": 77.8,
+        "market_cap": 43718.0
+      },
+      {
+        "code": "028050",
+        "name": "028050",
+        "price": 62600.0,
+        "stop_price": 61661.0,
+        "target_price": 64947.5,
+        "stoch_k": 71.3,
+        "stoch_d": 50.0,
+        "market_cap": 122696.0
+      },
+      {
+        "code": "006360",
+        "name": "006360",
+        "price": 30950.0,
+        "stop_price": 30485.8,
+        "target_price": 32110.6,
+        "stoch_k": 66.4,
+        "stoch_d": 47.4,
+        "market_cap": 26487.0
+      }
+    ]
   }
 ]
