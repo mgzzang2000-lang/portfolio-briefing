@@ -253,5 +253,30 @@
         "market_cap": 2004.0
       }
     ]
+  },
+  {
+    "time": "14:34:35",
+    "candidates": [
+      {
+        "code": "18064K",
+        "name": "18064K",
+        "price": 144000.0,
+        "drop_pct": 2.7,
+        "rsi": 44.8,
+        "stop_price": 139360.5,
+        "target_price": 155598.8,
+        "market_cap": 766.0
+      },
+      {
+        "code": "209640",
+        "name": "209640",
+        "price": 3690.0,
+        "drop_pct": 2.38,
+        "rsi": 39.4,
+        "stop_price": 3656.3,
+        "target_price": 3774.1,
+        "market_cap": 1050.0
+      }
+    ]
   }
 ]
