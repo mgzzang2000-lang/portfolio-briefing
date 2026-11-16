@@ -148,5 +148,30 @@
         "market_cap": 2545.0
       }
     ]
+  },
+  {
+    "time": "10:44:23",
+    "candidates": [
+      {
+        "code": "027360",
+        "name": "027360",
+        "price": 2530.0,
+        "base_high": 2515.0,
+        "stop_price": 2487.5,
+        "target_price": 2636.2,
+        "breakout_vol_ratio": 3.08,
+        "market_cap": 3053.0
+      },
+      {
+        "code": "085670",
+        "name": "085670",
+        "price": 3520.0,
+        "base_high": 3500.0,
+        "stop_price": 3441.6,
+        "target_price": 3716.1,
+        "breakout_vol_ratio": 2.26,
+        "market_cap": 854.0
+      }
+    ]
   }
 ]
