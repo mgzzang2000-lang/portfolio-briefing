@@ -103,5 +103,30 @@
         "market_cap": 1986.0
       }
     ]
+  },
+  {
+    "time": "10:33:04",
+    "candidates": [
+      {
+        "code": "345290",
+        "name": "345290",
+        "price": 13280.0,
+        "drop_pct": 4.32,
+        "rsi": 60.5,
+        "stop_price": 12607.4,
+        "target_price": 14961.6,
+        "market_cap": 1896.0
+      },
+      {
+        "code": "093370",
+        "name": "093370",
+        "price": 8970.0,
+        "drop_pct": 2.29,
+        "rsi": 29.4,
+        "stop_price": 8871.1,
+        "target_price": 9217.2,
+        "market_cap": 9610.0
+      }
+    ]
   }
 ]
