@@ -13,9 +13,9 @@
       "entry_date": "20260922",
       "qty": 1,
       "sector": "Energy",
-      "current_price": 414.65,
-      "pnl_pct": 4.5,
-      "price_updated_at": "10:19"
+      "current_price": 402.19,
+      "pnl_pct": 1.36,
+      "price_updated_at": "07:46"
     }
   },
   "trade_history": [
@@ -189,10 +189,6 @@
     }
   ],
   "balance_history": [
-    {
-      "date": "09/06",
-      "balance": 535.78
-    },
     {
       "date": "09/07",
       "balance": 536.42
@@ -428,14 +424,14 @@
     {
       "date": "11/14",
       "balance": 1434.34
+    },
+    {
+      "date": "11/17",
+      "balance": 1434.34
     }
   ],
-  "total_assets": 1848.99,
+  "total_assets": 1836.53,
   "total_assets_history": [
-    {
-      "date": "09/06",
-      "balance": 1851.57
-    },
     {
       "date": "09/07",
       "balance": 1852.21
@@ -671,7 +667,11 @@
     {
       "date": "11/14",
       "balance": 1848.99
+    },
+    {
+      "date": "11/17",
+      "balance": 1836.53
     }
   ],
-  "last_updated": "2026-11-14T10:19:02.581156+09:00"
+  "last_updated": "2026-11-17T07:46:15.411756+09:00"
 }
