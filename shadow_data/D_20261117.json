@@ -43,5 +43,30 @@
         "market_cap": 7485.0
       }
     ]
+  },
+  {
+    "time": "13:44:58",
+    "candidates": [
+      {
+        "code": "005935",
+        "name": "005935",
+        "price": 152800.0,
+        "stop_price": 150508.0,
+        "target_price": 158530.0,
+        "stoch_k": 72.5,
+        "stoch_d": 45.9,
+        "market_cap": 1227628.0
+      },
+      {
+        "code": "0039P0",
+        "name": "0039P0",
+        "price": 7500.0,
+        "stop_price": 7312.7,
+        "target_price": 7968.3,
+        "stoch_k": 87.6,
+        "stoch_d": 77.0,
+        "market_cap": 1412.0
+      }
+    ]
   }
 ]
