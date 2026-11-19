@@ -88,5 +88,30 @@
         "market_cap": 3346.0
       }
     ]
+  },
+  {
+    "time": "14:38:01",
+    "candidates": [
+      {
+        "code": "263860",
+        "name": "263860",
+        "price": 37000.0,
+        "stop_price": 36445.0,
+        "target_price": 38387.5,
+        "stoch_k": 82.0,
+        "stoch_d": 51.4,
+        "market_cap": 3359.0
+      },
+      {
+        "code": "150900",
+        "name": "150900",
+        "price": 6070.0,
+        "stop_price": 5978.9,
+        "target_price": 6297.6,
+        "stoch_k": 57.6,
+        "stoch_d": 27.3,
+        "market_cap": 710.0
+      }
+    ]
   }
 ]
