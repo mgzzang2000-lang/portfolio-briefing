@@ -1,0 +1,242 @@
+{
+  "date": "20261121",
+  "spy_market_healthy": false,
+  "sector_ranking": [
+    {
+      "sector": "Health Care",
+      "avg_rel_strength_12w": 0.1341
+    },
+    {
+      "sector": "Consumer Staples",
+      "avg_rel_strength_12w": 0.1283
+    },
+    {
+      "sector": "Utilities",
+      "avg_rel_strength_12w": 0.1038
+    },
+    {
+      "sector": "Consumer Discretionary",
+      "avg_rel_strength_12w": 0.0622
+    },
+    {
+      "sector": "Real Estate",
+      "avg_rel_strength_12w": 0.0459
+    },
+    {
+      "sector": "Financials",
+      "avg_rel_strength_12w": 0.0358
+    },
+    {
+      "sector": "Industrials",
+      "avg_rel_strength_12w": 0.0341
+    },
+    {
+      "sector": "Energy",
+      "avg_rel_strength_12w": 0.0205
+    },
+    {
+      "sector": "Materials",
+      "avg_rel_strength_12w": -0.0016
+    },
+    {
+      "sector": "Communication Services",
+      "avg_rel_strength_12w": -0.0167
+    },
+    {
+      "sector": "Information Technology",
+      "avg_rel_strength_12w": -0.0878
+    }
+  ],
+  "candidates": [
+    {
+      "symbol": "VTRS",
+      "sector": "Health Care",
+      "price": 19.63,
+      "rel_strength_12w": 0.30327009105510305,
+      "stage2": true,
+      "atr": 1.1128714285714287,
+      "avg_volume": 45601641.5
+    },
+    {
+      "symbol": "HAS",
+      "sector": "Consumer Discretionary",
+      "price": 112.19,
+      "rel_strength_12w": 0.292521176091313,
+      "stage2": true,
+      "atr": 6.54839285714286,
+      "avg_volume": 9962222.666666666
+    },
+    {
+      "symbol": "BBY",
+      "sector": "Consumer Discretionary",
+      "price": 97.645,
+      "rel_strength_12w": 0.28636086825028306,
+      "stage2": true,
+      "atr": 7.960078571428572,
+      "avg_volume": 15479382.916666666
+    },
+    {
+      "symbol": "HLT",
+      "sector": "Consumer Discretionary",
+      "price": 376.53,
+      "rel_strength_12w": 0.2718165090345438,
+      "stage2": true,
+      "atr": 13.700021428571429,
+      "avg_volume": 6930500.25
+    },
+    {
+      "symbol": "CAH",
+      "sector": "Health Care",
+      "price": 272.91,
+      "rel_strength_12w": 0.2654709199033861,
+      "stage2": true,
+      "atr": 15.822685714285713,
+      "avg_volume": 8486818.166666666
+    },
+    {
+      "symbol": "WST",
+      "sector": "Health Care",
+      "price": 390.3,
+      "rel_strength_12w": 0.2584709504705408,
+      "stage2": true,
+      "atr": 22.81200714285714,
+      "avg_volume": 3092475.4166666665
+    },
+    {
+      "symbol": "MAR",
+      "sector": "Consumer Discretionary",
+      "price": 405.93,
+      "rel_strength_12w": 0.2581558996158947,
+      "stage2": true,
+      "atr": 18.99134285714285,
+      "avg_volume": 7575127.416666667
+    },
+    {
+      "symbol": "LLY",
+      "sector": "Health Care",
+      "price": 1342.53,
+      "rel_strength_12w": 0.24488179004273147,
+      "stage2": true,
+      "atr": 94.91272142857144,
+      "avg_volume": 12657263.083333334
+    },
+    {
+      "symbol": "BIIB",
+      "sector": "Health Care",
+      "price": 249.215,
+      "rel_strength_12w": 0.24249578420607965,
+      "stage2": true,
+      "atr": 13.592699999999997,
+      "avg_volume": 5576371.0
+    },
+    {
+      "symbol": "GILD",
+      "sector": "Health Care",
+      "price": 166.0,
+      "rel_strength_12w": 0.24140750193604676,
+      "stage2": true,
+      "atr": 9.475935714285717,
+      "avg_volume": 29412009.083333332
+    },
+    {
+      "symbol": "EW",
+      "sector": "Health Care",
+      "price": 101.84,
+      "rel_strength_12w": 0.23084510743535136,
+      "stage2": true,
+      "atr": 5.6989285714285725,
+      "avg_volume": 19620832.666666668
+    },
+    {
+      "symbol": "ABBV",
+      "sector": "Health Care",
+      "price": 286.175,
+      "rel_strength_12w": 0.22207009293315305,
+      "stage2": true,
+      "atr": 14.513228571428566,
+      "avg_volume": 23716107.083333332
+    },
+    {
+      "symbol": "BDX",
+      "sector": "Health Care",
+      "price": 212.05,
+      "rel_strength_12w": 0.22080297578147234,
+      "stage2": true,
+      "atr": 9.857321428571426,
+      "avg_volume": 8944545.25
+    },
+    {
+      "symbol": "CHD",
+      "sector": "Consumer Staples",
+      "price": 110.9,
+      "rel_strength_12w": 0.19712417585347353,
+      "stage2": true,
+      "atr": 5.090357142857145,
+      "avg_volume": 9622439.416666666
+    },
+    {
+      "symbol": "LH",
+      "sector": "Health Care",
+      "price": 366.43,
+      "rel_strength_12w": 0.19538555017452064,
+      "stage2": true,
+      "atr": 18.09714285714285,
+      "avg_volume": 3667842.8333333335
+    },
+    {
+      "symbol": "MO",
+      "sector": "Consumer Staples",
+      "price": 74.93,
+      "rel_strength_12w": 0.19340221602869334,
+      "stage2": true,
+      "atr": 3.9607714285714275,
+      "avg_volume": 39484685.916666664
+    },
+    {
+      "symbol": "KDP",
+      "sector": "Consumer Staples",
+      "price": 34.805,
+      "rel_strength_12w": 0.18349610704685093,
+      "stage2": true,
+      "atr": 2.0295428571428573,
+      "avg_volume": 76477130.25
+    },
+    {
+      "symbol": "HST",
+      "sector": "Real Estate",
+      "price": 24.065,
+      "rel_strength_12w": 0.1820403984150859,
+      "stage2": true,
+      "atr": 1.1978642857142856,
+      "avg_volume": 41209984.0
+    },
+    {
+      "symbol": "KO",
+      "sector": "Consumer Staples",
+      "price": 96.785,
+      "rel_strength_12w": 0.18139057668680147,
+      "stage2": true,
+      "atr": 3.67142857142857,
+      "avg_volume": 83589794.25
+    },
+    {
+      "symbol": "DLTR",
+      "sector": "Consumer Staples",
+      "price": 137.615,
+      "rel_strength_12w": 0.17486148445525196,
+      "stage2": true,
+      "atr": 11.129285714285714,
+      "avg_volume": 11505230.25
+    },
+    {
+      "symbol": "DGX",
+      "sector": "Health Care",
+      "price": 257.92,
+      "rel_strength_12w": 0.16437221064150787,
+      "stage2": true,
+      "atr": 12.274135714285716,
+      "avg_volume": 5126160.583333333
+    }
+  ],
+  "trend_exit_symbols": []
+}
