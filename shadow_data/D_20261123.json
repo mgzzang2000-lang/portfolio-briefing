@@ -68,5 +68,30 @@
         "market_cap": 13765.0
       }
     ]
+  },
+  {
+    "time": "13:09:49",
+    "candidates": [
+      {
+        "code": "000660",
+        "name": "000660",
+        "price": 1079000.0,
+        "stop_price": 1062815.0,
+        "target_price": 1119462.5,
+        "stoch_k": 70.3,
+        "stoch_d": 43.8,
+        "market_cap": 7626362.0
+      },
+      {
+        "code": "031330",
+        "name": "031330",
+        "price": 6590.0,
+        "stop_price": 6491.1,
+        "target_price": 6837.1,
+        "stoch_k": 100.0,
+        "stoch_d": 92.2,
+        "market_cap": 6590.0
+      }
+    ]
   }
 ]
