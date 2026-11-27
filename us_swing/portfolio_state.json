@@ -184,10 +184,6 @@
   ],
   "balance_history": [
     {
-      "date": "09/15",
-      "balance": 746.08
-    },
-    {
       "date": "09/16",
       "balance": 746.08
     },
@@ -422,14 +418,14 @@
     {
       "date": "11/27",
       "balance": 1801.41
+    },
+    {
+      "date": "11/28",
+      "balance": 1801.41
     }
   ],
   "total_assets": 1801.41,
   "total_assets_history": [
-    {
-      "date": "09/15",
-      "balance": 1797.49
-    },
     {
       "date": "09/16",
       "balance": 1817.95
@@ -665,7 +661,11 @@
     {
       "date": "11/27",
       "balance": 1801.41
+    },
+    {
+      "date": "11/28",
+      "balance": 1801.41
     }
   ],
-  "last_updated": "2026-11-27T08:07:45.709152+09:00"
+  "last_updated": "2026-11-28T06:50:14.617466+09:00"
 }
